@@ -573,9 +573,7 @@ func (g *Generator) SetPathItem(info PathItemInfo, params interface{}, body inte
 		}
 	}
 
-	if response != nil {
-		operationObj.Responses = g.parseResponseObject(response)
-	}
+	operationObj.Responses = g.parseResponseObject(response)
 
 	if body != nil {
 		typeDef, err := g.ParseDefinition(body)
@@ -668,7 +666,10 @@ func (g *Generator) parseResponseObject(responseObj interface{}) (res Responses)
 		resObj.Schema = &schema
 		res["200"] = resObj
 	} else {
-		res["200"] = ResponseObj{Description: "request success"}
+		res["200"] = ResponseObj{
+			Description: "request success",
+			Schema:      &SchemaObj{Type: "null"},
+		}
 	}
 
 	return res

@@ -148,7 +148,7 @@ type ParamObj struct {
 	CollectionFormat string        `json:"collectionFormat,omitempty"` // "multi" - this is valid only for parameters in "query" or "formData"
 	Description      string        `json:"description,omitempty"`
 	Default          interface{}   `json:"default,omitempty"`
-	Required         bool          `json:"required"`
+	Required         bool          `json:"required,omitempty"`
 	Enum
 }
 

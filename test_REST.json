@@ -587,8 +587,7 @@
             "name": "id",
             "in": "path",
             "type": "integer",
-            "format": "int64",
-            "required": false
+            "format": "int64"
           },
           {
             "name": "category",

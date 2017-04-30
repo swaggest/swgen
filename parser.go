@@ -81,15 +81,11 @@ func ResetDefinitions() {
 	gen.ResetDefinitions()
 }
 
-// ParseDefinition create a DefObj from input object, it should be a non-nil pointer to anything
-// it reuse schema/json tag for property name.
-func (g *Generator) ParseDefinition(i interface{}) (schema SchemaObj, err error) {
+func (g *Generator) parse(i interface{}, t reflect.Type) (schema SchemaObj, err error) {
 	var (
 		typeName string
 		typeDef  SchemaObj
 	)
-
-	t := reflect.TypeOf(i)
 
 	if definition, ok := i.(IDefinition); ok {
 		typeName, typeDef, err = definition.SwgenDefinition()
@@ -209,6 +205,53 @@ func (g *Generator) ParseDefinition(i interface{}) (schema SchemaObj, err error)
 	return SchemaObj{Ref: refDefinitionPrefix + typeName, TypeName: typeName}, nil
 }
 
+func goType(t reflect.Type) (s string) {
+	s = t.Name()
+	pkgPath := t.PkgPath()
+	if pkgPath != "" {
+		pos := strings.Index(pkgPath, "/vendor/")
+		if pos != -1 {
+			pkgPath = pkgPath[pos+8:]
+		}
+		s = pkgPath + "." + s
+	}
+
+	ts := t.String()
+	typeRef := s
+
+	pos := strings.LastIndex(typeRef, "/")
+	if pos != -1 {
+		typeRef = typeRef[pos+1:]
+	}
+
+	if typeRef != ts {
+		s = s + "::" + t.String()
+	}
+
+	switch t.Kind() {
+	case reflect.Slice:
+		return "[]" + goType(t.Elem())
+	case reflect.Ptr:
+		return "*" + goType(t.Elem())
+	case reflect.Map:
+		return "map[" + goType(t.Key()) + "]" + goType(t.Elem())
+	}
+
+	return
+}
+
+// ParseDefinition create a DefObj from input object, it should be a non-nil pointer to anything
+// it reuse schema/json tag for property name.
+func (g *Generator) ParseDefinition(i interface{}) (schema SchemaObj, err error) {
+	t := reflect.TypeOf(i)
+
+	schema, err = g.parse(i, t)
+	if err == nil {
+		schema.GoType = goType(t)
+	}
+	return
+}
+
 func (g *Generator) parseDefinitionProperties(t reflect.Type) map[string]SchemaObj {
 	properties := make(map[string]SchemaObj, t.NumField())
 
@@ -249,6 +292,8 @@ func (g *Generator) parseDefinitionProperties(t reflect.Type) map[string]SchemaO
 				obj.Default = defaultValue
 			}
 		}
+		obj.GoName = field.Name
+		obj.GoType = goType(field.Type)
 
 		properties[propName] = obj
 

@@ -196,7 +196,7 @@ func (g *Generator) genDocument(host string) ([]byte, error) {
 	}
 
 	g.pathsMux.RLock()
-	data, err := json.Marshal(g.doc)
+	data, err := json.MarshalIndent(g.doc, "", "  ")
 	g.pathsMux.RUnlock()
 
 	return data, err

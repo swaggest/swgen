@@ -124,7 +124,7 @@ type OperationObj struct {
 	Description string     `json:"description"` // A verbose explanation of the operation behavior
 	Parameters  []ParamObj `json:"parameters,omitempty"`
 	Responses   Responses  `json:"responses"`
-	Deprecated  bool       `json:"deprecated"`
+	Deprecated  bool       `json:"deprecated,omitempty"`
 	additionalData
 }
 
@@ -186,6 +186,8 @@ type SchemaObj struct {
 	AdditionalProperties *SchemaObj           `json:"additionalProperties,omitempty"` // if type is object (map[])
 	Properties           map[string]SchemaObj `json:"properties,omitempty"`           // if type is object
 	TypeName             string               `json:"-"`                              // for internal using, passing typeName
+	GoType               string               `json:"x-go-type,omitempty"`
+	GoName               string               `json:"x-go-name,omitempty"`
 }
 
 // IParameter allows to return custom parameters

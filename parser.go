@@ -494,6 +494,9 @@ func (g *Generator) ParseParameter(i interface{}) (name string, params []ParamOb
 
 		paramName := strings.Split(nameTag, ",")[0]
 		param := ParamObj{}
+		param.AddExtendedField("x-go-name", field.Name)
+		param.AddExtendedField("x-go-type", goType(field.Type))
+
 		param.Name = paramName
 
 		if e, isEnumer := reflect.Zero(field.Type).Interface().(enumer); isEnumer {
@@ -611,6 +614,8 @@ func (g *Generator) SetPathItem(info PathItemInfo, params interface{}, body inte
 	}
 
 	if params != nil {
+		operationObj.AddExtendedField("x-request-go-type", goType(reflect.TypeOf(params)))
+
 		if _, params, err := g.ParseParameter(params); err == nil {
 			operationObj.Parameters = params
 		} else {

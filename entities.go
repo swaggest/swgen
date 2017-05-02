@@ -102,7 +102,7 @@ type PathItemInfo struct {
 	Description string
 	Tag         string
 	Deprecated  bool
-	additionalData
+	additionalData // todo ask @nguyen.nguyen about missing MarshalJson
 }
 
 // Enum can be use for sending Enum data that need validate
@@ -150,6 +150,14 @@ type ParamObj struct {
 	Default          interface{}   `json:"default,omitempty"`
 	Required         bool          `json:"required,omitempty"`
 	Enum
+	additionalData
+}
+
+type _ParamObj ParamObj
+
+// MarshalJSON marshal OperationObj with additionalData inlined
+func (o ParamObj) MarshalJSON() ([]byte, error) {
+	return o.marshalJSONWithStruct(_ParamObj(o))
 }
 
 // ParamItemObj describes an property object, in param object or property of definition

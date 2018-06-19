@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/kr/pretty"
-	"github.com/lazada/swgen/sample"
+	"github.com/swaggest/swgen/sample"
 )
 
 type TestSampleStruct struct {

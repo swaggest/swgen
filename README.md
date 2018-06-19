@@ -1,8 +1,8 @@
 # Swagger Generator (swgen)
 
-[![Build Status](https://travis-ci.org/lazada/swgen.svg?branch=master)](https://travis-ci.org/lazada/swgen)
-[![Coverage Status](https://coveralls.io/repos/github/lazada/swgen/badge.svg?branch=master)](https://coveralls.io/github/lazada/swgen?branch=master)
-[![GoDoc](https://godoc.org/github.com/lazada/swgen?status.svg)](https://godoc.org/github.com/lazada/swgen)
+[![Build Status](https://travis-ci.org/swaggest/swgen.svg?branch=master)](https://travis-ci.org/swaggest/swgen)
+[![Coverage Status](https://coveralls.io/repos/github/swaggest/swgen/badge.svg?branch=master)](https://coveralls.io/github/swaggest/swgen?branch=master)
+[![GoDoc](https://godoc.org/github.com/swaggest/swgen?status.svg)](https://godoc.org/github.com/swaggest/swgen)
 
 Swagger Generator is a library which helps to generate [Swagger Specification](http://swagger.io/specification/) in JSON format on-the-fly.
 
@@ -10,12 +10,12 @@ Swagger Generator is a library which helps to generate [Swagger Specification](h
 
 You can use `go get` to install the `swgen` package
 
-    go get github.com/lazada/swgen
+    go get github.com/swaggest/swgen
 
 Then import it into your own code
 
 ```go
-import "github.com/lazada/swgen"
+import "github.com/swaggest/swgen"
 ```
 
 ## Example
@@ -26,7 +26,7 @@ package main
 import (
     "fmt"
 
-    "github.com/lazada/swgen"
+    "github.com/swaggest/swgen"
 )
 
 // PetsRequest defines all params for /pets request
@@ -89,7 +89,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/lazada/swgen"
+	"github.com/swaggest/swgen"
 )
 
 const (

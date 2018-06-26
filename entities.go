@@ -141,6 +141,8 @@ type SecurityDef struct {
 	AuthorizationURL string            `json:"authorizationUrl,omitempty"` // Example: https://example.com/oauth/authorize
 	TokenURL         string            `json:"tokenUrl,omitempty"`         // Example: https://example.com/oauth/token
 	Scopes           map[string]string `json:"scopes,omitempty"`           // Example: {"read": "Grants read access", "write": "Grants write access"}
+
+	Description string `json:"description"`
 }
 
 // PathItemInfo some basic information of a path item and operation object

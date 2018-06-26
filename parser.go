@@ -462,7 +462,7 @@ func (g *Generator) ParseParameter(i interface{}) (name string, params []ParamOb
 		var nameTag string
 
 		var inPath bool
-		if nameTag = field.Tag.Get("schema"); nameTag == "-" || nameTag == "" {
+		if nameTag = field.Tag.Get("query"); nameTag == "-" || nameTag == "" {
 			inPath = true
 			if nameTag = field.Tag.Get("path"); nameTag == "-" || nameTag == "" {
 				continue
@@ -517,6 +517,10 @@ func (g *Generator) ParseParameter(i interface{}) (name string, params []ParamOb
 
 		param.Type = schema.Type
 		param.Format = schema.Format
+
+		if tag := field.Tag.Get("format"); tag != "-" && tag != "" {
+			param.Format = tag
+		}
 
 		if schema.Type == "array" && schema.Items != nil {
 			if schema.Items.Ref != "" || schema.Items.Type == "array" {

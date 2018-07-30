@@ -5,13 +5,9 @@ import (
 )
 
 func TestDefinition(t *testing.T) {
-	var obj IDefinition
-	obj = Definition{
-		TypeName:  "MyName",
-		SchemaObj: SchemaObj{Type: "integer", Format: "int64"},
-	}
+	var obj SchemaDefinition
+	obj = SchemaObj{Type: "integer", Format: "int64", TypeName: "MyName"}
 
-	typeName, _, err := obj.SwgenDefinition()
-	assertTrue(typeName == "MyName", t)
-	assertTrue(err == nil, t)
+	typeDef := obj.SwaggerSchema()
+	assertTrue(typeDef.TypeName == "MyName", t)
 }

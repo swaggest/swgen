@@ -211,7 +211,7 @@ func TestSetPathItem(t *testing.T) {
 			Description: fmt.Sprintf("This is just a test handler with %s request", method),
 			Method:      method,
 		}
-		err := SetPathItem(info, h.GetRequestBuffer(method), h.GetBodyBuffer(), h.GetResponseBuffer(method))
+		err := SetPathItem(&info, h.GetRequestBuffer(method), h.GetBodyBuffer(), h.GetResponseBuffer(method))
 		if err != nil {
 			t.Fatalf("error %v", err)
 		}
@@ -294,7 +294,7 @@ func BenchmarkSetPathItem(b *testing.B) {
 			mu.Unlock()
 
 			err := SetPathItem(
-				info,
+				&info,
 				h.GetRequestBuffer(info.Method),
 				h.GetBodyBuffer(),
 				h.GetResponseBuffer(info.Method),

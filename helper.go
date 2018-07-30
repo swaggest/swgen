@@ -14,6 +14,12 @@ func ReflectTypeHash(t reflect.Type) uint32 {
 // ReflectTypeReliableName returns real name of given reflect.Type, if it is non-empty, or auto-generates "anon_*"]
 // name for anonymous structs
 func ReflectTypeReliableName(t reflect.Type) string {
+	if def, ok := reflect.Zero(t).Interface().(SchemaDefinition); ok {
+		typeDef := def.SwaggerSchema()
+		if typeDef.TypeName != "" {
+			return typeDef.TypeName
+		}
+	}
 	if t.Name() != "" {
 		return t.Name()
 	}

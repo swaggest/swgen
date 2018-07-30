@@ -256,7 +256,7 @@ type Unknown struct {
 	Whatever *json.RawMessage `json:"whatever"`
 }
 
-var _ IDefinition = definitionExample{}
+var _ SchemaDefinition = definitionExample{}
 
 type definitionExample struct{}
 
@@ -484,7 +484,7 @@ func TestGenDocumentFunc(t *testing.T) {
 		Method:      "GET",
 	}
 
-	if err := SetPathItem(info, nil, nil, nil); err != nil {
+	if err := SetPathItem(&info, nil, nil, nil); err != nil {
 		t.Fatalf("error %v", err)
 	}
 

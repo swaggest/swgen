@@ -2,6 +2,7 @@ package swgen
 
 import (
 	"encoding/json"
+	"errors"
 	"strings"
 )
 
@@ -154,10 +155,49 @@ type PathItemInfo struct {
 	Tag         string
 	Deprecated  bool
 
+	Request  interface{}
+	Response interface{}
+
 	Security       []string            // Names of security definitions
 	SecurityOAuth2 map[string][]string // Map of names of security definitions to required scopes
 
+	responses              map[int]interface{}
+	SuccessfulResponseCode int
+
 	additionalData
+
+	// JSON Schema reflection of Swagger entities
+	requestParamsSchemaJson []byte
+	requestBodySchemaJson   []byte
+	responseSchemaJson      []byte
+}
+
+func (p *PathItemInfo) AddResponse(statusCode int, output interface{}) *PathItemInfo {
+	if nil == p.responses {
+		p.responses = make(map[int]interface{}, 1)
+	}
+	p.responses[statusCode] = output
+	return p
+}
+
+func (p *PathItemInfo) AddResponses(responses ...PathItemResponse) {
+	if len(responses) == 0 {
+		return
+	}
+	if nil == p.responses {
+		p.responses = make(map[int]interface{}, len(responses))
+	}
+	for _, r := range responses {
+		p.responses[r.StatusCode()] = r
+	}
+}
+
+type description interface {
+	Description() string
+}
+
+type PathItemResponse interface {
+	StatusCode() int
 }
 
 // Enum can be use for sending Enum data that need validate
@@ -166,9 +206,27 @@ type Enum struct {
 	EnumNames []string      `json:"x-enum-names,omitempty"`
 }
 
-type enumer interface {
-	// GetEnumSlices return the const-name pair slice
-	GetEnumSlices() ([]interface{}, []string)
+type namedEnum interface {
+	// NamedEnum return the const-name pair slice
+	NamedEnum() ([]interface{}, []string)
+}
+
+type enum interface {
+	Enum() []interface{}
+}
+
+type Schema struct {
+	ParamObj
+	SchemaObj
+}
+
+type SchemaShared struct {
+	Description string      `json:"description,omitempty"`
+	Example     interface{} `json:"example,omitempty"`
+	Default     interface{} `json:"default,omitempty"`
+	Type        string      `json:"type,omitempty"`
+	Pattern     string      `json:"pattern,omitempty"`
+	Format      string      `json:"format,omitempty"`
 }
 
 // OperationObj describes a single API operation on a path
@@ -194,9 +252,10 @@ func (o OperationObj) MarshalJSON() ([]byte, error) {
 // ParamObj describes a single operation parameter
 // see http://swagger.io/specification/#parameterObject
 type ParamObj struct {
+	SchemaShared
 	Ref              string        `json:"$ref,omitempty"`
-	Name             string        `json:"name"`
-	In               string        `json:"in"` // Possible values are "query", "header", "path", "formData" or "body"
+	Name             string        `json:"name,omitempty"`
+	In               string        `json:"in,omitempty"` // Possible values are "query", "header", "path", "formData" or "body"
 	Type             string        `json:"type,omitempty"`
 	Format           string        `json:"format,omitempty"`
 	Items            *ParamItemObj `json:"items,omitempty"`            // Required if type is "array"
@@ -204,9 +263,42 @@ type ParamObj struct {
 	CollectionFormat string        `json:"collectionFormat,omitempty"` // "multi" - this is valid only for parameters in "query" or "formData"
 	Description      string        `json:"description,omitempty"`
 	Default          interface{}   `json:"default,omitempty"`
+	Example          interface{}   `json:"example,omitempty"`
 	Required         bool          `json:"required,omitempty"`
 	Enum
 	additionalData
+}
+
+func jsonRecode(v interface{}) (map[string]interface{}, error) {
+	jsonBytes, err := json.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+
+	var decoded interface{}
+	err = json.Unmarshal(jsonBytes, &decoded)
+	if err != nil {
+		return nil, err
+	}
+
+	if m, ok := decoded.(map[string]interface{}); ok {
+		return m, nil
+	}
+
+	return nil, errors.New(`invalid json, map expected`)
+}
+
+func (p ParamObj) JsonSchemaData() (map[string]interface{}, error) {
+	if p.Schema != nil {
+		return p.Schema.JsonSchemaData()
+	}
+
+	p.Name = ""
+	p.In = ""
+	// TODO honor required
+	p.Required = false
+
+	return jsonRecode(p)
 }
 
 type _ParamObj ParamObj
@@ -242,8 +334,10 @@ type ResponseObj struct {
 type SchemaObj struct {
 	Ref                  string               `json:"$ref,omitempty"`
 	Description          string               `json:"description,omitempty"`
+	Example              interface{}          `json:"example,omitempty"`
 	Default              interface{}          `json:"default,omitempty"`
 	Type                 string               `json:"type,omitempty"`
+	Pattern              string               `json:"pattern,omitempty"`
 	Format               string               `json:"format,omitempty"`
 	Title                string               `json:"title,omitempty"`
 	Items                *SchemaObj           `json:"items,omitempty"`                // if type is array
@@ -253,6 +347,29 @@ type SchemaObj struct {
 	GoType               string               `json:"x-go-type,omitempty"`
 	GoPropertyNames      map[string]string    `json:"x-go-property-names,omitempty"`
 	GoPropertyTypes      map[string]string    `json:"x-go-property-types,omitempty"`
+
+	g *Generator
+}
+
+// SwaggerSchema return type name and definition that was set
+func (s SchemaObj) SwaggerSchema() SchemaObj {
+	return s
+}
+
+func (s SchemaObj) JsonSchemaData() (map[string]interface{}, error) {
+	res, err := jsonRecode(s)
+	if err != nil {
+		return nil, err
+	}
+	definitions, err := jsonRecode(s.g.definitions.GenDefinitions())
+	if err != nil {
+		return nil, err
+	}
+	if s.Ref != "" {
+		res = definitions[strings.TrimPrefix(s.Ref, "#/definitions/")].(map[string]interface{})
+	}
+	res["definitions"] = definitions
+	return res, err
 }
 
 // NewSchemaObj Constructor function for SchemaObj struct type
@@ -293,6 +410,7 @@ func (so SchemaObj) Export() SchemaObj {
 	return SchemaObj{
 		Ref:      so.Ref,
 		TypeName: so.TypeName,
+		g:        so.g,
 	}
 }
 

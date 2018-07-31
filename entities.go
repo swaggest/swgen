@@ -166,7 +166,7 @@ type PathItemInfo struct {
 
 	additionalData
 
-	// JSON Schema reflection of Swagger entities
+	// JSON SwaggerData reflection of Swagger entities
 	requestParamsSchemaJson []byte
 	requestBodySchemaJson   []byte
 	responseSchemaJson      []byte
@@ -215,18 +215,36 @@ type enum interface {
 	Enum() []interface{}
 }
 
-type Schema struct {
+type SwaggerData struct {
+	shared
 	ParamObj
 	SchemaObj
 }
 
-type SchemaShared struct {
+// Schema returns schema object
+func (s SwaggerData) SwaggerDef() SwaggerData {
+	return s
+}
+
+// Schema returns schema object
+func (s SwaggerData) Schema() SchemaObj {
+	s.SchemaObj.shared = s.shared
+	return s.SchemaObj
+}
+
+// Param returns parameter object
+func (s SwaggerData) Param() ParamObj {
+	s.ParamObj.shared = s.shared
+	return s.ParamObj
+}
+
+type shared struct {
 	Description string      `json:"description,omitempty"`
-	Example     interface{} `json:"example,omitempty"`
 	Default     interface{} `json:"default,omitempty"`
 	Type        string      `json:"type,omitempty"`
 	Pattern     string      `json:"pattern,omitempty"`
 	Format      string      `json:"format,omitempty"`
+	Enum
 }
 
 // OperationObj describes a single API operation on a path
@@ -252,20 +270,13 @@ func (o OperationObj) MarshalJSON() ([]byte, error) {
 // ParamObj describes a single operation parameter
 // see http://swagger.io/specification/#parameterObject
 type ParamObj struct {
-	SchemaShared
-	Ref              string        `json:"$ref,omitempty"`
+	shared
 	Name             string        `json:"name,omitempty"`
-	In               string        `json:"in,omitempty"` // Possible values are "query", "header", "path", "formData" or "body"
-	Type             string        `json:"type,omitempty"`
-	Format           string        `json:"format,omitempty"`
+	In               string        `json:"in,omitempty"`               // Possible values are "query", "header", "path", "formData" or "body"
 	Items            *ParamItemObj `json:"items,omitempty"`            // Required if type is "array"
 	Schema           *SchemaObj    `json:"schema,omitempty"`           // Required if type is "body"
 	CollectionFormat string        `json:"collectionFormat,omitempty"` // "multi" - this is valid only for parameters in "query" or "formData"
-	Description      string        `json:"description,omitempty"`
-	Default          interface{}   `json:"default,omitempty"`
-	Example          interface{}   `json:"example,omitempty"`
 	Required         bool          `json:"required,omitempty"`
-	Enum
 	additionalData
 }
 
@@ -332,28 +343,19 @@ type ResponseObj struct {
 
 // SchemaObj describes a schema for json format
 type SchemaObj struct {
+	shared
 	Ref                  string               `json:"$ref,omitempty"`
-	Description          string               `json:"description,omitempty"`
-	Example              interface{}          `json:"example,omitempty"`
-	Default              interface{}          `json:"default,omitempty"`
-	Type                 string               `json:"type,omitempty"`
-	Pattern              string               `json:"pattern,omitempty"`
-	Format               string               `json:"format,omitempty"`
 	Title                string               `json:"title,omitempty"`
 	Items                *SchemaObj           `json:"items,omitempty"`                // if type is array
 	AdditionalProperties *SchemaObj           `json:"additionalProperties,omitempty"` // if type is object (map[])
 	Properties           map[string]SchemaObj `json:"properties,omitempty"`           // if type is object
-	TypeName             string               `json:"-"`                              // for internal using, passing typeName
+	Example              interface{}          `json:"example,omitempty"`
+	TypeName             string               `json:"-"` // for internal using, passing typeName
 	GoType               string               `json:"x-go-type,omitempty"`
 	GoPropertyNames      map[string]string    `json:"x-go-property-names,omitempty"`
 	GoPropertyTypes      map[string]string    `json:"x-go-property-types,omitempty"`
 
 	g *Generator
-}
-
-// SwaggerSchema return type name and definition that was set
-func (s SchemaObj) SwaggerSchema() SchemaObj {
-	return s
 }
 
 func (s SchemaObj) JsonSchemaData() (map[string]interface{}, error) {
@@ -374,10 +376,10 @@ func (s SchemaObj) JsonSchemaData() (map[string]interface{}, error) {
 
 // NewSchemaObj Constructor function for SchemaObj struct type
 func NewSchemaObj(jsonType, typeName string) (so *SchemaObj) {
-	so = &SchemaObj{
-		Type:     jsonType,
-		TypeName: typeName,
-	}
+	so = &SchemaObj{}
+	so.Type = jsonType
+	so.TypeName = typeName
+
 	if typeName != "" {
 		so.Ref = refDefinitionPrefix + typeName
 	}
@@ -386,7 +388,7 @@ func NewSchemaObj(jsonType, typeName string) (so *SchemaObj) {
 
 // Checks whether current SchemaObj is "empty". A schema object is considered "empty" if it is an object without visible
 // (exported) properties, an array without elements, or in other cases when it has neither regular nor additional
-// properties, and format is not specified. Schema objects that describe common types ("string", "integer", "boolean" etc.)
+// properties, and format is not specified. SwaggerData objects that describe common types ("string", "integer", "boolean" etc.)
 // are always considered non-empty. Same is true for "schema reference objects" (objects that have a non-empty Ref field).
 func (so *SchemaObj) isEmpty() bool {
 	if isCommonName(so.TypeName) || so.Ref != "" {
@@ -404,7 +406,7 @@ func (so *SchemaObj) isEmpty() bool {
 }
 
 // Export returns a "schema reference object" corresponding to this schema object. A "schema reference object" is an abridged
-// version of the original SchemaObj, having only two non-empty fields: Ref and TypeName. "Schema reference objects"
+// version of the original SchemaObj, having only two non-empty fields: Ref and TypeName. "SwaggerData reference objects"
 // are used to refer original schema objects from other schemas.
 func (so SchemaObj) Export() SchemaObj {
 	return SchemaObj{

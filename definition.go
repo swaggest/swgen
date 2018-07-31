@@ -5,7 +5,7 @@ type Definition struct {
 	SchemaObj
 }
 
-// SwaggerSchema return type name and definition that was set
+// SwaggerDef return type name and definition that was set
 func (s Definition) SwgenDefinition() (typeName string, typeDef SchemaObj, err error) {
 	typeName = s.TypeName
 	typeDef = s.SchemaObj

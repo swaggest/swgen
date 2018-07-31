@@ -15,7 +15,7 @@ func ReflectTypeHash(t reflect.Type) uint32 {
 // name for anonymous structs
 func ReflectTypeReliableName(t reflect.Type) string {
 	if def, ok := reflect.Zero(t).Interface().(SchemaDefinition); ok {
-		typeDef := def.SwaggerSchema()
+		typeDef := def.SwaggerDef()
 		if typeDef.TypeName != "" {
 			return typeDef.TypeName
 		}

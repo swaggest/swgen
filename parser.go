@@ -23,23 +23,11 @@ var (
 	typeOfTextUnmarshaler = reflect.TypeOf((*encoding.TextUnmarshaler)(nil)).Elem()
 )
 
-// Parameters allows to return custom parameters
-// TODO remove?
-type Parameters interface {
-	SwgenParameters() (name string, params []ParamObj, err error)
-}
-
-// ParameterPreparer allows to return custom parameter
-// TODO remove?
-type ParameterPreparer interface {
-	SwgenPrepareParameter(*ParamObj) error
-}
-
 // SchemaDefinition allows to return custom definitions
 // TODO move typeName to typeDef.TypeName?
 // TODO panic instead of error?
 type SchemaDefinition interface {
-	SwaggerSchema() SchemaObj
+	SwaggerDef() SwaggerData
 }
 
 func (g *Generator) addDefinition(t reflect.Type, typeDef *SchemaObj) {
@@ -143,7 +131,7 @@ func (g *Generator) parseDefinition(i interface{}) (schema SchemaObj, err error)
 	println(ts)
 
 	if definition, ok := i.(SchemaDefinition); ok {
-		typeDef = definition.SwaggerSchema()
+		typeDef = definition.SwaggerDef().Schema()
 		if typeDef.TypeName == "" {
 			typeName = t.Name()
 		} else {
@@ -316,7 +304,7 @@ func (g *Generator) parseDefinitionProperties(v reflect.Value, parent *SchemaObj
 		} else {
 			if mapped, found := g.getMappedType(field.Type); found {
 				if def, ok := mapped.(SchemaDefinition); ok {
-					obj = def.SwaggerSchema()
+					obj = def.SwaggerDef().Schema()
 					objReady = true
 
 				} else {
@@ -463,10 +451,6 @@ func (g *Generator) genSchemaForType(t reflect.Type) SchemaObj {
 
 // ParseParameter parse input struct to swagger parameter object
 func (g *Generator) ParseParameter(i interface{}) (name string, params []ParamObj, err error) {
-	if param, ok := i.(Parameters); ok {
-		return param.SwgenParameters()
-	}
-
 	v := reflect.ValueOf(i)
 
 	if v.Kind() == reflect.Ptr {
@@ -507,22 +491,53 @@ func (g *Generator) ParseParameter(i interface{}) (name string, params []ParamOb
 
 		paramName := strings.Split(nameTag, ",")[0]
 		param := ParamObj{}
+		if def, ok := reflect.Zero(field.Type).Interface().(SchemaDefinition); ok {
+			param = def.SwaggerDef().Param()
+		}
+
+		var schemaObj SchemaObj
+		// TODO remove `swgen_type` ?
+		if swGenType := field.Tag.Get("swgen_type"); swGenType != "" {
+			schemaObj = SchemaFromCommonName(commonName(swGenType))
+		} else {
+			if mappedTo, ok := g.getMappedType(field.Type); ok {
+				if def, ok := mappedTo.(SchemaDefinition); ok {
+					schemaObj = def.SwaggerDef().Schema()
+					if schemaObj.TypeName != "" {
+						name = schemaObj.TypeName
+					}
+				} else {
+					schemaObj = g.genSchemaForType(reflect.TypeOf(mappedTo))
+				}
+			} else {
+				schemaObj = g.genSchemaForType(field.Type)
+			}
+		}
+
+		if schemaObj.Type == "" {
+			panic("unsupported field " + field.Name + " in request type " + goType(v.Type()))
+		}
+
+		param.shared = schemaObj.shared
+
+		if schemaObj.Type == "array" && schemaObj.Items != nil {
+			if schemaObj.Items.Ref != "" || schemaObj.Items.Type == "array" {
+				panic("unsupported array of struct or nested array in parameter")
+			}
+
+			param.Items = &ParamItemObj{
+				Type:   schemaObj.Items.Type,
+				Format: schemaObj.Items.Format,
+			}
+			param.CollectionFormat = "multi" // default for now
+		}
+
 		if g.reflectGoTypes {
 			param.AddExtendedField("x-go-name", field.Name)
 			param.AddExtendedField("x-go-type", goType(field.Type))
 		}
 
 		param.Name = paramName
-
-		if p, ok := reflect.Zero(field.Type).Interface().(ParameterPreparer); ok {
-			p.SwgenPrepareParameter(&param)
-		}
-
-		/*
-			if p, ok := reflect.Zero(field.Type).Interface().(SchemaDefinition); ok {
-				def := p.SwaggerSchema()
-			}
-		*/
 
 		if e, isEnumer := reflect.Zero(field.Type).Interface().(namedEnum); isEnumer {
 			param.Enum.Enum, param.Enum.EnumNames = e.NamedEnum()
@@ -550,46 +565,8 @@ func (g *Generator) ParseParameter(i interface{}) (name string, params []ParamOb
 			param.In = "query"
 		}
 
-		var schema SchemaObj
-		if swGenType := field.Tag.Get("swgen_type"); swGenType != "" {
-			schema = SchemaFromCommonName(commonName(swGenType))
-		} else {
-			if mappedTo, ok := g.getMappedType(field.Type); ok {
-				if def, ok := mappedTo.(SchemaDefinition); ok {
-					schema = def.SwaggerSchema()
-					if schema.TypeName != "" {
-						name = schema.TypeName
-					}
-				} else {
-					schema = g.genSchemaForType(reflect.TypeOf(mappedTo))
-				}
-			} else {
-				schema = g.genSchemaForType(field.Type)
-			}
-		}
-
-		if schema.Type == "" {
-			panic("unsupported field " + field.Name + " in request type " + goType(v.Type()))
-		}
-
-		param.Type = schema.Type
-		param.Format = schema.Format
-		param.Example = schema.Example
-
 		if tag := field.Tag.Get("format"); tag != "-" && tag != "" {
 			param.Format = tag
-		}
-
-		if schema.Type == "array" && schema.Items != nil {
-			if schema.Items.Ref != "" || schema.Items.Type == "array" {
-				panic("unsupported array of struct or nested array in parameter")
-			}
-
-			param.Items = &ParamItemObj{
-				Type:   schema.Items.Type,
-				Format: schema.Items.Format,
-			}
-			param.CollectionFormat = "multi" // default for now
 		}
 
 		params = append(params, param)
@@ -787,7 +764,7 @@ func (g *Generator) parseResponseObject(operationObj *OperationObj, statusCode i
 	} else {
 		operationObj.Responses[code] = ResponseObj{
 			//Description: "request success",
-			Schema: &SchemaObj{Type: "null"},
+			Schema: &SchemaObj{shared: shared{Type: "null"}},
 		}
 	}
 }

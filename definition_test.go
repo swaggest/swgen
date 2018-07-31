@@ -8,6 +8,6 @@ func TestDefinition(t *testing.T) {
 	var obj SchemaDefinition
 	obj = SchemaObj{Type: "integer", Format: "int64", TypeName: "MyName"}
 
-	typeDef := obj.SwaggerSchema()
+	typeDef := obj.SwaggerDef()
 	assertTrue(typeDef.TypeName == "MyName", t)
 }

@@ -493,43 +493,43 @@ func (g *Generator) ParseParameter(i interface{}) (name string, params []ParamOb
 		param := ParamObj{}
 		if def, ok := reflect.Zero(field.Type).Interface().(SchemaDefinition); ok {
 			param = def.SwaggerDef().Param()
-		}
-
-		var schemaObj SchemaObj
-		// TODO remove `swgen_type` ?
-		if swGenType := field.Tag.Get("swgen_type"); swGenType != "" {
-			schemaObj = SchemaFromCommonName(commonName(swGenType))
 		} else {
-			if mappedTo, ok := g.getMappedType(field.Type); ok {
-				if def, ok := mappedTo.(SchemaDefinition); ok {
-					schemaObj = def.SwaggerDef().Schema()
-					if schemaObj.TypeName != "" {
-						name = schemaObj.TypeName
+			var schemaObj SchemaObj
+			// TODO remove `swgen_type` ?
+			if swGenType := field.Tag.Get("swgen_type"); swGenType != "" {
+				schemaObj = SchemaFromCommonName(commonName(swGenType))
+			} else {
+				if mappedTo, ok := g.getMappedType(field.Type); ok {
+					if def, ok := mappedTo.(SchemaDefinition); ok {
+						schemaObj = def.SwaggerDef().Schema()
+						if schemaObj.TypeName != "" {
+							name = schemaObj.TypeName
+						}
+					} else {
+						schemaObj = g.genSchemaForType(reflect.TypeOf(mappedTo))
 					}
 				} else {
-					schemaObj = g.genSchemaForType(reflect.TypeOf(mappedTo))
+					schemaObj = g.genSchemaForType(field.Type)
 				}
-			} else {
-				schemaObj = g.genSchemaForType(field.Type)
-			}
-		}
-
-		if schemaObj.Type == "" {
-			panic("unsupported field " + field.Name + " in request type " + goType(v.Type()))
-		}
-
-		param.shared = schemaObj.shared
-
-		if schemaObj.Type == "array" && schemaObj.Items != nil {
-			if schemaObj.Items.Ref != "" || schemaObj.Items.Type == "array" {
-				panic("unsupported array of struct or nested array in parameter")
 			}
 
-			param.Items = &ParamItemObj{
-				Type:   schemaObj.Items.Type,
-				Format: schemaObj.Items.Format,
+			if schemaObj.Type == "" {
+				panic("unsupported field " + field.Name + " in request type " + goType(v.Type()))
 			}
-			param.CollectionFormat = "multi" // default for now
+
+			param.shared = schemaObj.shared
+
+			if schemaObj.Type == "array" && schemaObj.Items != nil {
+				if schemaObj.Items.Ref != "" || schemaObj.Items.Type == "array" {
+					panic("unsupported array of struct or nested array in parameter")
+				}
+
+				param.Items = &ParamItemObj{
+					Type:   schemaObj.Items.Type,
+					Format: schemaObj.Items.Format,
+				}
+				param.CollectionFormat = "multi" // default for now
+			}
 		}
 
 		if g.reflectGoTypes {

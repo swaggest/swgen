@@ -155,7 +155,10 @@ type PathItemInfo struct {
 	Tag         string
 	Deprecated  bool
 
-	Request  interface{}
+	// Request holds a sample of request structure, e.g. new(MyRequest)
+	Request interface{}
+
+	// Output holds a sample of successful response, e.g. new(MyResponse)
 	Response interface{}
 
 	Security       []string            // Names of security definitions
@@ -299,19 +302,6 @@ func jsonRecode(v interface{}) (map[string]interface{}, error) {
 	return nil, errors.New(`invalid json, map expected`)
 }
 
-func (p ParamObj) JsonSchemaData() (map[string]interface{}, error) {
-	if p.Schema != nil {
-		return p.Schema.JsonSchemaData()
-	}
-
-	p.Name = ""
-	p.In = ""
-	// TODO honor required
-	p.Required = false
-
-	return jsonRecode(p)
-}
-
 type _ParamObj ParamObj
 
 // MarshalJSON marshal OperationObj with additionalData inlined
@@ -350,28 +340,13 @@ type SchemaObj struct {
 	AdditionalProperties *SchemaObj           `json:"additionalProperties,omitempty"` // if type is object (map[])
 	Properties           map[string]SchemaObj `json:"properties,omitempty"`           // if type is object
 	Example              interface{}          `json:"example,omitempty"`
+	Nullable             bool                 `json:"nullable,omitempty"`
 	TypeName             string               `json:"-"` // for internal using, passing typeName
 	GoType               string               `json:"x-go-type,omitempty"`
 	GoPropertyNames      map[string]string    `json:"x-go-property-names,omitempty"`
 	GoPropertyTypes      map[string]string    `json:"x-go-property-types,omitempty"`
 
 	g *Generator
-}
-
-func (s SchemaObj) JsonSchemaData() (map[string]interface{}, error) {
-	res, err := jsonRecode(s)
-	if err != nil {
-		return nil, err
-	}
-	definitions, err := jsonRecode(s.g.definitions.GenDefinitions())
-	if err != nil {
-		return nil, err
-	}
-	if s.Ref != "" {
-		res = definitions[strings.TrimPrefix(s.Ref, "#/definitions/")].(map[string]interface{})
-	}
-	res["definitions"] = definitions
-	return res, err
 }
 
 // NewSchemaObj Constructor function for SchemaObj struct type

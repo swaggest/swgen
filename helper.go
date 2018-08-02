@@ -25,3 +25,35 @@ func ReflectTypeReliableName(t reflect.Type) string {
 	}
 	return fmt.Sprintf("anon_%08x", ReflectTypeHash(t))
 }
+
+// ObjectHasXFields checks if the structure has fields with tag name
+func ObjectHasXFields(i interface{}, tagname string) bool {
+	if i == nil {
+		return false
+	}
+	t := reflect.TypeOf(i)
+	for t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+	if t.Kind() != reflect.Struct {
+		return false
+	}
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		if tag := field.Tag.Get(tagname); tag != "" && tag != "-" {
+			return true
+		}
+	}
+	return false
+}
+
+func IsSlice(i interface{}) bool {
+	t := reflect.TypeOf(i)
+	for t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+	if t.Kind() == reflect.Slice {
+		return true
+	}
+	return false
+}

@@ -118,17 +118,11 @@ func (g *Generator) parseDefinition(i interface{}) (schema SchemaObj, err error)
 		v        = reflect.ValueOf(i)
 	)
 
-	ts := goType(t)
-	println(ts)
-
 	if mappedTo, ok := g.getMappedType(t); ok {
 		typeName = t.Name()
 		t = reflect.TypeOf(mappedTo)
 		v = reflect.ValueOf(mappedTo)
 	}
-
-	ts = goType(t)
-	println(ts)
 
 	if definition, ok := i.(SchemaDefinition); ok {
 		typeDef = definition.SwaggerDef().Schema()
@@ -316,12 +310,13 @@ func (g *Generator) parseDefinitionProperties(v reflect.Value, parent *SchemaObj
 				if field.Type.Kind() == reflect.Interface && v.Field(i).Elem().IsValid() {
 					obj = g.genSchemaForType(v.Field(i).Elem().Type())
 				} else {
-					tt := goType(field.Type)
-					println(tt)
 					obj = g.genSchemaForType(field.Type)
 				}
 			}
 
+		}
+		if formatTag := field.Tag.Get("format"); formatTag != "" {
+			obj.Format = formatTag
 		}
 
 		if defaultTag := field.Tag.Get("default"); defaultTag != "" {
@@ -593,11 +588,20 @@ func ResetPaths() {
 var regexFindPathParameter = regexp.MustCompile(`\{([^}:]+)(:[^\/]+)?(?:\})`)
 
 // SetPathItem register path item with some information and input, output
-func (g *Generator) SetPathItem(info *PathItemInfo, params interface{}, body interface{}, response interface{}) (*OperationObj, error) {
+func (g *Generator) SetPathItem(info PathItemInfo) (*OperationObj, error) {
 	var (
 		item  PathItem
 		found bool
 	)
+
+	var params = info.Request
+	var body interface{}
+	if info.Method != http.MethodGet && info.Method != http.MethodHead {
+		if ObjectHasXFields(info.Request, "json") || IsSlice(info.Request) {
+			body = info.Request
+		}
+	}
+	var response = info.Response
 
 	pathParametersSubmatches := regexFindPathParameter.FindAllStringSubmatch(info.Path, -1)
 	if len(pathParametersSubmatches) > 0 {
@@ -728,13 +732,6 @@ func (g *Generator) SetPathItem(info *PathItemInfo, params interface{}, body int
 	g.paths[info.Path] = item
 
 	return operationObj, nil
-}
-
-// SetPathItem register path item with some information and input, output
-// Deprecated
-func SetPathItem(info *PathItemInfo, params interface{}, body interface{}, response interface{}) error {
-	_, err := gen.SetPathItem(info, params, body, response)
-	return err
 }
 
 func (g *Generator) parseResponseObject(operationObj *OperationObj, statusCode int, responseObj interface{}) {

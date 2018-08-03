@@ -2,6 +2,7 @@ package swgen
 
 import (
 	"encoding/json"
+	"errors"
 	"strings"
 )
 
@@ -141,6 +142,8 @@ type SecurityDef struct {
 	AuthorizationURL string            `json:"authorizationUrl,omitempty"` // Example: https://example.com/oauth/authorize
 	TokenURL         string            `json:"tokenUrl,omitempty"`         // Example: https://example.com/oauth/token
 	Scopes           map[string]string `json:"scopes,omitempty"`           // Example: {"read": "Grants read access", "write": "Grants write access"}
+
+	Description string `json:"description,omitempty"`
 }
 
 // PathItemInfo some basic information of a path item and operation object
@@ -152,10 +155,55 @@ type PathItemInfo struct {
 	Tag         string
 	Deprecated  bool
 
+	// Request holds a sample of request structure, e.g. new(MyRequest)
+	Request interface{}
+
+	// Output holds a sample of successful response, e.g. new(MyResponse)
+	Response interface{}
+
 	Security       []string            // Names of security definitions
 	SecurityOAuth2 map[string][]string // Map of names of security definitions to required scopes
 
+	responses              map[int]interface{}
+	SuccessfulResponseCode int
+
 	additionalData
+
+	// JSON SwaggerData reflection of Swagger entities
+	requestParamsSchemaJSON []byte
+	requestBodySchemaJSON   []byte
+	responseSchemaJSON      []byte
+}
+
+// AddResponse adds response with http status code and output structure
+func (p *PathItemInfo) AddResponse(statusCode int, output interface{}) *PathItemInfo {
+	if nil == p.responses {
+		p.responses = make(map[int]interface{}, 1)
+	}
+	p.responses[statusCode] = output
+	return p
+}
+
+// AddResponses adds multiple responses with WithStatusCode
+func (p *PathItemInfo) AddResponses(responses ...WithStatusCode) {
+	if len(responses) == 0 {
+		return
+	}
+	if nil == p.responses {
+		p.responses = make(map[int]interface{}, len(responses))
+	}
+	for _, r := range responses {
+		p.responses[r.StatusCode()] = r
+	}
+}
+
+type description interface {
+	Description() string
+}
+
+// WithStatusCode is an interface to expose http status code
+type WithStatusCode interface {
+	StatusCode() int
 }
 
 // Enum can be use for sending Enum data that need validate
@@ -164,9 +212,46 @@ type Enum struct {
 	EnumNames []string      `json:"x-enum-names,omitempty"`
 }
 
-type enumer interface {
-	// GetEnumSlices return the const-name pair slice
-	GetEnumSlices() ([]interface{}, []string)
+type namedEnum interface {
+	// NamedEnum return the const-name pair slice
+	NamedEnum() ([]interface{}, []string)
+}
+
+type enum interface {
+	Enum() []interface{}
+}
+
+// SwaggerData holds parameter and schema information for swagger definition
+type SwaggerData struct {
+	shared
+	ParamObj
+	SchemaObj
+}
+
+// SwaggerDef returns schema object
+func (s SwaggerData) SwaggerDef() SwaggerData {
+	return s
+}
+
+// Schema returns schema object
+func (s SwaggerData) Schema() SchemaObj {
+	s.SchemaObj.shared = s.shared
+	return s.SchemaObj
+}
+
+// Param returns parameter object
+func (s SwaggerData) Param() ParamObj {
+	s.ParamObj.shared = s.shared
+	return s.ParamObj
+}
+
+type shared struct {
+	Description string      `json:"description,omitempty"`
+	Default     interface{} `json:"default,omitempty"`
+	Type        string      `json:"type,omitempty"`
+	Pattern     string      `json:"pattern,omitempty"`
+	Format      string      `json:"format,omitempty"`
+	Enum
 }
 
 // OperationObj describes a single API operation on a path
@@ -192,19 +277,33 @@ func (o OperationObj) MarshalJSON() ([]byte, error) {
 // ParamObj describes a single operation parameter
 // see http://swagger.io/specification/#parameterObject
 type ParamObj struct {
-	Ref              string        `json:"$ref,omitempty"`
-	Name             string        `json:"name"`
-	In               string        `json:"in"` // Possible values are "query", "header", "path", "formData" or "body"
-	Type             string        `json:"type,omitempty"`
-	Format           string        `json:"format,omitempty"`
+	shared
+	Name             string        `json:"name,omitempty"`
+	In               string        `json:"in,omitempty"`               // Possible values are "query", "header", "path", "formData" or "body"
 	Items            *ParamItemObj `json:"items,omitempty"`            // Required if type is "array"
 	Schema           *SchemaObj    `json:"schema,omitempty"`           // Required if type is "body"
 	CollectionFormat string        `json:"collectionFormat,omitempty"` // "multi" - this is valid only for parameters in "query" or "formData"
-	Description      string        `json:"description,omitempty"`
-	Default          interface{}   `json:"default,omitempty"`
 	Required         bool          `json:"required,omitempty"`
-	Enum
 	additionalData
+}
+
+func jsonRecode(v interface{}) (map[string]interface{}, error) {
+	jsonBytes, err := json.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+
+	var decoded interface{}
+	err = json.Unmarshal(jsonBytes, &decoded)
+	if err != nil {
+		return nil, err
+	}
+
+	if m, ok := decoded.(map[string]interface{}); ok {
+		return m, nil
+	}
+
+	return nil, errors.New(`invalid json, map expected`)
 }
 
 type _ParamObj ParamObj
@@ -225,7 +324,7 @@ type ParamItemObj struct {
 }
 
 // Responses list of response object
-type Responses map[string]ResponseObj
+type Responses map[int]ResponseObj
 
 // ResponseObj describes a single response from an API Operation
 type ResponseObj struct {
@@ -238,16 +337,15 @@ type ResponseObj struct {
 
 // SchemaObj describes a schema for json format
 type SchemaObj struct {
+	shared
 	Ref                  string               `json:"$ref,omitempty"`
-	Description          string               `json:"description,omitempty"`
-	Default              interface{}          `json:"default,omitempty"`
-	Type                 string               `json:"type,omitempty"`
-	Format               string               `json:"format,omitempty"`
 	Title                string               `json:"title,omitempty"`
 	Items                *SchemaObj           `json:"items,omitempty"`                // if type is array
 	AdditionalProperties *SchemaObj           `json:"additionalProperties,omitempty"` // if type is object (map[])
 	Properties           map[string]SchemaObj `json:"properties,omitempty"`           // if type is object
-	TypeName             string               `json:"-"`                              // for internal using, passing typeName
+	Example              interface{}          `json:"example,omitempty"`
+	Nullable             bool                 `json:"nullable,omitempty"`
+	TypeName             string               `json:"-"` // for internal using, passing typeName
 	GoType               string               `json:"x-go-type,omitempty"`
 	GoPropertyNames      map[string]string    `json:"x-go-property-names,omitempty"`
 	GoPropertyTypes      map[string]string    `json:"x-go-property-types,omitempty"`
@@ -255,10 +353,10 @@ type SchemaObj struct {
 
 // NewSchemaObj Constructor function for SchemaObj struct type
 func NewSchemaObj(jsonType, typeName string) (so *SchemaObj) {
-	so = &SchemaObj{
-		Type:     jsonType,
-		TypeName: typeName,
-	}
+	so = &SchemaObj{}
+	so.Type = jsonType
+	so.TypeName = typeName
+
 	if typeName != "" {
 		so.Ref = refDefinitionPrefix + typeName
 	}
@@ -267,7 +365,7 @@ func NewSchemaObj(jsonType, typeName string) (so *SchemaObj) {
 
 // Checks whether current SchemaObj is "empty". A schema object is considered "empty" if it is an object without visible
 // (exported) properties, an array without elements, or in other cases when it has neither regular nor additional
-// properties, and format is not specified. Schema objects that describe common types ("string", "integer", "boolean" etc.)
+// properties, and format is not specified. SwaggerData objects that describe common types ("string", "integer", "boolean" etc.)
 // are always considered non-empty. Same is true for "schema reference objects" (objects that have a non-empty Ref field).
 func (so *SchemaObj) isEmpty() bool {
 	if isCommonName(so.TypeName) || so.Ref != "" {
@@ -285,7 +383,7 @@ func (so *SchemaObj) isEmpty() bool {
 }
 
 // Export returns a "schema reference object" corresponding to this schema object. A "schema reference object" is an abridged
-// version of the original SchemaObj, having only two non-empty fields: Ref and TypeName. "Schema reference objects"
+// version of the original SchemaObj, having only two non-empty fields: Ref and TypeName. "SwaggerData reference objects"
 // are used to refer original schema objects from other schemas.
 func (so SchemaObj) Export() SchemaObj {
 	return SchemaObj{

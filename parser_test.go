@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
-	"sync"
 	"testing"
 )
 
@@ -23,7 +22,7 @@ type PersonName struct {
 	First    string `json:"first_name"`
 	Middle   string `json:"middle_name"`
 	Last     string `json:"last_name"`
-	Nickname string `schema:"-"`
+	Nickname string `query:"-"`
 	_        string
 }
 
@@ -40,13 +39,14 @@ type Project struct {
 
 // PreferredWarehouseRequest is request object of get preferred warehouse handler
 type PreferredWarehouseRequest struct {
-	Items              []string `schema:"items" description:"List of simple sku"`
-	IDCustomerLocation uint64   `schema:"id_customer_location" description:"-"`
+	Items              []string `query:"items" description:"List of simple sku"`
+	IDCustomerLocation uint64   `query:"id_customer_location" description:"-"`
 }
 
 func TestResetDefinitions(t *testing.T) {
 	ts := &Person{}
-	if _, err := ParseDefinition(ts); err != nil {
+	gen := NewGenerator()
+	if _, err := gen.ParseDefinition(ts); err != nil {
 		t.Fatalf("%v", err)
 	}
 
@@ -54,7 +54,7 @@ func TestResetDefinitions(t *testing.T) {
 		t.Fatalf("len of gen.definitions must be greater than 0")
 	}
 
-	ResetDefinitions()
+	gen.ResetDefinitions()
 	if len(gen.definitions) != 0 {
 		t.Fatalf("len of gen.definitions must be equal to 0")
 	}
@@ -62,14 +62,15 @@ func TestResetDefinitions(t *testing.T) {
 
 func TestParseDefinition(t *testing.T) {
 	ts := &Person{}
-	if _, err := ParseDefinition(ts); err != nil {
+	if _, err := NewGenerator().ParseDefinition(ts); err != nil {
 		t.Fatalf("%v", err)
 	}
 }
 
 func TestParseDefinitionEmptyInterface(t *testing.T) {
 	var ts interface{}
-	if _, err := ParseDefinition(&ts); err != nil {
+	gen := NewGenerator()
+	if _, err := gen.ParseDefinition(&ts); err != nil {
 		t.Fatalf("%v", err)
 	}
 }
@@ -85,7 +86,7 @@ func TestParseDefinitionNonEmptyInterface(t *testing.T) {
 		Test()
 	}
 
-	if _, err := ParseDefinition(&ts); err != nil {
+	if _, err := NewGenerator().ParseDefinition(&ts); err != nil {
 		t.Fatalf("%v", err)
 	}
 }
@@ -94,7 +95,8 @@ func TestParseDefinitionWithEmbeddedStruct(t *testing.T) {
 	ts := &Employee{}
 	tt := reflect.TypeOf(ts)
 
-	if _, err := ParseDefinition(ts); err != nil {
+	gen := NewGenerator()
+	if _, err := gen.ParseDefinition(ts); err != nil {
 		t.Fatalf("%v", err)
 	}
 
@@ -113,7 +115,8 @@ func TestParseDefinitionWithEmbeddedInterface(t *testing.T) {
 	p := &Project{Manager: new(Employee)}
 	tt := reflect.TypeOf(p)
 
-	if _, err := ParseDefinition(p); err != nil {
+	gen := NewGenerator()
+	if _, err := gen.ParseDefinition(p); err != nil {
 		t.Fatalf("%v", err)
 	}
 
@@ -127,7 +130,7 @@ func TestParseDefinitionWithEmbeddedInterface(t *testing.T) {
 }
 
 func TestParseDefinitionString(t *testing.T) {
-	typeDef, err := ParseDefinition("string")
+	typeDef, err := NewGenerator().ParseDefinition("string")
 	name := typeDef.TypeName
 	if err != nil {
 		t.Fatalf("Error parsing string: %+v", err)
@@ -139,7 +142,7 @@ func TestParseDefinitionString(t *testing.T) {
 
 func TestParseDefinitionArray(t *testing.T) {
 	type Names []string
-	typeDef, err := ParseDefinition(Names{})
+	typeDef, err := NewGenerator().ParseDefinition(Names{})
 	if err != nil {
 		t.Fatalf("Error while parsing array of string: %v", err)
 	}
@@ -150,14 +153,14 @@ func TestParseDefinitionArray(t *testing.T) {
 
 	// re-parse with pointer input
 	// should get from definition list
-	_, err = ParseDefinition(&Names{})
+	_, err = NewGenerator().ParseDefinition(&Names{})
 	if err != nil {
 		t.Fatalf("Error while parsing array of string: %v", err)
 	}
 
 	// try to parse a named map
 	type MapList map[string]string
-	_, err = ParseDefinition(&MapList{})
+	_, err = NewGenerator().ParseDefinition(&MapList{})
 	if err != nil {
 		t.Fatalf("Error while parsing map string to string: %v", err)
 	}
@@ -165,7 +168,7 @@ func TestParseDefinitionArray(t *testing.T) {
 	// named array of object
 	type Person struct{}
 	type Persons []*Person
-	_, err = ParseDefinition(&Persons{})
+	_, err = NewGenerator().ParseDefinition(&Persons{})
 	if err != nil {
 		t.Fatalf("Error while parsing array of object: %v", err)
 	}
@@ -173,7 +176,7 @@ func TestParseDefinitionArray(t *testing.T) {
 
 func TestParseParameter(t *testing.T) {
 	p := &PreferredWarehouseRequest{}
-	name, params, err := ParseParameter(p)
+	name, params, err := NewGenerator().ParseParameter(p)
 
 	if err != nil {
 		t.Fatalf("error %v", err)
@@ -189,7 +192,7 @@ func TestParseParameter(t *testing.T) {
 }
 
 func TestParseParameterError(t *testing.T) {
-	_, _, err := ParseParameter(true)
+	_, _, err := NewGenerator().ParseParameter(true)
 	if err == nil {
 		t.Fatalf("it should return error")
 	}
@@ -202,6 +205,7 @@ func TestParseParameterError(t *testing.T) {
 func TestSetPathItem(t *testing.T) {
 	h := &testHandler{}
 
+	gen := NewGenerator()
 	methods := []string{"GET", "POST", "HEAD", "PUT", "OPTIONS", "DELETE", "PATCH"}
 
 	for _, method := range methods {
@@ -210,101 +214,24 @@ func TestSetPathItem(t *testing.T) {
 			Title:       "TestHandler",
 			Description: fmt.Sprintf("This is just a test handler with %s request", method),
 			Method:      method,
+			Request:     h.GetRequestBuffer(method),
+			Response:    h.GetResponseBuffer(method),
 		}
-		err := SetPathItem(info, h.GetRequestBuffer(method), h.GetBodyBuffer(), h.GetResponseBuffer(method))
+		_, err := gen.SetPathItem(info)
 		if err != nil {
 			t.Fatalf("error %v", err)
 		}
 	}
-}
-
-func TestResetPaths(t *testing.T) {
-	TestSetPathItem(t)
 
 	if len(gen.paths) == 0 {
 		t.Fatalf("len of gen.paths must be greater than 0")
 	}
 
-	ResetPaths()
+	gen.ResetPaths()
 	if len(gen.paths) != 0 {
 		t.Fatalf("len of gen.paths must be equal to 0")
 	}
-}
 
-//
-// benchmark and parallel testing
-//
-
-func BenchmarkParseDefinitionsParallel(b *testing.B) {
-	var (
-		mu sync.Mutex
-		i  int
-	)
-
-	data := []interface{}{
-		&Person{},
-		&PersonName{},
-		&PreferredWarehouseRequest{},
-	}
-
-	b.SetParallelism(10)
-	b.RunParallel(func(pb *testing.PB) {
-		for pb.Next() {
-			mu.Lock()
-			i++
-			input := data[i%3]
-			mu.Unlock()
-
-			if _, err := ParseDefinition(input); err != nil {
-				b.Fatalf("%v", err)
-			}
-		}
-	})
-}
-
-func BenchmarkSetPathItem(b *testing.B) {
-	h := &testHandler{}
-
-	infos := []PathItemInfo{
-		{
-			Path:        "/v1/test/handler",
-			Title:       "TestHandler",
-			Description: "This is just a test handler with GET request",
-			Method:      "GET",
-		},
-		{
-			Path:        "/v1/test/handler",
-			Title:       "TestHandler",
-			Description: "This is just a test handler with POST reqest",
-			Method:      "POST",
-		},
-	}
-
-	var (
-		mu sync.Mutex
-		i  int
-	)
-
-	b.SetParallelism(10)
-	b.RunParallel(func(pb *testing.PB) {
-		for pb.Next() {
-			mu.Lock()
-			i++
-			info := infos[i%2]
-			mu.Unlock()
-
-			err := SetPathItem(
-				info,
-				h.GetRequestBuffer(info.Method),
-				h.GetBodyBuffer(),
-				h.GetResponseBuffer(info.Method),
-			)
-
-			if err != nil {
-				b.Fatalf("error %v", err)
-			}
-		}
-	})
 }
 
 // testHandler can handle POST and GET request

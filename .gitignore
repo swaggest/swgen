@@ -29,6 +29,5 @@ _testmain.go
 .vscode
 .idea
 tmp
-testdata/test_REST_last_run.json
-testdata/test_JSON-RPC_last_run.json
+testdata/*_last_run.json
 vendor/*

@@ -17,11 +17,12 @@ type Generator struct {
 	corsEnabled      bool         // allow cross-origin HTTP request
 	corsAllowHeaders []string
 
-	definitionAdded map[string]bool           // index of TypeNames
-	definitions     defMap                    // list of all definition objects
-	defQueue        map[reflect.Type]struct{} // queue of reflect.Type objects waiting for analysis
-	paths           map[string]PathItem       // list all of paths object
-	typesMap        map[reflect.Type]interface{}
+	definitionAdded  map[string]bool           // index of TypeNames
+	definitions      defMap                    // list of all definition objects
+	defQueue         map[reflect.Type]struct{} // queue of reflect.Type objects waiting for analysis
+	paths            map[string]PathItem       // list all of paths object
+	typesMap         map[reflect.Type]interface{}
+	defaultResponses map[int]interface{}
 
 	indentJSON     bool
 	reflectGoTypes bool
@@ -87,6 +88,14 @@ func (g *Generator) ReflectGoTypes(enabled bool) *Generator {
 	g.reflectGoTypes = enabled
 	g.mu.Unlock()
 	return g
+}
+
+// AddDefaultResponse adds http code and response structure that will be applied to all operations
+func (g *Generator) AddDefaultResponse(httpCode int, response interface{}) {
+	if g.defaultResponses == nil {
+		g.defaultResponses = make(map[int]interface{})
+	}
+	g.defaultResponses[httpCode] = response
 }
 
 // EnableCORS enable HTTP handler support CORS

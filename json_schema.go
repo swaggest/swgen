@@ -7,8 +7,8 @@ type schemaBuilder struct {
 	g    *Generator
 }
 
-// JsonSchema builds JSON Schema for Swagger Schema object
-func (g *Generator) JsonSchema(s SchemaObj) (map[string]interface{}, error) {
+// JSONSchema builds JSON Schema for Swagger Schema object
+func (g *Generator) JSONSchema(s SchemaObj) (map[string]interface{}, error) {
 	sb := &schemaBuilder{
 		refs: make(map[string]bool),
 		g:    g,
@@ -24,7 +24,7 @@ func (g *Generator) JsonSchema(s SchemaObj) (map[string]interface{}, error) {
 		refs := sb.refs
 		sb.refs = make(map[string]bool)
 
-		for ref, _ := range refs {
+		for ref := range refs {
 			ref := strings.TrimPrefix(ref, "#/definitions/")
 			if _, ok := definitions[ref]; !ok {
 				jsonSchema, err := sb.jsonSchemaPlain(allDef[ref])
@@ -86,10 +86,10 @@ func (sb *schemaBuilder) jsonSchemaPlain(s SchemaObj) (map[string]interface{}, e
 	return res, nil
 }
 
-// ParamJsonSchema builds JSON Schema for Swagger Parameter object
-func (g *Generator) ParamJsonSchema(p ParamObj) (map[string]interface{}, error) {
+// ParamJSONSchema builds JSON Schema for Swagger Parameter object
+func (g *Generator) ParamJSONSchema(p ParamObj) (map[string]interface{}, error) {
 	if p.Schema != nil {
-		return g.JsonSchema(*p.Schema)
+		return g.JSONSchema(*p.Schema)
 	}
 
 	p.Name = ""

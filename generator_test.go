@@ -128,7 +128,7 @@ type paramStructMap struct {
 	Field2 string                `query:"field2"`
 	Field3 simpleTestReplacement `query:"field3"`
 }
-type paramStructMapJson struct {
+type paramStructMapJSON struct {
 	Field1 int                   `json:"field1"`
 	Field2 string                `json:"field2"`
 	Field3 simpleTestReplacement `json:"field3"`
@@ -429,7 +429,7 @@ func TestJsonRpc(t *testing.T) {
 	gen.SetPathItem(createPathItemInfo("/V1/test5", "POST", "test5 name", "test5 description", "v1", true, testSimpleMapList{}, testSubTypes{}))
 	gen.SetPathItem(createPathItemInfo("/V1/test6", "POST", "test6 name", "test6 description", "v1", true, testSubTypes{}, testSimpleStruct{}))
 	gen.SetPathItem(createPathItemInfo("/V1/test7", "POST", "test7 name", "test7 description", "v1", true, emptyInterface, testSimpleSlices{}))
-	gen.SetPathItem(createPathItemInfo("/V1/test8", "POST", "test8v1 name", "test8v1 description", "v1", true, paramStructMapJson{}, map[string]testSimpleStruct{}))
+	gen.SetPathItem(createPathItemInfo("/V1/test8", "POST", "test8v1 name", "test8v1 description", "v1", true, paramStructMapJSON{}, map[string]testSimpleStruct{}))
 	gen.SetPathItem(createPathItemInfo("/V1/test9", "POST", "test9 name", "test9 description", "v1", true, mixedStruct{}, map[string]testSimpleStruct{}))
 	gen.SetPathItem(createPathItemInfo("/V1/test10", "POST", "test10 name", "test10 description", "v1", true, mixedStructWithEnumer{}, map[string]testSimpleStruct{}))
 
@@ -561,32 +561,32 @@ func TestGenerator_JsonSchema(t *testing.T) {
 		t.Fatalf("error %v", err)
 	}
 
-	jsonSchema, err := gen.JsonSchema(*obj.Responses[http.StatusOK].Schema)
+	jsonSchema, err := gen.JSONSchema(*obj.Responses[http.StatusOK].Schema)
 	if err != nil {
 		t.Fatalf("error %v", err)
 	}
-	jsonSchemaJson, err := json.MarshalIndent(jsonSchema, "", " ")
+	jsonSchemaJSON, err := json.MarshalIndent(jsonSchema, "", " ")
 	if err != nil {
 		t.Fatalf("error %v", err)
 	}
 
-	if err := writeLastRun("test_ResponseJsonSchema_last_run.json", jsonSchemaJson); err != nil {
+	if err := writeLastRun("test_ResponseJsonSchema_last_run.json", jsonSchemaJSON); err != nil {
 		t.Fatalf("Failed write last run data to a file: %s", err.Error())
 	}
-	checkResult(jsonSchemaJson, "test_ResponseJsonSchema.json", t)
+	checkResult(jsonSchemaJSON, "test_ResponseJsonSchema.json", t)
 
-	jsonSchema, err = gen.ParamJsonSchema(obj.Parameters[0])
+	jsonSchema, err = gen.ParamJSONSchema(obj.Parameters[0])
 	if err != nil {
 		t.Fatalf("error %v", err)
 	}
-	jsonSchemaJson, err = json.MarshalIndent(jsonSchema, "", " ")
+	jsonSchemaJSON, err = json.MarshalIndent(jsonSchema, "", " ")
 	if err != nil {
 		t.Fatalf("error %v", err)
 	}
 
-	if err := writeLastRun("test_Param0JsonSchema_last_run.json", jsonSchemaJson); err != nil {
+	if err := writeLastRun("test_Param0JsonSchema_last_run.json", jsonSchemaJSON); err != nil {
 		t.Fatalf("Failed write last run data to a file: %s", err.Error())
 	}
-	checkResult(jsonSchemaJson, "test_Param0JsonSchema.json", t)
+	checkResult(jsonSchemaJSON, "test_Param0JsonSchema.json", t)
 
 }

@@ -47,6 +47,7 @@ func ObjectHasXFields(i interface{}, tagname string) bool {
 	return false
 }
 
+// IsSlice checks if variable is a slice or a pointer to a slice
 func IsSlice(i interface{}) bool {
 	if i == nil {
 		return false
@@ -61,6 +62,7 @@ func IsSlice(i interface{}) bool {
 	return false
 }
 
+// IsStruct checks if variable is a struct or a pointer to a struct
 func IsStruct(i interface{}) bool {
 	if i == nil {
 		return false

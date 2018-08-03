@@ -90,6 +90,7 @@ func (g *Generator) ReflectGoTypes(enabled bool) *Generator {
 	return g
 }
 
+// AddDefaultResponse adds http code and response structure that will be applied to all operations
 func (g *Generator) AddDefaultResponse(httpCode int, response interface{}) {
 	if g.defaultResponses == nil {
 		g.defaultResponses = make(map[int]interface{})

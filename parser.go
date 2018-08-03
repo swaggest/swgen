@@ -677,7 +677,7 @@ func (g *Generator) SetPathItem(info PathItemInfo) (*OperationObj, error) {
 		if err != nil {
 			return nil, err
 		}
-		info.requestBodySchemaJson, _ = json.Marshal(typeDef)
+		info.requestBodySchemaJSON, _ = json.Marshal(typeDef)
 
 		if !typeDef.isEmpty() {
 			param := ParamObj{

@@ -170,11 +170,12 @@ type PathItemInfo struct {
 	additionalData
 
 	// JSON SwaggerData reflection of Swagger entities
-	requestParamsSchemaJson []byte
-	requestBodySchemaJson   []byte
-	responseSchemaJson      []byte
+	requestParamsSchemaJSON []byte
+	requestBodySchemaJSON   []byte
+	responseSchemaJSON      []byte
 }
 
+// AddResponse adds response with http status code and output structure
 func (p *PathItemInfo) AddResponse(statusCode int, output interface{}) *PathItemInfo {
 	if nil == p.responses {
 		p.responses = make(map[int]interface{}, 1)
@@ -183,7 +184,8 @@ func (p *PathItemInfo) AddResponse(statusCode int, output interface{}) *PathItem
 	return p
 }
 
-func (p *PathItemInfo) AddResponses(responses ...PathItemResponse) {
+// AddResponses adds multiple responses with WithStatusCode
+func (p *PathItemInfo) AddResponses(responses ...WithStatusCode) {
 	if len(responses) == 0 {
 		return
 	}
@@ -199,7 +201,8 @@ type description interface {
 	Description() string
 }
 
-type PathItemResponse interface {
+// WithStatusCode is an interface to expose http status code
+type WithStatusCode interface {
 	StatusCode() int
 }
 
@@ -218,13 +221,14 @@ type enum interface {
 	Enum() []interface{}
 }
 
+// SwaggerData holds parameter and schema information for swagger definition
 type SwaggerData struct {
 	shared
 	ParamObj
 	SchemaObj
 }
 
-// Schema returns schema object
+// SwaggerDef returns schema object
 func (s SwaggerData) SwaggerDef() SwaggerData {
 	return s
 }

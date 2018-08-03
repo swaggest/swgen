@@ -692,7 +692,7 @@
             "name": "body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/paramStructMapJson"
+              "$ref": "#/definitions/paramStructMapJSON"
             },
             "required": true
           }
@@ -811,7 +811,7 @@
         }
       }
     },
-    "paramStructMapJson": {
+    "paramStructMapJSON": {
       "type": "object",
       "properties": {
         "field1": {

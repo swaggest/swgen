@@ -41,7 +41,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/definitionExample"
             }
@@ -69,7 +69,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "object",
               "additionalProperties": {
@@ -103,7 +103,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "object",
               "additionalProperties": {
@@ -136,7 +136,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "array",
               "items": {
@@ -169,7 +169,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "array",
               "items": {
@@ -203,7 +203,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "string",
               "x-go-type": "string"
@@ -232,7 +232,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "boolean",
               "x-go-type": "bool"
@@ -261,7 +261,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "object",
               "additionalProperties": {
@@ -283,7 +283,7 @@
         "description": "test1 description",
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/testSimpleStruct"
             }
@@ -309,7 +309,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/testSimpleMaps"
             }
@@ -336,7 +336,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/testSimpleMapList"
             }
@@ -363,7 +363,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/testSubTypes"
             }
@@ -390,7 +390,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/testSimpleStruct"
             }
@@ -417,7 +417,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/testSimpleStruct"
             }
@@ -446,7 +446,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/simpleDateTime"
             }
@@ -474,7 +474,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/sliceDateTime"
             }
@@ -502,7 +502,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/mapDateTime"
             }
@@ -530,7 +530,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "array",
               "items": {
@@ -543,7 +543,7 @@
         "x-request-go-type": "github.com/swaggest/swgen.testSimpleStruct"
       }
     },
-    "/V1/defaeults1": {
+    "/V1/defaults1": {
       "get": {
         "tags": [
           "v1"
@@ -552,7 +552,7 @@
         "description": "test defaults",
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/testDefaults"
             }
@@ -569,7 +569,7 @@
         "description": "test empty struct",
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/testEmptyStruct"
             }
@@ -579,7 +579,7 @@
       }
     },
     "/V1/nullTypes": {
-      "get": {
+      "post": {
         "tags": [
           "v1"
         ],
@@ -597,7 +597,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/NullTypes"
             }
@@ -615,17 +615,17 @@
         "description": "test8 description",
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
             "type": "integer",
             "format": "int64",
+            "name": "id",
+            "in": "path",
             "x-go-name": "ID",
             "x-go-type": "uint64"
           },
           {
+            "type": "string",
             "name": "category",
             "in": "path",
-            "type": "string",
             "required": true,
             "x-go-name": "Cat",
             "x-go-type": "string"
@@ -633,7 +633,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/testSimpleStruct"
             }
@@ -662,7 +662,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -693,7 +693,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "number",
               "format": "double",
@@ -725,7 +725,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "string",
               "x-go-type": "string"
@@ -756,7 +756,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "string",
               "x-go-type": "string"
@@ -785,7 +785,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "array",
               "items": {
@@ -817,7 +817,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "number",
               "format": "double",
@@ -847,7 +847,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/TestSampleStruct"
             }
@@ -865,7 +865,7 @@
         "description": "test1 description",
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/testSimpleStruct"
             }
@@ -882,80 +882,80 @@
         "description": "test2 description",
         "parameters": [
           {
+            "type": "string",
             "name": "simple_string",
             "in": "query",
-            "type": "string",
             "required": true,
             "x-go-name": "SimpleString",
             "x-go-type": "string"
           },
           {
-            "name": "simple_int",
-            "in": "query",
             "type": "integer",
             "format": "int32",
+            "name": "simple_int",
+            "in": "query",
             "required": true,
             "x-go-name": "SimpleInt",
             "x-go-type": "int"
           },
           {
-            "name": "simple_int32",
-            "in": "query",
             "type": "integer",
             "format": "int32",
+            "name": "simple_int32",
+            "in": "query",
             "required": true,
             "x-go-name": "SimpleInt32",
             "x-go-type": "int32"
           },
           {
-            "name": "simple_int64",
-            "in": "query",
             "type": "integer",
             "format": "int64",
+            "name": "simple_int64",
+            "in": "query",
             "required": true,
             "x-go-name": "SimpleInt64",
             "x-go-type": "int64"
           },
           {
-            "name": "simple_uint32",
-            "in": "query",
             "type": "integer",
             "format": "int64",
+            "name": "simple_uint32",
+            "in": "query",
             "required": true,
             "x-go-name": "SimpleUInt32",
             "x-go-type": "uint32"
           },
           {
-            "name": "simple_uint64",
-            "in": "query",
             "type": "integer",
             "format": "int64",
+            "name": "simple_uint64",
+            "in": "query",
             "required": true,
             "x-go-name": "SimpleUInt64",
             "x-go-type": "uint64"
           },
           {
-            "name": "simple_float32",
-            "in": "query",
             "type": "number",
             "format": "float",
+            "name": "simple_float32",
+            "in": "query",
             "required": true,
             "x-go-name": "SimpleFloat32",
             "x-go-type": "float32"
           },
           {
-            "name": "simple_float64",
-            "in": "query",
             "type": "number",
             "format": "double",
+            "name": "simple_float64",
+            "in": "query",
             "required": true,
             "x-go-name": "SimpleFloat64",
             "x-go-type": "float64"
           },
           {
+            "type": "boolean",
             "name": "simple_bool",
             "in": "query",
-            "type": "boolean",
             "required": true,
             "x-go-name": "SimpleBool",
             "x-go-type": "bool"
@@ -963,13 +963,13 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/testSimpleSlices"
             }
           }
         },
-        "x-request-go-type": "github.com/swaggest/swgen.testSimpleStruct"
+        "x-request-go-type": "github.com/swaggest/swgen.testSimpleQueryStruct"
       }
     },
     "/V1/test3": {
@@ -991,7 +991,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/testSimpleMaps"
             }
@@ -1019,7 +1019,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/testSimpleMapList"
             }
@@ -1047,7 +1047,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/testSubTypes"
             }
@@ -1075,7 +1075,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/testSimpleStruct"
             }
@@ -1093,7 +1093,7 @@
         "description": "test7 description",
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/testSimpleSlices"
             }
@@ -1110,26 +1110,26 @@
         "description": "test8v1 description",
         "parameters": [
           {
-            "name": "field1",
-            "in": "query",
             "type": "integer",
             "format": "int32",
+            "name": "field1",
+            "in": "query",
             "required": true,
             "x-go-name": "Field1",
             "x-go-type": "int"
           },
           {
+            "type": "string",
             "name": "field2",
             "in": "query",
-            "type": "string",
             "required": true,
             "x-go-name": "Field2",
             "x-go-type": "string"
           },
           {
+            "type": "string",
             "name": "field3",
             "in": "query",
-            "type": "string",
             "required": true,
             "x-go-name": "Field3",
             "x-go-type": "github.com/swaggest/swgen.simpleTestReplacement"
@@ -1137,7 +1137,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "object",
               "additionalProperties": {
@@ -1151,7 +1151,7 @@
       }
     },
     "/V1/test9": {
-      "get": {
+      "post": {
         "tags": [
           "v1"
         ],
@@ -1159,10 +1159,10 @@
         "description": "test9 description",
         "parameters": [
           {
-            "name": "fieldQuery",
-            "in": "query",
             "type": "integer",
             "format": "int32",
+            "name": "fieldQuery",
+            "in": "query",
             "required": true,
             "x-go-name": "FieldQuery",
             "x-go-type": "int"
@@ -1178,7 +1178,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "object",
               "additionalProperties": {
@@ -1200,7 +1200,7 @@
         "description": "test type mapping",
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/typeMapHolder"
             }
@@ -1227,7 +1227,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/testWrapParams"
             }
@@ -1255,7 +1255,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/Unknown"
             }
@@ -1283,7 +1283,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/TestSampleStructType2"
             }
@@ -2090,7 +2090,8 @@
           "x-go-type": "int"
         },
         "simple_test_replacement": {
-          "$ref": "#/definitions/simpleTestReplacement"
+          "type": "string",
+          "x-go-type": "github.com/swaggest/swgen.simpleTestReplacement"
         }
       },
       "x-go-type": "github.com/swaggest/swgen.testWrapParams",
@@ -2105,20 +2106,17 @@
         "simple_test_replacement": "github.com/swaggest/swgen.simpleTestReplacement"
       }
     },
-    "typeMap": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "integer",
-        "format": "int32",
-        "x-go-type": "int"
-      },
-      "x-go-type": "map[string]int"
-    },
     "typeMapHolder": {
       "type": "object",
       "properties": {
         "m": {
-          "$ref": "#/definitions/typeMap"
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "format": "int32",
+            "x-go-type": "int"
+          },
+          "x-go-type": "github.com/swaggest/swgen.typeMap"
         }
       },
       "x-go-type": "github.com/swaggest/swgen.typeMapHolder",

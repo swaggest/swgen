@@ -48,11 +48,28 @@ func ObjectHasXFields(i interface{}, tagname string) bool {
 }
 
 func IsSlice(i interface{}) bool {
+	if i == nil {
+		return false
+	}
 	t := reflect.TypeOf(i)
 	for t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}
 	if t.Kind() == reflect.Slice {
+		return true
+	}
+	return false
+}
+
+func IsStruct(i interface{}) bool {
+	if i == nil {
+		return false
+	}
+	t := reflect.TypeOf(i)
+	for t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+	if t.Kind() == reflect.Struct {
 		return true
 	}
 	return false

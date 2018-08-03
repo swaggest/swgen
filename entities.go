@@ -143,7 +143,7 @@ type SecurityDef struct {
 	TokenURL         string            `json:"tokenUrl,omitempty"`         // Example: https://example.com/oauth/token
 	Scopes           map[string]string `json:"scopes,omitempty"`           // Example: {"read": "Grants read access", "write": "Grants write access"}
 
-	Description string `json:"description"`
+	Description string `json:"description,omitempty"`
 }
 
 // PathItemInfo some basic information of a path item and operation object
@@ -320,7 +320,7 @@ type ParamItemObj struct {
 }
 
 // Responses list of response object
-type Responses map[string]ResponseObj
+type Responses map[int]ResponseObj
 
 // ResponseObj describes a single response from an API Operation
 type ResponseObj struct {
@@ -345,8 +345,6 @@ type SchemaObj struct {
 	GoType               string               `json:"x-go-type,omitempty"`
 	GoPropertyNames      map[string]string    `json:"x-go-property-names,omitempty"`
 	GoPropertyTypes      map[string]string    `json:"x-go-property-types,omitempty"`
-
-	g *Generator
 }
 
 // NewSchemaObj Constructor function for SchemaObj struct type
@@ -387,7 +385,6 @@ func (so SchemaObj) Export() SchemaObj {
 	return SchemaObj{
 		Ref:      so.Ref,
 		TypeName: so.TypeName,
-		g:        so.g,
 	}
 }
 

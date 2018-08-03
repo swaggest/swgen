@@ -96,26 +96,15 @@ func (g *Generator) ResetDefinitions() {
 	g.defQueue = make(map[reflect.Type]struct{})
 }
 
-// ResetDefinitions will remove all exists definitions and init again
-func ResetDefinitions() {
-	gen.ResetDefinitions()
-}
-
 // ParseDefinition create a DefObj from input object, it should be a non-nil pointer to anything
 // it reuse schema/json tag for property name.
 func (g *Generator) ParseDefinition(i interface{}) (schema SchemaObj, err error) {
-	s, err := g.parseDefinition(i)
-	s.g = g
-
-	return s, err
-}
-
-func (g *Generator) parseDefinition(i interface{}) (schema SchemaObj, err error) {
 	var (
 		typeName string
 		typeDef  SchemaObj
 		t        = reflect.TypeOf(i)
 		v        = reflect.ValueOf(i)
+		ot       = t // original type
 	)
 
 	if mappedTo, ok := g.getMappedType(t); ok {
@@ -208,7 +197,7 @@ func (g *Generator) parseDefinition(i interface{}) (schema SchemaObj, err error)
 	defer g.parseDefInQueue()
 
 	if g.reflectGoTypes {
-		typeDef.GoType = goType(t)
+		typeDef.GoType = goType(ot)
 	}
 
 	if typeDef.TypeName != "" { // non-anonymous types should be added to definitions map and returned "in-place" as references
@@ -266,6 +255,8 @@ func (g *Generator) parseDefinitionProperties(v reflect.Value, parent *SchemaObj
 
 	for i := 0; i < t.NumField(); i = i + 1 {
 		field := t.Field(i)
+
+		oft := field.Type
 
 		// we can't access the value of un-exportable field
 		if field.PkgPath != "" {
@@ -326,10 +317,10 @@ func (g *Generator) parseDefinitionProperties(v reflect.Value, parent *SchemaObj
 		}
 		if g.reflectGoTypes {
 			if obj.Ref == "" {
-				obj.GoType = goType(field.Type)
+				obj.GoType = goType(oft)
 			}
 			parent.GoPropertyNames[propName] = field.Name
-			parent.GoPropertyTypes[propName] = goType(field.Type)
+			parent.GoPropertyTypes[propName] = goType(oft)
 		}
 
 		properties[propName] = obj
@@ -363,12 +354,6 @@ func (g *Generator) caseDefaultValue(t reflect.Type, defaultValue string) (inter
 		}
 		return reflect.Indirect(reflect.ValueOf(instance)).Interface(), nil
 	}
-}
-
-// ParseDefinition create a DefObj from input object, it should be a pointer to a struct,
-// it reuse schema/json tag for property name.
-func ParseDefinition(i interface{}) (typeDef SchemaObj, err error) {
-	return gen.ParseDefinition(i)
 }
 
 func (g *Generator) parseDefInQueue() {
@@ -570,19 +555,9 @@ func (g *Generator) ParseParameter(i interface{}) (name string, params []ParamOb
 	return
 }
 
-// ParseParameter parse input struct to swagger parameter object
-func ParseParameter(i interface{}) (name string, params []ParamObj, err error) {
-	return gen.ParseParameter(i)
-}
-
 // ResetPaths remove all current paths
 func (g *Generator) ResetPaths() {
 	g.paths = make(map[string]PathItem)
-}
-
-// ResetPaths remove all current paths
-func ResetPaths() {
-	gen.ResetPaths()
 }
 
 var regexFindPathParameter = regexp.MustCompile(`\{([^}:]+)(:[^\/]+)?(?:\})`)
@@ -594,10 +569,20 @@ func (g *Generator) SetPathItem(info PathItemInfo) (*OperationObj, error) {
 		found bool
 	)
 
-	var params = info.Request
+	var params interface{}
+	if _, ok := info.Request.(SchemaDefinition); ok {
+		params = info.Request
+	} else if IsStruct(info.Request) {
+		params = info.Request
+	}
+
 	var body interface{}
 	if info.Method != http.MethodGet && info.Method != http.MethodHead {
-		if ObjectHasXFields(info.Request, "json") || IsSlice(info.Request) {
+		if _, ok := info.Request.(SchemaDefinition); ok {
+			body = info.Request
+		} else if ObjectHasXFields(info.Request, "json") ||
+			IsSlice(info.Request) ||
+			!IsStruct(info.Request) {
 			body = info.Request
 		}
 	}
@@ -739,8 +724,6 @@ func (g *Generator) parseResponseObject(operationObj *OperationObj, statusCode i
 		operationObj.Responses = make(Responses)
 	}
 
-	code := strconv.Itoa(statusCode)
-
 	if responseObj != nil {
 		schema, err := g.ParseDefinition(responseObj)
 		if err != nil {
@@ -754,12 +737,12 @@ func (g *Generator) parseResponseObject(operationObj *OperationObj, statusCode i
 		}
 		// since we only response json object
 		// so, type of response object is always object
-		operationObj.Responses[code] = ResponseObj{
+		operationObj.Responses[statusCode] = ResponseObj{
 			Description: desc,
 			Schema:      &schema,
 		}
 	} else {
-		operationObj.Responses[code] = ResponseObj{
+		operationObj.Responses[statusCode] = ResponseObj{
 			//Description: "request success",
 			Schema: &SchemaObj{shared: shared{Type: "null"}},
 		}

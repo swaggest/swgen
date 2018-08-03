@@ -31,7 +31,7 @@
         "description": "test10 description",
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "object",
               "additionalProperties": {
@@ -52,7 +52,7 @@
         "description": "test11 description",
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "object",
               "additionalProperties": {
@@ -72,7 +72,7 @@
         "description": "test12 description",
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "array",
               "items": {
@@ -92,7 +92,7 @@
         "description": "test13 description",
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "array",
               "items": {
@@ -113,7 +113,7 @@
         "description": "test14 description",
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "string"
             }
@@ -130,7 +130,7 @@
         "description": "test15 description",
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "boolean"
             }
@@ -147,7 +147,7 @@
         "description": "test16 description",
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "object",
               "additionalProperties": {
@@ -167,7 +167,7 @@
         "description": "test date 1 description",
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/simpleDateTime"
             }
@@ -184,7 +184,7 @@
         "description": "test date 2 description",
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/sliceDateTime"
             }
@@ -201,7 +201,7 @@
         "description": "test date 3 description",
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/mapDateTime"
             }
@@ -218,7 +218,7 @@
         "description": "test date 4 description",
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "array",
               "items": {
@@ -238,7 +238,7 @@
         "description": "test defaults",
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/testDefaults"
             }
@@ -265,7 +265,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -293,7 +293,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "number",
               "format": "double"
@@ -322,7 +322,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "string"
             }
@@ -350,7 +350,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "string"
             }
@@ -367,7 +367,7 @@
         "description": "test slice 1 description",
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "array",
               "items": {
@@ -387,7 +387,7 @@
         "description": "test slice 2 description",
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "string"
             }
@@ -404,7 +404,7 @@
         "description": "test1 description",
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/testSimpleStruct"
             }
@@ -422,11 +422,8 @@
         "description": "test10 description",
         "parameters": [
           {
-            "name": "gender",
-            "in": "query",
             "type": "integer",
             "format": "int32",
-            "required": true,
             "enum": [
               0,
               1,
@@ -438,13 +435,13 @@
               "Male",
               "Female",
               "LGBT"
-            ]
+            ],
+            "name": "gender",
+            "in": "query",
+            "required": true
           },
           {
-            "name": "flag",
-            "in": "query",
             "type": "string",
-            "required": true,
             "enum": [
               "Foo",
               "Bar"
@@ -452,20 +449,15 @@
             "x-enum-names": [
               "Foo",
               "Bar"
-            ]
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "$ref": "#/definitions/mixedStruct"
-            },
+            ],
+            "name": "flag",
+            "in": "query",
             "required": true
           }
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "object",
               "additionalProperties": {
@@ -486,70 +478,70 @@
         "description": "test2 description",
         "parameters": [
           {
+            "type": "string",
             "name": "simple_string",
             "in": "query",
-            "type": "string",
             "required": true
           },
           {
+            "type": "integer",
+            "format": "int32",
             "name": "simple_int",
             "in": "query",
-            "type": "integer",
-            "format": "int32",
             "required": true
           },
           {
+            "type": "integer",
+            "format": "int32",
             "name": "simple_int32",
             "in": "query",
-            "type": "integer",
-            "format": "int32",
             "required": true
           },
           {
+            "type": "integer",
+            "format": "int64",
             "name": "simple_int64",
             "in": "query",
-            "type": "integer",
-            "format": "int64",
             "required": true
           },
           {
+            "type": "integer",
+            "format": "int64",
             "name": "simple_uint32",
             "in": "query",
-            "type": "integer",
-            "format": "int64",
             "required": true
           },
           {
+            "type": "integer",
+            "format": "int64",
             "name": "simple_uint64",
             "in": "query",
-            "type": "integer",
-            "format": "int64",
             "required": true
           },
           {
-            "name": "simple_float32",
-            "in": "query",
             "type": "number",
             "format": "float",
+            "name": "simple_float32",
+            "in": "query",
             "required": true
           },
           {
-            "name": "simple_float64",
-            "in": "query",
             "type": "number",
             "format": "double",
+            "name": "simple_float64",
+            "in": "query",
             "required": true
           },
           {
+            "type": "boolean",
             "name": "simple_bool",
             "in": "query",
-            "type": "boolean",
             "required": true
           }
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/testSimpleSlices"
             }
@@ -577,7 +569,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/testSimpleMaps"
             }
@@ -605,7 +597,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/testSimpleMapList"
             }
@@ -633,7 +625,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/testSubTypes"
             }
@@ -661,7 +653,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/testSimpleStruct"
             }
@@ -679,7 +671,7 @@
         "description": "test7 description",
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/testSimpleSlices"
             }
@@ -700,14 +692,14 @@
             "name": "body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/paramStructMap"
+              "$ref": "#/definitions/paramStructMapJson"
             },
             "required": true
           }
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "object",
               "additionalProperties": {
@@ -728,10 +720,10 @@
         "description": "test9 description",
         "parameters": [
           {
-            "name": "fieldQuery",
-            "in": "query",
             "type": "integer",
             "format": "int32",
+            "name": "fieldQuery",
+            "in": "query",
             "required": true
           },
           {
@@ -745,7 +737,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "type": "object",
               "additionalProperties": {
@@ -776,7 +768,7 @@
         ],
         "responses": {
           "200": {
-            "description": "request success",
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/testWrapParams"
             }
@@ -819,8 +811,20 @@
         }
       }
     },
-    "paramStructMap": {
-      "type": "object"
+    "paramStructMapJson": {
+      "type": "object",
+      "properties": {
+        "field1": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "field2": {
+          "type": "string"
+        },
+        "field3": {
+          "type": "string"
+        }
+      }
     },
     "simpleDateTime": {
       "type": "object",
@@ -1183,7 +1187,7 @@
           "type": "string"
         },
         "simple_test_replacement": {
-          "$ref": "#/definitions/simpleTestReplacement"
+          "type": "string"
         }
       }
     }

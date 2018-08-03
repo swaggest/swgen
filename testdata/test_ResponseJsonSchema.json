@@ -1,0 +1,47 @@
+{
+  "additionalProperties": {
+    "$ref": "#/definitions/testSimpleStruct"
+  },
+  "definitions": {
+    "testSimpleStruct": {
+      "properties": {
+        "simple_bool": {
+          "type": "boolean"
+        },
+        "simple_float32": {
+          "format": "float",
+          "type": "number"
+        },
+        "simple_float64": {
+          "format": "double",
+          "type": "number"
+        },
+        "simple_int": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "simple_int32": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "simple_int64": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "simple_string": {
+          "type": "string"
+        },
+        "simple_uint32": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "simple_uint64": {
+          "format": "int64",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "type": "object"
+}

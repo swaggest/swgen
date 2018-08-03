@@ -5,8 +5,10 @@ import (
 )
 
 func TestDefinition(t *testing.T) {
-	var obj SchemaDefinition
-	obj = SchemaObj{Type: "integer", Format: "int64", TypeName: "MyName"}
+	var obj = SwaggerData{}
+	obj.Type = "integer"
+	obj.Format = "int64"
+	obj.TypeName = "MyName"
 
 	typeDef := obj.SwaggerDef()
 	assertTrue(typeDef.TypeName == "MyName", t)

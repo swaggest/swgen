@@ -1,0 +1,16 @@
+{
+  "enum": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "format": "int32",
+  "type": "integer",
+  "x-enum-names": [
+    "PreferNotToDisclose",
+    "Male",
+    "Female",
+    "LGBT"
+  ]
+}

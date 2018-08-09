@@ -168,11 +168,18 @@ type PathItemInfo struct {
 	SuccessfulResponseCode int
 
 	additionalData
+}
 
-	// JSON SwaggerData reflection of Swagger entities
-	requestParamsSchemaJSON []byte
-	requestBodySchemaJSON   []byte
-	responseSchemaJSON      []byte
+// RemoveResponse removes response with http status code and returns if it existed
+func (p *PathItemInfo) RemoveResponse(statusCode int) bool {
+	if nil == p.responses {
+		return false
+	}
+	if _, ok := p.responses[statusCode]; ok {
+		delete(p.responses, statusCode)
+		return true
+	}
+	return false
 }
 
 // AddResponse adds response with http status code and output structure
@@ -344,7 +351,7 @@ type SchemaObj struct {
 	AdditionalProperties *SchemaObj           `json:"additionalProperties,omitempty"` // if type is object (map[])
 	Properties           map[string]SchemaObj `json:"properties,omitempty"`           // if type is object
 	Example              interface{}          `json:"example,omitempty"`
-	Nullable             bool                 `json:"nullable,omitempty"`
+	Nullable             bool                 `json:"x-nullable,omitempty"`
 	TypeName             string               `json:"-"` // for internal using, passing typeName
 	GoType               string               `json:"x-go-type,omitempty"`
 	GoPropertyNames      map[string]string    `json:"x-go-property-names,omitempty"`

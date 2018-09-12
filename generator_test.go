@@ -2,16 +2,16 @@ package swgen
 
 import (
 	"encoding/json"
+	"github.com/yudai/gojsondiff"
+	"github.com/yudai/gojsondiff/formatter"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path"
-	"reflect"
 	"testing"
 	"time"
 
-	"github.com/kr/pretty"
 	"github.com/swaggest/swgen/sample"
 )
 
@@ -493,26 +493,41 @@ func readTestFile(filename string) ([]byte, error) {
 	return bytes, nil
 }
 
-func checkResult(generatedBytes []byte, expectedDataFileName string, t *testing.T) bool {
+func assertEqualJSON(generatedBytes []byte, expectedBytes []byte, t *testing.T) {
 	expectedData := make(map[string]interface{})
 	generatedData := make(map[string]interface{})
 
+	if err := json.Unmarshal(expectedBytes, &expectedData); err != nil {
+		t.Fatalf("can not unmarshal expected data: %s", err.Error())
+	}
+	if err := json.Unmarshal(generatedBytes, &generatedData); err != nil {
+		t.Fatalf("can not unmarshal generated data: %s", err.Error())
+	}
+
+	diff, err := gojsondiff.New().Compare(expectedBytes, generatedBytes)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if diff.Modified() {
+		config := formatter.AsciiFormatterConfig{
+			Coloring:       true,
+			ShowArrayIndex: true,
+		}
+
+		f := formatter.NewAsciiFormatter(expectedData, config)
+		diffString, _ := f.Format(diff)
+		t.Fatalf("Unexpected result: %s", diffString)
+	}
+}
+
+func checkResult(generatedBytes []byte, expectedDataFileName string, t *testing.T) bool {
 	expectedBytes, err := readTestFile(expectedDataFileName)
 	if err != nil {
 		t.Fatalf("can not read test file '%s': %s", expectedDataFileName, err.Error())
 	}
-	if err = json.Unmarshal(expectedBytes, &expectedData); err != nil {
-		t.Fatalf("can not unmarshal '%s' data: %s", expectedDataFileName, err.Error())
-	}
-	if err = json.Unmarshal(generatedBytes, &generatedData); err != nil {
-		t.Fatalf("can not unmarshal generated data: %s", err.Error())
-	}
-
-	for _, diff := range pretty.Diff(expectedData, generatedData) {
-		pretty.Println(diff)
-	}
-
-	return reflect.DeepEqual(expectedData, generatedData)
+	assertEqualJSON(generatedBytes, expectedBytes, t)
+	return true
 }
 
 func TestCORSSupport(t *testing.T) {

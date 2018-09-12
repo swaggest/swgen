@@ -1,8 +1,8 @@
 package swgen
 
 import (
-	"encoding/json"
 	"fmt"
+	"net/http"
 	"reflect"
 	"testing"
 )
@@ -279,15 +279,145 @@ func (th *testHandler) HandleGet(_ interface{}) (response interface{}, err error
 	return
 }
 
-//
-// Test helper
-//
+type custom string
 
-func getReadableJSON(i interface{}, t *testing.T) []byte {
-	data, err := json.MarshalIndent(i, "", "  ")
+func (custom) SwaggerDef() SwaggerData {
+	d := SwaggerData{}
+	d.Description = "A custom string"
+	d.Type = "string"
+	d.Pattern = "^[a-z]{4}$"
+	return d
+}
+
+type bodyWithCustom struct {
+	Id int    `json:"id"`
+	C  custom `json:"c"`
+}
+
+type paramsWithCustom struct {
+	Id int    `query:"id"`
+	C  custom `query:"c"`
+}
+
+func TestSwaggerDef(t *testing.T) {
+	gen := NewGenerator()
+
+	_, err := gen.SetPathItem(PathItemInfo{
+		Method:  http.MethodPost,
+		Path:    "/bla",
+		Request: new(bodyWithCustom),
+	})
 	if err != nil {
-		t.Fatalf("error while parsing struct to JSON string: %v", err)
+		t.Fatalf("error while adding POST handler: %v", err)
 	}
 
-	return data
+	_, err = gen.SetPathItem(PathItemInfo{
+		Method:  http.MethodGet,
+		Path:    "/bla",
+		Request: new(paramsWithCustom),
+	})
+	if err != nil {
+		t.Fatalf("error while adding GET handler: %v", err)
+	}
+
+	swg, err := gen.GenDocument()
+	if err != nil {
+		t.Fatalf("error while generating swagger doc: %v", err)
+	}
+	expected := []byte(`
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "",
+    "description": "",
+    "termsOfService": "",
+    "contact": {
+      "name": ""
+    },
+    "license": {
+      "name": ""
+    },
+    "version": ""
+  },
+  "basePath": "/",
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "paths": {
+    "/bla": {
+      "get": {
+        "summary": "",
+        "description": "",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int32",
+            "name": "id",
+            "in": "query",
+            "required": true
+          },
+          {
+            "description": "A custom string",
+            "type": "string",
+            "pattern": "^[a-z]{4}$",
+            "name": "c",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "null"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "",
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/bodyWithCustom"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "null"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "bodyWithCustom": {
+      "type": "object",
+      "properties": {
+        "c": {
+          "$ref": "#/definitions/custom"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "custom": {
+      "description": "A custom string",
+      "pattern": "^[a-z]{4}$",
+      "type": "string"
+    }
+  }
+}
+`)
+
+	assertEqualJSON(swg, expected, t)
 }

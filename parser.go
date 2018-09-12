@@ -417,6 +417,15 @@ func (g *Generator) genSchemaForType(t reflect.Type) SchemaObj {
 		panic(fmt.Sprintf("type %s is not supported: %s", t.Kind(), t.String()))
 	}
 
+	if sd, ok := reflect.New(t).Interface().(SchemaDefinition); ok {
+		smObj = sd.SwaggerDef().Schema()
+		name := ReflectTypeReliableName(t)
+		smObj = SchemaObj{Ref: refDefinitionPrefix + name}
+		if !g.defExists(t) || !g.defInQueue(t) {
+			g.addToDefQueue(t)
+		}
+	}
+
 	if g.reflectGoTypes && smObj.Ref == "" {
 		smObj.GoType = goType(t)
 	}

@@ -290,12 +290,12 @@ func (custom) SwaggerDef() SwaggerData {
 }
 
 type bodyWithCustom struct {
-	Id int    `json:"id"`
+	ID int    `json:"id"`
 	C  custom `json:"c"`
 }
 
 type paramsWithCustom struct {
-	Id int    `query:"id"`
+	ID int    `query:"id"`
 	C  custom `query:"c"`
 }
 

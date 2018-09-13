@@ -22,3 +22,8 @@ script:
   - go vet
   - go test -v -cover -race -coverprofile coverage.out
   - $HOME/gopath/bin/goveralls -coverprofile coverage.out -service travis-ci
+
+matrix:
+  allow_failures:
+  - go: tip
+fast_finish: true

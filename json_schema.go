@@ -110,8 +110,8 @@ type ObjectJSONSchema struct {
 	Properties map[string]interface{} `json:"properties"`
 }
 
-// WalkJsonSchemaRequestGroups iterates over all request parameters grouped by path, method and in into an instance of JSON Schema
-func (g *Generator) WalkJsonSchemaRequestGroups(function func(path, method, in string, schema ObjectJSONSchema)) {
+// WalkJSONSchemaRequestGroups iterates over all request parameters grouped by path, method and in into an instance of JSON Schema
+func (g *Generator) WalkJSONSchemaRequestGroups(function func(path, method, in string, schema ObjectJSONSchema)) {
 	var err error
 	for path, pi := range g.doc.Paths {
 		for method, op := range pi.Map() {
@@ -144,8 +144,8 @@ func (g *Generator) WalkJsonSchemaRequestGroups(function func(path, method, in s
 	}
 }
 
-// WalkJsonSchemaResponses iterates over all responses grouped by path, method and status code into an instance of JSON Schema
-func (g *Generator) WalkJsonSchemaResponses(function func(path, method string, statusCode int, schema map[string]interface{})) {
+// WalkJSONSchemaResponses iterates over all responses grouped by path, method and status code into an instance of JSON Schema
+func (g *Generator) WalkJSONSchemaResponses(function func(path, method string, statusCode int, schema map[string]interface{})) {
 	for path, pi := range g.doc.Paths {
 		for method, op := range pi.Map() {
 			for statusCode, resp := range op.Responses {

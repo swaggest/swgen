@@ -3,6 +3,7 @@ package swgen
 import (
 	"encoding/json"
 	"errors"
+	"net/http"
 	"strings"
 )
 
@@ -94,6 +95,33 @@ func (pi PathItem) HasMethod(method string) bool {
 	}
 
 	return false
+}
+
+// Map returns operations mapped by HTTP method
+func (pi PathItem) Map() map[string]*OperationObj {
+	result := make(map[string]*OperationObj, 7)
+	if pi.Get != nil {
+		result[http.MethodGet] = pi.Get
+	}
+	if pi.Put != nil {
+		result[http.MethodPut] = pi.Put
+	}
+	if pi.Post != nil {
+		result[http.MethodPost] = pi.Post
+	}
+	if pi.Delete != nil {
+		result[http.MethodDelete] = pi.Delete
+	}
+	if pi.Options != nil {
+		result[http.MethodOptions] = pi.Options
+	}
+	if pi.Head != nil {
+		result[http.MethodHead] = pi.Head
+	}
+	if pi.Patch != nil {
+		result[http.MethodPatch] = pi.Patch
+	}
+	return result
 }
 
 type securityType string

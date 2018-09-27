@@ -284,3 +284,8 @@ func (g *Generator) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	w.Write(data)
 }
+
+// Document is an accessor to generated document
+func (g *Generator) Document() Document {
+	return g.doc
+}

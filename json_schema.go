@@ -95,7 +95,68 @@ func (g *Generator) ParamJSONSchema(p ParamObj) (map[string]interface{}, error) 
 	p.Name = ""
 	p.In = ""
 	p.Required = false
+	p.CollectionFormat = ""
 
 	res, err := jsonRecode(p)
 	return res, err
+}
+
+// ObjectJSONSchema is a simplified JSON Schema for object
+type ObjectJSONSchema struct {
+	ID         string                 `json:"id,omitempty"`
+	Schema     string                 `json:"$schema,omitempty"`
+	Type       string                 `json:"type"`
+	Required   []string               `json:"required,omitempty"`
+	Properties map[string]interface{} `json:"properties"`
+}
+
+// WalkJsonSchemaRequestGroups iterates over all request parameters grouped by path, method and in into an instance of JSON Schema
+func (g *Generator) WalkJsonSchemaRequestGroups(function func(path, method, in string, schema ObjectJSONSchema)) {
+	var err error
+	for path, pi := range g.doc.Paths {
+		for method, op := range pi.Map() {
+			requestSchemas := map[string]ObjectJSONSchema{}
+			for _, param := range op.Parameters {
+				if _, ok := requestSchemas[param.In]; !ok {
+					requestSchemas[param.In] = ObjectJSONSchema{
+						Schema:     "http://json-schema.org/draft-04/schema#",
+						Type:       "object",
+						Required:   []string{},
+						Properties: map[string]interface{}{},
+					}
+				}
+
+				if param.Required {
+					rs := requestSchemas[param.In]
+					rs.Required = append(rs.Required, param.Name)
+					requestSchemas[param.In] = rs
+				}
+				requestSchemas[param.In].Properties[param.Name], err = g.ParamJSONSchema(param)
+				if err != nil {
+					panic(err.Error())
+				}
+			}
+
+			for in, schema := range requestSchemas {
+				function(path, method, in, schema)
+			}
+		}
+	}
+}
+
+// WalkJsonSchemaResponses iterates over all responses grouped by path, method and status code into an instance of JSON Schema
+func (g *Generator) WalkJsonSchemaResponses(function func(path, method string, statusCode int, schema map[string]interface{})) {
+	for path, pi := range g.doc.Paths {
+		for method, op := range pi.Map() {
+			for statusCode, resp := range op.Responses {
+				schema, err := g.JSONSchema(*resp.Schema)
+				if err != nil {
+					panic(err.Error())
+				}
+				schema["$schema"] = "http://json-schema.org/draft-04/schema#"
+				function(path, method, statusCode, schema)
+			}
+		}
+	}
+
 }

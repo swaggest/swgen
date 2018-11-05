@@ -225,6 +225,11 @@ func (g *Generator) genDocument(host *string) ([]byte, error) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
+	var (
+		data []byte
+		err  error
+	)
+
 	// ensure that all definition in queue is parsed before generating
 	g.parseDefInQueue()
 	g.doc.Definitions = g.definitions.GenDefinitions()
@@ -252,10 +257,6 @@ func (g *Generator) genDocument(host *string) ([]byte, error) {
 		g.doc.Paths[path] = item
 	}
 
-	var (
-		data []byte
-		err  error
-	)
 	if g.indentJSON {
 		data, err = json.MarshalIndent(g.doc, "", "  ")
 	} else {
@@ -282,6 +283,7 @@ func (g *Generator) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	g.writeCORSHeaders(w)
 
+	//nolint:errcheck
 	w.Write(data)
 }
 

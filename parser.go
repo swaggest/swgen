@@ -3,7 +3,6 @@ package swgen
 import (
 	"encoding"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -98,7 +97,7 @@ func (g *Generator) ResetDefinitions() {
 
 // ParseDefinition create a DefObj from input object, it should be a non-nil pointer to anything
 // it reuse schema/json tag for property name.
-func (g *Generator) ParseDefinition(i interface{}) (schema SchemaObj, err error) {
+func (g *Generator) ParseDefinition(i interface{}) SchemaObj {
 	var (
 		typeName string
 		typeDef  SchemaObj
@@ -122,7 +121,7 @@ func (g *Generator) ParseDefinition(i interface{}) (schema SchemaObj, err error)
 		}
 		typeDef.TypeName = typeName
 		if def, ok := g.getDefinition(t); ok {
-			return SchemaObj{Ref: refDefinitionPrefix + def.TypeName, TypeName: def.TypeName}, nil
+			return SchemaObj{Ref: refDefinitionPrefix + def.TypeName, TypeName: def.TypeName}
 		}
 		defer g.parseDefInQueue()
 		if g.reflectGoTypes {
@@ -130,7 +129,7 @@ func (g *Generator) ParseDefinition(i interface{}) (schema SchemaObj, err error)
 		}
 		g.addDefinition(t, &typeDef)
 
-		return SchemaObj{Ref: refDefinitionPrefix + typeDef.TypeName, TypeName: typeDef.TypeName}, nil
+		return SchemaObj{Ref: refDefinitionPrefix + typeDef.TypeName, TypeName: typeDef.TypeName}
 	}
 
 	if t.Kind() == reflect.Ptr {
@@ -140,7 +139,7 @@ func (g *Generator) ParseDefinition(i interface{}) (schema SchemaObj, err error)
 	switch t.Kind() {
 	case reflect.Struct:
 		if typeDef, found := g.getDefinition(t); found {
-			return typeDef.Export(), nil
+			return typeDef.Export()
 		}
 
 		typeDef = *NewSchemaObj("object", ReflectTypeReliableName(t))
@@ -156,7 +155,7 @@ func (g *Generator) ParseDefinition(i interface{}) (schema SchemaObj, err error)
 		}
 
 		if typeDef, found := g.getDefinition(t); found {
-			return typeDef.Export(), nil
+			return typeDef.Export()
 		}
 
 		var itemSchema SchemaObj
@@ -179,7 +178,7 @@ func (g *Generator) ParseDefinition(i interface{}) (schema SchemaObj, err error)
 		}
 
 		if typeDef, found := g.getDefinition(t); found {
-			return typeDef.Export(), nil
+			return typeDef.Export()
 		}
 
 		typeDef = *NewSchemaObj("object", t.Name())
@@ -191,7 +190,7 @@ func (g *Generator) ParseDefinition(i interface{}) (schema SchemaObj, err error)
 	default:
 		typeDef = g.genSchemaForType(t)
 		typeDef.TypeName = typeDef.Type
-		return typeDef, nil
+		return typeDef
 	}
 
 	defer g.parseDefInQueue()
@@ -202,13 +201,13 @@ func (g *Generator) ParseDefinition(i interface{}) (schema SchemaObj, err error)
 
 	if typeDef.TypeName != "" { // non-anonymous types should be added to definitions map and returned "in-place" as references
 		g.addDefinition(t, &typeDef)
-		return typeDef.Export(), nil
+		return typeDef.Export()
 	}
-	return typeDef, nil // anonymous types are not added to definitions map; instead, they are returned "in-place" in full form
+	return typeDef // anonymous types are not added to definitions map; instead, they are returned "in-place" in full form
 }
 
-func goType(t reflect.Type) (s string) {
-	s = t.Name()
+func goType(t reflect.Type) string {
+	s := t.Name()
 	pkgPath := t.PkgPath()
 	if pkgPath != "" {
 		pos := strings.Index(pkgPath, "/vendor/")
@@ -239,7 +238,7 @@ func goType(t reflect.Type) (s string) {
 		return "map[" + goType(t.Key()) + "]" + goType(t.Elem())
 	}
 
-	return
+	return s
 }
 
 func (g *Generator) parseDefinitionProperties(v reflect.Value, parent *SchemaObj) map[string]SchemaObj {
@@ -438,8 +437,8 @@ func (g *Generator) genSchemaForType(t reflect.Type) SchemaObj {
 // see http://swagger.io/specification/#parameterObject
 //
 
-// ParseParameter parse input struct to swagger parameter object
-func (g *Generator) ParseParameter(i interface{}) (name string, params []ParamObj, err error) {
+// ParseParameters parse input struct to swagger parameter object
+func (g *Generator) ParseParameters(i interface{}) (string, []ParamObj) {
 	v := reflect.ValueOf(i)
 
 	if v.Kind() == reflect.Ptr {
@@ -447,35 +446,51 @@ func (g *Generator) ParseParameter(i interface{}) (name string, params []ParamOb
 	}
 
 	if v.Kind() != reflect.Struct {
-		err = errors.New("Generator.ParseParameter() failed: parameters must be a struct")
-		return
+		panic("struct expected for ParseParameters")
 	}
 
 	t := v.Type()
 
 	if mappedTo, ok := g.getMappedType(t); ok {
-		return g.ParseParameter(mappedTo)
+		return g.ParseParameters(mappedTo)
 	}
 
-	name = t.Name()
-	params = []ParamObj{}
+	name := t.Name()
+	numField := t.NumField()
+	params := make([]ParamObj, 0, numField)
 
-	for i := 0; i < t.NumField(); i = i + 1 {
+	for i := 0; i < numField; i = i + 1 {
 		field := t.Field(i)
 		// we can't access the value of un-exportable or anonymous fields
 		if field.PkgPath != "" || field.Anonymous {
 			continue
 		}
 
-		// don't check if it's omitted
-		var nameTag string
+		var (
+			nameTag string
+			in      string
+		)
 
-		var inPath bool
-		if nameTag = field.Tag.Get("query"); nameTag == "-" || nameTag == "" {
-			inPath = true
-			if nameTag = field.Tag.Get("path"); nameTag == "-" || nameTag == "" {
-				continue
+		if tagIn := field.Tag.Get("in"); tagIn != "" {
+			if tagName := field.Tag.Get("name");tagName != "" {
+				nameTag = tagName
+				in = tagIn
 			}
+		}
+
+		if in == "" {
+			for _, tag := range []string{"path", "query", "header", "formData", "cookie"} {
+				tagValue := field.Tag.Get(tag)
+				if tagValue != "" && tagValue != "-" {
+					nameTag = tagValue
+					in = tag
+					break
+				}
+			}
+		}
+
+		if in == "" {
+			continue
 		}
 
 		paramName := strings.Split(nameTag, ",")[0]
@@ -546,22 +561,16 @@ func (g *Generator) ParseParameter(i interface{}) (name string, params []ParamOb
 			param.Required = true
 		}
 
-		if inTag := field.Tag.Get("in"); inTag != "-" && inTag != "" {
-			param.In = inTag // todo: validate IN value
-		} else if inPath {
-			param.In = "path"
-		} else {
-			param.In = "query"
-		}
-
 		if tag := field.Tag.Get("format"); tag != "-" && tag != "" {
 			param.Format = tag
 		}
 
+		param.In = in
+
 		params = append(params, param)
 	}
 
-	return
+	return name, params
 }
 
 // ResetPaths remove all current paths
@@ -572,7 +581,7 @@ func (g *Generator) ResetPaths() {
 var regexFindPathParameter = regexp.MustCompile(`\{([^}:]+)(:[^\/]+)?(?:\})`)
 
 // SetPathItem register path item with some information and input, output
-func (g *Generator) SetPathItem(info PathItemInfo) (*OperationObj, error) {
+func (g *Generator) SetPathItem(info PathItemInfo) *OperationObj {
 	var (
 		item  PathItem
 		found bool
@@ -609,7 +618,7 @@ func (g *Generator) SetPathItem(info PathItemInfo) (*OperationObj, error) {
 	item, found = g.paths[info.Path]
 
 	if found && item.HasMethod(info.Method) {
-		return nil, nil
+		return item.Map()[info.Method]
 	}
 
 	if !found {
@@ -628,21 +637,13 @@ func (g *Generator) SetPathItem(info PathItemInfo) (*OperationObj, error) {
 	operationObj.Security = make([]map[string][]string, 0)
 	if len(info.Security) > 0 {
 		for _, sec := range info.Security {
-			if _, ok := g.doc.SecurityDefinitions[sec]; ok {
-				operationObj.Security = append(operationObj.Security, map[string][]string{sec: {}})
-			} else {
-				return nil, errors.New("Undefined security definition: " + sec)
-			}
+			operationObj.Security = append(operationObj.Security, map[string][]string{sec: {}})
 		}
 	}
 
 	if len(info.SecurityOAuth2) > 0 {
 		for sec, scopes := range info.SecurityOAuth2 {
-			if _, ok := g.doc.SecurityDefinitions[sec]; ok {
-				operationObj.Security = append(operationObj.Security, map[string][]string{sec: scopes})
-			} else {
-				return nil, errors.New("Undefined security definition: " + sec)
-			}
+			operationObj.Security = append(operationObj.Security, map[string][]string{sec: scopes})
 		}
 	}
 
@@ -651,11 +652,8 @@ func (g *Generator) SetPathItem(info PathItemInfo) (*OperationObj, error) {
 			operationObj.AddExtendedField("x-request-go-type", goType(reflect.TypeOf(params)))
 		}
 
-		if _, params, err := g.ParseParameter(params); err == nil {
-			operationObj.Parameters = params
-		} else {
-			return nil, err
-		}
+		_, params := g.ParseParameters(params)
+		operationObj.Parameters = params
 	}
 
 	if g.defaultResponses != nil {
@@ -681,11 +679,7 @@ func (g *Generator) SetPathItem(info PathItemInfo) (*OperationObj, error) {
 			operationObj.AddExtendedField("x-request-go-type", goType(reflect.TypeOf(body)))
 		}
 
-		typeDef, err := g.ParseDefinition(body)
-
-		if err != nil {
-			return nil, err
-		}
+		typeDef := g.ParseDefinition(body)
 
 		if !typeDef.isEmpty() {
 			param := ParamObj{
@@ -706,25 +700,25 @@ func (g *Generator) SetPathItem(info PathItemInfo) (*OperationObj, error) {
 	}
 
 	switch strings.ToUpper(info.Method) {
-	case "GET":
+	case http.MethodGet:
 		item.Get = operationObj
-	case "POST":
+	case http.MethodPost:
 		item.Post = operationObj
-	case "PUT":
+	case http.MethodPut:
 		item.Put = operationObj
-	case "DELETE":
+	case http.MethodDelete:
 		item.Delete = operationObj
-	case "OPTIONS":
+	case http.MethodOptions:
 		item.Options = operationObj
-	case "HEAD":
+	case http.MethodHead:
 		item.Head = operationObj
-	case "PATCH":
+	case http.MethodPatch:
 		item.Patch = operationObj
 	}
 
 	g.paths[info.Path] = item
 
-	return operationObj, nil
+	return operationObj
 }
 
 func (g *Generator) parseResponseObject(operationObj *OperationObj, statusCode int, responseObj interface{}) {
@@ -733,10 +727,7 @@ func (g *Generator) parseResponseObject(operationObj *OperationObj, statusCode i
 	}
 
 	if responseObj != nil {
-		schema, err := g.ParseDefinition(responseObj)
-		if err != nil {
-			panic(fmt.Sprintf("could not create schema object for response %v", responseObj))
-		}
+		schema := g.ParseDefinition(responseObj)
 		var desc string
 		if withDesc, ok := responseObj.(description); ok {
 			desc = withDesc.Description()

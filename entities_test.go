@@ -29,13 +29,13 @@ func TestAdditionalDataJSONMarshal(t *testing.T) {
 }
 
 func assertTrue(v bool, t *testing.T) {
-	if v != true {
+	if !v {
 		t.Fatal("value must return true")
 	}
 }
 
 func assertFalse(v bool, t *testing.T) {
-	if v != false {
+	if v {
 		t.Fatal("value must return false")
 	}
 }

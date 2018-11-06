@@ -10,8 +10,8 @@ import (
 )
 
 type foo struct {
-	ID   int64  `path:"id"`
-	Name string `json:"name"`
+	ID   int64  `path:"id" minimum:"1000"`
+	Name string `json:"name" minLength:"10"`
 	Bar  bar    `json:"bar"`
 }
 
@@ -46,7 +46,7 @@ func TestGenerator_JSONSchemaWithCustomConfig(t *testing.T) {
 
 	js, err := json.Marshal(g[`path`])
 	assert.NoError(t, err)
-	assert.Equal(t, `{"$schema":"http://json-schema.org/draft-04/schema#","type":"object","required":["id"],"properties":{"id":{"format":"int64","type":"integer"}}}`, string(js))
+	assert.Equal(t, `{"$schema":"http://json-schema.org/draft-04/schema#","type":"object","required":["id"],"properties":{"id":{"format":"int64","minimum":1000,"type":"integer"}}}`, string(js))
 
 	js, err = json.Marshal(g[`body`].Properties[`body`])
 	assert.NoError(t, err)
@@ -94,6 +94,7 @@ func TestGenerator_JSONSchemaWithCustomConfig(t *testing.T) {
     "$ref": "#/components/schema/bar"
    },
    "name": {
+    "minLength": 10,
     "type": "string"
    }
   },

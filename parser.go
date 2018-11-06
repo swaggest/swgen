@@ -322,6 +322,8 @@ func (g *Generator) parseDefinitionProperties(v reflect.Value, parent *SchemaObj
 			parent.GoPropertyTypes[propName] = goType(oft)
 		}
 
+		readSchemaTags(&obj.additionalData, field.Tag)
+
 		properties[propName] = obj
 	}
 
@@ -472,7 +474,7 @@ func (g *Generator) ParseParameters(i interface{}) (string, []ParamObj) {
 		)
 
 		if tagIn := field.Tag.Get("in"); tagIn != "" {
-			if tagName := field.Tag.Get("name");tagName != "" {
+			if tagName := field.Tag.Get("name"); tagName != "" {
 				nameTag = tagName
 				in = tagIn
 			}
@@ -567,10 +569,62 @@ func (g *Generator) ParseParameters(i interface{}) (string, []ParamObj) {
 
 		param.In = in
 
+		readSchemaTags(&param.additionalData, field.Tag)
+
 		params = append(params, param)
 	}
 
 	return name, params
+}
+
+func readSchemaTags(a *additionalData, tag reflect.StructTag) {
+	for _, tagName := range []string{
+		"pattern", "title",
+	} {
+		value, ok := tag.Lookup(tagName)
+		if ok {
+			a.AddExtendedField(tagName, value)
+		}
+	}
+
+	for _, tagName := range []string{
+		"multipleOf", "maximum", "minimum",
+	} {
+		value, ok := tag.Lookup(tagName)
+		if ok {
+			v, err := strconv.ParseFloat(value, 64)
+			if err != nil {
+				continue
+			}
+			a.AddExtendedField(tagName, v)
+		}
+	}
+
+	for _, tagName := range []string{
+		"maxLength", "minLength", "maxItems", "minItems", "maxProperties", "minProperties",
+	} {
+		value, ok := tag.Lookup(tagName)
+		if ok {
+			v, err := strconv.ParseInt(value, 10, 64)
+			if err != nil {
+				continue
+			}
+			a.AddExtendedField(tagName, v)
+		}
+	}
+
+	for _, tagName := range []string{
+		"exclusiveMaximum", "exclusiveMinimum", "uniqueItems",
+	} {
+		value, ok := tag.Lookup(tagName)
+		if ok {
+			v, err := strconv.ParseBool(value)
+			if err != nil {
+				continue
+			}
+			a.AddExtendedField(tagName, v)
+		}
+	}
 }
 
 // ResetPaths remove all current paths

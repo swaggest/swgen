@@ -309,6 +309,10 @@ func (g *Generator) parseDefinitionProperties(v reflect.Value, parent *SchemaObj
 			obj.Format = formatTag
 		}
 
+		if description := field.Tag.Get("description"); description != "" {
+			obj.Description = description
+		}
+
 		if defaultTag := field.Tag.Get("default"); defaultTag != "" {
 			if defaultValue, err := g.caseDefaultValue(field.Type, defaultTag); err == nil {
 				obj.Default = defaultValue

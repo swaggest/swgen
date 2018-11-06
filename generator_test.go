@@ -2,8 +2,6 @@ package swgen
 
 import (
 	"encoding/json"
-	"github.com/yudai/gojsondiff"
-	"github.com/yudai/gojsondiff/formatter"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -11,6 +9,9 @@ import (
 	"path"
 	"testing"
 	"time"
+
+	"github.com/yudai/gojsondiff"
+	"github.com/yudai/gojsondiff/formatter"
 
 	"github.com/swaggest/swgen/sample"
 )
@@ -188,11 +189,6 @@ func (Flag) NamedEnum() ([]interface{}, []string) {
 type mixedStructWithEnumer struct {
 	Gender Gender `query:"gender"`
 	Flag   Flag   `query:"flag"`
-}
-
-type MixedStructs struct {
-	mixedStruct
-	mixedStructWithEnumer
 }
 
 type sliceType []testSimpleStruct
@@ -542,9 +538,7 @@ func TestCORSSupport(t *testing.T) {
 		Method:      "GET",
 	}
 
-	if _, err := g.SetPathItem(info); err != nil {
-		t.Fatalf("error %v", err)
-	}
+	g.SetPathItem(info)
 
 	w := httptest.NewRecorder()
 	r, err := http.NewRequest("GET", "http://localhost:1234/docs/swagger.json", nil)
@@ -571,10 +565,7 @@ func TestGenerator_JsonSchema(t *testing.T) {
 		Request:  new(mixedStructWithEnumer),
 		Response: new(map[string]testSimpleStruct),
 	}
-	obj, err := gen.SetPathItem(info)
-	if err != nil {
-		t.Fatalf("error %v", err)
-	}
+	obj := gen.SetPathItem(info)
 
 	jsonSchema, err := gen.JSONSchema(*obj.Responses[http.StatusOK].Schema)
 	if err != nil {
@@ -603,5 +594,4 @@ func TestGenerator_JsonSchema(t *testing.T) {
 		t.Fatalf("Failed write last run data to a file: %s", err.Error())
 	}
 	checkResult(jsonSchemaJSON, "test_Param0JsonSchema.json", t)
-
 }

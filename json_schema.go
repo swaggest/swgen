@@ -1,19 +1,35 @@
 package swgen
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/pkg/errors"
+)
 
 type schemaBuilder struct {
 	refs map[string]bool
 	g    *Generator
 }
 
+// JSONSchemaConfig is optional JSON schema rendering configuration
+type JSONSchemaConfig struct {
+	CollectDefinitions map[string]map[string]interface{}
+	StripDefinitions   bool
+	DefinitionsPrefix  string
+}
+
 // JSONSchema builds JSON Schema for Swagger Schema object
-func (g *Generator) JSONSchema(s SchemaObj) (map[string]interface{}, error) {
+func (g *Generator) JSONSchema(s SchemaObj, option ...JSONSchemaConfig) (map[string]interface{}, error) {
+	var cfg *JSONSchemaConfig
+	if len(option) != 0 {
+		cfg = &option[0]
+	}
+
 	sb := &schemaBuilder{
 		refs: make(map[string]bool),
 		g:    g,
 	}
-	res, err := sb.jsonSchemaPlain(s)
+	res, err := sb.jsonSchemaPlain(s, cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -27,25 +43,35 @@ func (g *Generator) JSONSchema(s SchemaObj) (map[string]interface{}, error) {
 		for ref := range refs {
 			ref := strings.TrimPrefix(ref, "#/definitions/")
 			if _, ok := definitions[ref]; !ok {
-				jsonSchema, err := sb.jsonSchemaPlain(allDef[ref])
+				jsonSchema, err := sb.jsonSchemaPlain(allDef[ref], cfg)
 				if err != nil {
 					return nil, err
 				}
 				definitions[ref] = jsonSchema
+				if cfg != nil && cfg.CollectDefinitions != nil {
+					cfg.CollectDefinitions[ref] = jsonSchema
+				}
 			}
+
 		}
 	}
 
 	if len(definitions) > 0 {
-		res["definitions"] = definitions
+		if cfg == nil || !cfg.StripDefinitions {
+			res["definitions"] = definitions
+		}
 	}
 	return res, nil
 }
 
-func (sb *schemaBuilder) jsonSchemaPlain(s SchemaObj) (map[string]interface{}, error) {
+func (sb *schemaBuilder) jsonSchemaPlain(s SchemaObj, cfg *JSONSchemaConfig) (map[string]interface{}, error) {
 	if s.Ref != "" {
 		sb.refs[s.Ref] = true
-		return map[string]interface{}{"$ref": s.Ref}, nil
+		ref := s.Ref
+		if cfg != nil && cfg.DefinitionsPrefix != "" {
+			ref = cfg.DefinitionsPrefix + strings.TrimPrefix(ref, "#/definitions/")
+		}
+		return map[string]interface{}{"$ref": ref}, nil
 	}
 	res, err := jsonRecode(s)
 	if err != nil {
@@ -59,7 +85,7 @@ func (sb *schemaBuilder) jsonSchemaPlain(s SchemaObj) (map[string]interface{}, e
 	if s.Properties != nil && len(s.Properties) > 0 {
 		properties := make(map[string]interface{}, len(s.Properties))
 		for name, schema := range s.Properties {
-			properties[name], err = sb.jsonSchemaPlain(schema)
+			properties[name], err = sb.jsonSchemaPlain(schema, cfg)
 			if err != nil {
 				return nil, err
 			}
@@ -68,7 +94,7 @@ func (sb *schemaBuilder) jsonSchemaPlain(s SchemaObj) (map[string]interface{}, e
 	}
 
 	if s.AdditionalProperties != nil {
-		jsonSchema, err := sb.jsonSchemaPlain(*s.AdditionalProperties)
+		jsonSchema, err := sb.jsonSchemaPlain(*s.AdditionalProperties, cfg)
 		if err != nil {
 			return nil, err
 		}
@@ -76,7 +102,7 @@ func (sb *schemaBuilder) jsonSchemaPlain(s SchemaObj) (map[string]interface{}, e
 	}
 
 	if s.Items != nil {
-		jsonSchema, err := sb.jsonSchemaPlain(*s.Items)
+		jsonSchema, err := sb.jsonSchemaPlain(*s.Items, cfg)
 		if err != nil {
 			return nil, err
 		}
@@ -87,9 +113,9 @@ func (sb *schemaBuilder) jsonSchemaPlain(s SchemaObj) (map[string]interface{}, e
 }
 
 // ParamJSONSchema builds JSON Schema for Swagger Parameter object
-func (g *Generator) ParamJSONSchema(p ParamObj) (map[string]interface{}, error) {
+func (g *Generator) ParamJSONSchema(p ParamObj, cfg ...JSONSchemaConfig) (map[string]interface{}, error) {
 	if p.Schema != nil {
-		return g.JSONSchema(*p.Schema)
+		return g.JSONSchema(*p.Schema, cfg...)
 	}
 
 	p.Name = ""
@@ -103,38 +129,53 @@ func (g *Generator) ParamJSONSchema(p ParamObj) (map[string]interface{}, error) 
 
 // ObjectJSONSchema is a simplified JSON Schema for object
 type ObjectJSONSchema struct {
-	ID         string                 `json:"id,omitempty"`
-	Schema     string                 `json:"$schema,omitempty"`
-	Type       string                 `json:"type"`
-	Required   []string               `json:"required,omitempty"`
-	Properties map[string]interface{} `json:"properties"`
+	ID         string                            `json:"id,omitempty"`
+	Schema     string                            `json:"$schema,omitempty"`
+	Type       string                            `json:"type"`
+	Required   []string                          `json:"required,omitempty"`
+	Properties map[string]map[string]interface{} `json:"properties"`
+}
+
+func (o ObjectJSONSchema) ToMap() (map[string]interface{}, error) {
+	return jsonRecode(o)
+}
+
+// GetJSONSchemaRequestGroups returns a map of object schemas converted from parameters, grouped by in
+func (g *Generator) GetJSONSchemaRequestGroups(op *OperationObj, cfg ...JSONSchemaConfig) (map[string]ObjectJSONSchema, error) {
+	var err error
+	requestSchemas := map[string]ObjectJSONSchema{}
+
+	for _, param := range op.Parameters {
+		if _, ok := requestSchemas[param.In]; !ok {
+			requestSchemas[param.In] = ObjectJSONSchema{
+				Schema:     "http://json-schema.org/draft-04/schema#",
+				Type:       "object",
+				Required:   []string{},
+				Properties: map[string]map[string]interface{}{},
+			}
+		}
+
+		if param.Required {
+			rs := requestSchemas[param.In]
+			rs.Required = append(rs.Required, param.Name)
+			requestSchemas[param.In] = rs
+		}
+		requestSchemas[param.In].Properties[param.Name], err = g.ParamJSONSchema(param, cfg...)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return requestSchemas, nil
 }
 
 // WalkJSONSchemaRequestGroups iterates over all request parameters grouped by path, method and in into an instance of JSON Schema
-func (g *Generator) WalkJSONSchemaRequestGroups(function func(path, method, in string, schema ObjectJSONSchema)) {
-	var err error
+func (g *Generator) WalkJSONSchemaRequestGroups(function func(path, method, in string, schema ObjectJSONSchema)) error {
 	for path, pi := range g.doc.Paths {
 		for method, op := range pi.Map() {
-			requestSchemas := map[string]ObjectJSONSchema{}
-			for _, param := range op.Parameters {
-				if _, ok := requestSchemas[param.In]; !ok {
-					requestSchemas[param.In] = ObjectJSONSchema{
-						Schema:     "http://json-schema.org/draft-04/schema#",
-						Type:       "object",
-						Required:   []string{},
-						Properties: map[string]interface{}{},
-					}
-				}
-
-				if param.Required {
-					rs := requestSchemas[param.In]
-					rs.Required = append(rs.Required, param.Name)
-					requestSchemas[param.In] = rs
-				}
-				requestSchemas[param.In].Properties[param.Name], err = g.ParamJSONSchema(param)
-				if err != nil {
-					panic(err.Error())
-				}
+			requestSchemas, err := g.GetJSONSchemaRequestGroups(op)
+			if err != nil {
+				return errors.Wrapf(err, "failed to get schema request groups schemas for %s %s", method, path)
 			}
 
 			for in, schema := range requestSchemas {
@@ -142,21 +183,22 @@ func (g *Generator) WalkJSONSchemaRequestGroups(function func(path, method, in s
 			}
 		}
 	}
+	return nil
 }
 
 // WalkJSONSchemaResponses iterates over all responses grouped by path, method and status code into an instance of JSON Schema
-func (g *Generator) WalkJSONSchemaResponses(function func(path, method string, statusCode int, schema map[string]interface{})) {
+func (g *Generator) WalkJSONSchemaResponses(function func(path, method string, statusCode int, schema map[string]interface{})) error {
 	for path, pi := range g.doc.Paths {
 		for method, op := range pi.Map() {
 			for statusCode, resp := range op.Responses {
 				schema, err := g.JSONSchema(*resp.Schema)
 				if err != nil {
-					panic(err.Error())
+					return errors.Wrapf(err, "failed to get response schema for %s %s %d", method, path, statusCode)
 				}
 				schema["$schema"] = "http://json-schema.org/draft-04/schema#"
 				function(path, method, statusCode, schema)
 			}
 		}
 	}
-
+	return nil
 }

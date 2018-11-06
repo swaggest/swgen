@@ -31,11 +31,11 @@ type Document struct {
 	additionalData
 }
 
-type _Document Document
 
 // MarshalJSON marshal Document with additionalData inlined
 func (s Document) MarshalJSON() ([]byte, error) {
-	return s.marshalJSONWithStruct(_Document(s))
+	type i Document
+	return s.marshalJSONWithStruct(i(s))
 }
 
 // InfoObj provides metadata about the API
@@ -302,11 +302,10 @@ type OperationObj struct {
 	additionalData
 }
 
-type _OperationObj OperationObj
-
 // MarshalJSON marshal OperationObj with additionalData inlined
 func (o OperationObj) MarshalJSON() ([]byte, error) {
-	return o.marshalJSONWithStruct(_OperationObj(o))
+	type i OperationObj
+	return o.marshalJSONWithStruct(i(o))
 }
 
 // ParamObj describes a single operation parameter
@@ -341,11 +340,16 @@ func jsonRecode(v interface{}) (map[string]interface{}, error) {
 	return nil, errors.New(`invalid json, map expected`)
 }
 
-type _ParamObj ParamObj
-
-// MarshalJSON marshal OperationObj with additionalData inlined
+// MarshalJSON marshal ParamObj with additionalData inlined
 func (o ParamObj) MarshalJSON() ([]byte, error) {
-	return o.marshalJSONWithStruct(_ParamObj(o))
+	type i ParamObj
+	return o.marshalJSONWithStruct(i(o))
+}
+
+// MarshalJSON marshal SchemaObj with additionalData inlined
+func (o SchemaObj) MarshalJSON() ([]byte, error) {
+	type i SchemaObj
+	return o.marshalJSONWithStruct(i(o))
 }
 
 // ParamItemObj describes an property object, in param object or property of definition
@@ -384,6 +388,7 @@ type SchemaObj struct {
 	GoType               string               `json:"x-go-type,omitempty"`
 	GoPropertyNames      map[string]string    `json:"x-go-property-names,omitempty"`
 	GoPropertyTypes      map[string]string    `json:"x-go-property-types,omitempty"`
+	additionalData
 }
 
 // NewSchemaObj Constructor function for SchemaObj struct type

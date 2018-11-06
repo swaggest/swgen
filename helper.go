@@ -56,10 +56,7 @@ func IsSlice(i interface{}) bool {
 	for t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}
-	if t.Kind() == reflect.Slice {
-		return true
-	}
-	return false
+	return t.Kind() == reflect.Slice
 }
 
 // IsStruct checks if variable is a struct or a pointer to a struct
@@ -71,8 +68,5 @@ func IsStruct(i interface{}) bool {
 	for t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}
-	if t.Kind() == reflect.Struct {
-		return true
-	}
-	return false
+	return t.Kind() == reflect.Struct
 }

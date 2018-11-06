@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type Person struct {
@@ -46,9 +48,7 @@ type PreferredWarehouseRequest struct {
 func TestResetDefinitions(t *testing.T) {
 	ts := &Person{}
 	gen := NewGenerator()
-	if _, err := gen.ParseDefinition(ts); err != nil {
-		t.Fatalf("%v", err)
-	}
+	gen.ParseDefinition(ts)
 
 	if len(gen.definitions) == 0 {
 		t.Fatalf("len of gen.definitions must be greater than 0")
@@ -62,17 +62,13 @@ func TestResetDefinitions(t *testing.T) {
 
 func TestParseDefinition(t *testing.T) {
 	ts := &Person{}
-	if _, err := NewGenerator().ParseDefinition(ts); err != nil {
-		t.Fatalf("%v", err)
-	}
+	NewGenerator().ParseDefinition(ts)
 }
 
 func TestParseDefinitionEmptyInterface(t *testing.T) {
 	var ts interface{}
 	gen := NewGenerator()
-	if _, err := gen.ParseDefinition(&ts); err != nil {
-		t.Fatalf("%v", err)
-	}
+	gen.ParseDefinition(&ts)
 }
 
 func TestParseDefinitionNonEmptyInterface(t *testing.T) {
@@ -86,9 +82,7 @@ func TestParseDefinitionNonEmptyInterface(t *testing.T) {
 		Test()
 	}
 
-	if _, err := NewGenerator().ParseDefinition(&ts); err != nil {
-		t.Fatalf("%v", err)
-	}
+	NewGenerator().ParseDefinition(&ts)
 }
 
 func TestParseDefinitionWithEmbeddedStruct(t *testing.T) {
@@ -96,11 +90,9 @@ func TestParseDefinitionWithEmbeddedStruct(t *testing.T) {
 	tt := reflect.TypeOf(ts)
 
 	gen := NewGenerator()
-	if _, err := gen.ParseDefinition(ts); err != nil {
-		t.Fatalf("%v", err)
-	}
+	gen.ParseDefinition(ts)
 
-	if typeDef, found := gen.getDefinition(tt); found == false {
+	if typeDef, found := gen.getDefinition(tt); !found {
 		t.Fatal("No definition for", tt)
 	} else {
 		propertiesCount := len(typeDef.Properties)
@@ -116,11 +108,9 @@ func TestParseDefinitionWithEmbeddedInterface(t *testing.T) {
 	tt := reflect.TypeOf(p)
 
 	gen := NewGenerator()
-	if _, err := gen.ParseDefinition(p); err != nil {
-		t.Fatalf("%v", err)
-	}
+	gen.ParseDefinition(p)
 
-	if typeDef, found := gen.getDefinition(tt); found == false {
+	if typeDef, found := gen.getDefinition(tt); !found {
 		t.Fatal("No definition for", tt)
 	} else {
 		if typeDef.Properties["manager"].Ref != "#/definitions/Employee" {
@@ -130,11 +120,8 @@ func TestParseDefinitionWithEmbeddedInterface(t *testing.T) {
 }
 
 func TestParseDefinitionString(t *testing.T) {
-	typeDef, err := NewGenerator().ParseDefinition("string")
+	typeDef := NewGenerator().ParseDefinition("string")
 	name := typeDef.TypeName
-	if err != nil {
-		t.Fatalf("Error parsing string: %+v", err)
-	}
 	if name != "string" {
 		t.Fatalf("Wrong type name. Expect %q, got %q", "string", name)
 	}
@@ -142,10 +129,7 @@ func TestParseDefinitionString(t *testing.T) {
 
 func TestParseDefinitionArray(t *testing.T) {
 	type Names []string
-	typeDef, err := NewGenerator().ParseDefinition(Names{})
-	if err != nil {
-		t.Fatalf("Error while parsing array of string: %v", err)
-	}
+	typeDef := NewGenerator().ParseDefinition(Names{})
 
 	if typeDef.TypeName != "Names" {
 		t.Fatalf("Wrong type name. Expected: Names, Obtained: %v", typeDef.TypeName)
@@ -153,34 +137,21 @@ func TestParseDefinitionArray(t *testing.T) {
 
 	// re-parse with pointer input
 	// should get from definition list
-	_, err = NewGenerator().ParseDefinition(&Names{})
-	if err != nil {
-		t.Fatalf("Error while parsing array of string: %v", err)
-	}
+	NewGenerator().ParseDefinition(&Names{})
 
 	// try to parse a named map
 	type MapList map[string]string
-	_, err = NewGenerator().ParseDefinition(&MapList{})
-	if err != nil {
-		t.Fatalf("Error while parsing map string to string: %v", err)
-	}
+	NewGenerator().ParseDefinition(&MapList{})
 
 	// named array of object
 	type Person struct{}
 	type Persons []*Person
-	_, err = NewGenerator().ParseDefinition(&Persons{})
-	if err != nil {
-		t.Fatalf("Error while parsing array of object: %v", err)
-	}
+	NewGenerator().ParseDefinition(&Persons{})
 }
 
 func TestParseParameter(t *testing.T) {
 	p := &PreferredWarehouseRequest{}
-	name, params, err := NewGenerator().ParseParameter(p)
-
-	if err != nil {
-		t.Fatalf("error %v", err)
-	}
+	name, params := NewGenerator().ParseParameters(p)
 
 	if name != "PreferredWarehouseRequest" {
 		t.Fatalf("name of parameter is %s, expected is PreferredWarehouseRequest", name)
@@ -192,10 +163,7 @@ func TestParseParameter(t *testing.T) {
 }
 
 func TestParseParameterError(t *testing.T) {
-	_, _, err := NewGenerator().ParseParameter(true)
-	if err == nil {
-		t.Fatalf("it should return error")
-	}
+	assert.Panics(t, func() { NewGenerator().ParseParameters(true) })
 }
 
 //
@@ -217,10 +185,7 @@ func TestSetPathItem(t *testing.T) {
 			Request:     h.GetRequestBuffer(method),
 			Response:    h.GetResponseBuffer(method),
 		}
-		_, err := gen.SetPathItem(info)
-		if err != nil {
-			t.Fatalf("error %v", err)
-		}
+		gen.SetPathItem(info)
 	}
 
 	if len(gen.paths) == 0 {
@@ -302,23 +267,17 @@ type paramsWithCustom struct {
 func TestSwaggerDef(t *testing.T) {
 	gen := NewGenerator()
 
-	_, err := gen.SetPathItem(PathItemInfo{
+	gen.SetPathItem(PathItemInfo{
 		Method:  http.MethodPost,
 		Path:    "/bla",
 		Request: new(bodyWithCustom),
 	})
-	if err != nil {
-		t.Fatalf("error while adding POST handler: %v", err)
-	}
 
-	_, err = gen.SetPathItem(PathItemInfo{
+	gen.SetPathItem(PathItemInfo{
 		Method:  http.MethodGet,
 		Path:    "/bla",
 		Request: new(paramsWithCustom),
 	})
-	if err != nil {
-		t.Fatalf("error while adding GET handler: %v", err)
-	}
 
 	swg, err := gen.GenDocument()
 	if err != nil {

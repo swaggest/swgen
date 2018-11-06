@@ -1,7 +1,7 @@
 # Swagger Generator (swgen)
 
 [![Build Status](https://travis-ci.org/swaggest/swgen.svg?branch=master)](https://travis-ci.org/swaggest/swgen)
-[![Coverage Status](https://coveralls.io/repos/github/swaggest/swgen/badge.svg?branch=master)](https://coveralls.io/github/swaggest/swgen?branch=master)
+[![Coverage Status](https://codecov.io/gh/swaggest/swgen/branch/master/graph/badge.svg)](https://codecov.io/gh/swaggest/swgen)
 [![GoDoc](https://godoc.org/github.com/swaggest/swgen?status.svg)](https://godoc.org/github.com/swaggest/swgen)
 
 Swagger Generator is a library which helps to generate [Swagger Specification](http://swagger.io/specification/) in JSON format on-the-fly.

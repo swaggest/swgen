@@ -305,6 +305,9 @@ func (g *Generator) parseDefinitionProperties(v reflect.Value, parent *SchemaObj
 			}
 
 		}
+
+		obj.Enum.LoadFromField(field)
+
 		if formatTag := field.Tag.Get("format"); formatTag != "" {
 			obj.Format = formatTag
 		}
@@ -549,13 +552,7 @@ func (g *Generator) ParseParameters(i interface{}) (string, []ParamObj) {
 
 		param.Name = paramName
 
-		if e, isEnumer := reflect.Zero(field.Type).Interface().(namedEnum); isEnumer {
-			param.Enum.Enum, param.Enum.EnumNames = e.NamedEnum()
-		}
-
-		if e, isEnumer := reflect.Zero(field.Type).Interface().(enum); isEnumer {
-			param.Enum.Enum = e.Enum()
-		}
+		param.Enum.LoadFromField(field)
 
 		if descTag := field.Tag.Get("description"); descTag != "-" && descTag != "" {
 			param.Description = descTag

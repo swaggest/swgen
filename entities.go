@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"reflect"
 	"strings"
 )
 
@@ -30,7 +31,6 @@ type Document struct {
 	SecurityDefinitions map[string]SecurityDef `json:"securityDefinitions,omitempty"` // An object to hold available security mechanisms
 	additionalData
 }
-
 
 // MarshalJSON marshal Document with additionalData inlined
 func (s Document) MarshalJSON() ([]byte, error) {
@@ -247,13 +247,38 @@ type Enum struct {
 	EnumNames []string      `json:"x-enum-names,omitempty"`
 }
 
-type namedEnum interface {
-	// NamedEnum return the const-name pair slice
-	NamedEnum() ([]interface{}, []string)
-}
+// LoadFromField loads enum from field tag: json array or comma-separated string
+func (enum *Enum) LoadFromField(field reflect.StructField) {
+	type namedEnum interface {
+		// NamedEnum return the const-name pair slice
+		NamedEnum() ([]interface{}, []string)
+	}
 
-type enum interface {
-	Enum() []interface{}
+	type plainEnum interface {
+		Enum() []interface{}
+	}
+
+
+	if e, isEnumer := reflect.Zero(field.Type).Interface().(namedEnum); isEnumer {
+		enum.Enum, enum.EnumNames = e.NamedEnum()
+	}
+
+	if e, isEnumer := reflect.Zero(field.Type).Interface().(plainEnum); isEnumer {
+		enum.Enum = e.Enum()
+	}
+
+	if enumTag := field.Tag.Get("enum"); enumTag != "" {
+		var e []interface{}
+		err := json.Unmarshal([]byte(enumTag), &e)
+		if err != nil {
+			es := strings.Split(enumTag, ",")
+			e = make([]interface{}, len(es))
+			for i, s := range es {
+				e[i] = s
+			}
+		}
+		enum.Enum = e
+	}
 }
 
 // SwaggerData holds parameter and schema information for swagger definition

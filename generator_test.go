@@ -2,11 +2,6 @@ package swgen
 
 import (
 	"encoding/json"
-	"github.com/stretchr/testify/assert"
-	"github.com/swaggest/swgen/sample"
-	"github.com/swaggest/swgen/sample/experiment"
-	"github.com/yudai/gojsondiff"
-	"github.com/yudai/gojsondiff/formatter"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -14,6 +9,12 @@ import (
 	"path"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/swaggest/swgen/sample"
+	"github.com/swaggest/swgen/sample/experiment"
+	"github.com/yudai/gojsondiff"
+	"github.com/yudai/gojsondiff/formatter"
 )
 
 type TestSampleStruct struct {

@@ -1,8 +1,9 @@
 package experiment
 
 import (
-	"github.com/swaggest/swgen/sample/experiment/variation"
 	"time"
+
+	"github.com/swaggest/swgen/sample/experiment/variation"
 )
 
 type (

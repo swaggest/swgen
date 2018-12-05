@@ -45,6 +45,12 @@ func ObjectHasXFields(i interface{}, tagname string) bool {
 		if tag := field.Tag.Get(tagname); tag != "" && tag != "-" {
 			return true
 		}
+		if field.Anonymous {
+			if ObjectHasXFields(reflect.New(field.Type).Interface(), tagname) {
+				return true
+			}
+		}
+
 	}
 	return false
 }

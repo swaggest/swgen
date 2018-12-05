@@ -258,7 +258,6 @@ func (enum *Enum) LoadFromField(field reflect.StructField) {
 		Enum() []interface{}
 	}
 
-
 	if e, isEnumer := reflect.Zero(field.Type).Interface().(namedEnum); isEnumer {
 		enum.Enum, enum.EnumNames = e.NamedEnum()
 	}

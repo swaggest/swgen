@@ -29,32 +29,37 @@ type SchemaDefinition interface {
 	SwaggerDef() SwaggerData
 }
 
-func (g *Generator) addDefinition(t reflect.Type, typeDef *SchemaObj) {
-	if typeDef.TypeName == "" {
-		return // there should be no anonymous definitions in Swagger JSON
-	}
-	if _, ok := g.definitions[t]; ok { // skip existing definition
-		return
-	}
+func (g *Generator) makeNameForType(t reflect.Type, baseTypeName string) string {
+	goTypeName := goType(t)
 
-	if _, ok := g.definitionAdded[typeDef.TypeName]; ok { // process duplicate TypeName
-		var typeName string
+	allocatedType, isAllocated := g.definitionAlloc[baseTypeName]
+	if isAllocated && allocatedType != goTypeName {
 		typeIndex := 2
 		for {
-			typeName = fmt.Sprintf("%sType%d", typeDef.TypeName, typeIndex)
-			if _, ok := g.definitionAdded[typeName]; !ok {
+			typeName := fmt.Sprintf("%sType%d", baseTypeName, typeIndex)
+			allocatedType, isAllocated := g.definitionAlloc[typeName]
+
+			if !isAllocated || allocatedType == goTypeName {
+				baseTypeName = typeName
 				break
 			}
 			typeIndex++
 		}
-
-		typeDef.TypeName = typeName
-		if typeDef.Ref != "" {
-			typeDef.Ref = refDefinitionPrefix + typeDef.TypeName
-		}
 	}
-	g.definitionAdded[typeDef.TypeName] = true
-	g.definitions[t] = *typeDef
+	g.definitionAlloc[baseTypeName] = goTypeName
+	return baseTypeName
+}
+
+func (g *Generator) addDefinition(t reflect.Type, typeDef *SchemaObj) {
+	if typeDef.TypeName == "" {
+		return // there should be no anonymous definitions in Swagger JSON
+	}
+	goTypeName := goType(t)
+	if _, ok := g.definitions[goTypeName]; ok { // skip existing definition
+		return
+	}
+	typeDef.TypeName = g.makeNameForType(t, typeDef.TypeName)
+	g.definitions[goType(t)] = *typeDef
 }
 
 func (g *Generator) defExists(t reflect.Type) bool {
@@ -63,24 +68,24 @@ func (g *Generator) defExists(t reflect.Type) bool {
 }
 
 func (g *Generator) addToDefQueue(t reflect.Type) {
-	g.defQueue[t] = struct{}{}
+	g.defQueue[goType(t)] = t
 }
 
 func (g *Generator) defInQueue(t reflect.Type) (found bool) {
-	_, found = g.defQueue[t]
+	_, found = g.defQueue[goType(t)]
 	return
 }
 
 func (g *Generator) getDefinition(t reflect.Type) (typeDef SchemaObj, found bool) {
-	typeDef, found = g.definitions[t]
+	typeDef, found = g.definitions[goType(t)]
 	if !found && t.Kind() == reflect.Ptr {
-		typeDef, found = g.definitions[t.Elem()]
+		typeDef, found = g.definitions[goType(t.Elem())]
 	}
 	return
 }
 
 func (g *Generator) deleteDefinition(t reflect.Type) {
-	delete(g.definitions, t)
+	delete(g.definitions, goType(t))
 }
 
 //
@@ -91,8 +96,7 @@ func (g *Generator) deleteDefinition(t reflect.Type) {
 // ResetDefinitions will remove all exists definitions and init again
 func (g *Generator) ResetDefinitions() {
 	g.definitions = make(defMap)
-	g.definitionAdded = make(map[string]bool)
-	g.defQueue = make(map[reflect.Type]struct{})
+	g.defQueue = make(map[string]reflect.Type)
 }
 
 // ParseDefinition create a DefObj from input object, it should be a non-nil pointer to anything
@@ -136,6 +140,9 @@ func (g *Generator) ParseDefinition(i interface{}) SchemaObj {
 		t = t.Elem()
 	}
 
+	name := goType(t)
+	_ = name
+
 	switch t.Kind() {
 	case reflect.Struct:
 		if typeDef, found := g.getDefinition(t); found {
@@ -143,10 +150,11 @@ func (g *Generator) ParseDefinition(i interface{}) SchemaObj {
 		}
 
 		typeDef = *NewSchemaObj("object", ReflectTypeReliableName(t))
-		typeDef.Properties = g.parseDefinitionProperties(v, &typeDef)
 		if typeDef.TypeName == "" {
 			typeDef.TypeName = typeName
 		}
+		typeDef.TypeName = g.makeNameForType(t, typeDef.TypeName)
+		typeDef.Properties = g.parseDefinitionProperties(v, &typeDef)
 
 	case reflect.Slice, reflect.Array:
 		elemType := t.Elem()
@@ -300,6 +308,8 @@ func (g *Generator) parseDefinitionProperties(v reflect.Value, parent *SchemaObj
 				if field.Type.Kind() == reflect.Interface && v.Field(i).Elem().IsValid() {
 					obj = g.genSchemaForType(v.Field(i).Elem().Type())
 				} else {
+					typeName := goType(field.Type)
+					_ = typeName
 					obj = g.genSchemaForType(field.Type)
 				}
 			}
@@ -369,8 +379,10 @@ func (g *Generator) parseDefInQueue() {
 		return
 	}
 
-	for t := range g.defQueue {
-		g.ParseDefinition(reflect.Zero(t).Interface())
+	for name, t := range g.defQueue {
+		_ = name
+		z := reflect.Zero(t).Interface()
+		g.ParseDefinition(z)
 	}
 }
 
@@ -412,6 +424,7 @@ func (g *Generator) genSchemaForType(t reflect.Type) SchemaObj {
 			smObj.Type = "string"
 		default:
 			name := ReflectTypeReliableName(t)
+			name = g.makeNameForType(t, name)
 			smObj.Ref = refDefinitionPrefix + name
 			if !g.defExists(t) || !g.defInQueue(t) {
 				g.addToDefQueue(t)
@@ -428,6 +441,7 @@ func (g *Generator) genSchemaForType(t reflect.Type) SchemaObj {
 	if sd, ok := reflect.New(t).Interface().(SchemaDefinition); ok {
 		smObj = sd.SwaggerDef().Schema()
 		name := ReflectTypeReliableName(t)
+		name = g.makeNameForType(t, name)
 		smObj = SchemaObj{Ref: refDefinitionPrefix + name}
 		if !g.defExists(t) || !g.defInQueue(t) {
 			g.addToDefQueue(t)

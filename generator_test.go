@@ -2,6 +2,11 @@ package swgen
 
 import (
 	"encoding/json"
+	"github.com/stretchr/testify/assert"
+	"github.com/swaggest/swgen/sample"
+	"github.com/swaggest/swgen/sample/experiment"
+	"github.com/yudai/gojsondiff"
+	"github.com/yudai/gojsondiff/formatter"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -9,16 +14,18 @@ import (
 	"path"
 	"testing"
 	"time"
-
-	"github.com/yudai/gojsondiff"
-	"github.com/yudai/gojsondiff/formatter"
-
-	"github.com/swaggest/swgen/sample"
 )
 
 type TestSampleStruct struct {
 	SimpleString string `json:"simple_string"`
 	SimpleInt    int    `json:"simple_int"`
+
+	Sub      TestSubStruct   `json:"sub"`
+	SubSlice []TestSubStruct `json:"sub_slice"`
+}
+
+type TestSubStruct struct {
+	SubInt int `json:"sample_int"`
 }
 
 type testEmptyStruct struct{}
@@ -402,7 +409,7 @@ func TestREST(t *testing.T) {
 		t.Fatalf("Failed write last run data to a file: %s", err.Error())
 	}
 
-	assertTrue(checkResult(bytes, "test_REST.json", t), t)
+	assert.True(t, checkResult(t, bytes, "test_REST.json"))
 }
 
 func TestJsonRpc(t *testing.T) {
@@ -464,7 +471,7 @@ func TestJsonRpc(t *testing.T) {
 		t.Fatalf("Failed write last run data to a file: %s", err.Error())
 	}
 
-	assertTrue(checkResult(bytes, "test_JSON-RPC.json", t), t)
+	assert.True(t, checkResult(t, bytes, "test_JSON-RPC.json"))
 }
 
 func getTestDataDir(filename string) string {
@@ -489,7 +496,7 @@ func readTestFile(filename string) ([]byte, error) {
 	return bytes, nil
 }
 
-func assertEqualJSON(generatedBytes []byte, expectedBytes []byte, t *testing.T) {
+func assertEqualJSON(t *testing.T, generatedBytes []byte, expectedBytes []byte) {
 	expectedData := make(map[string]interface{})
 	generatedData := make(map[string]interface{})
 
@@ -517,12 +524,12 @@ func assertEqualJSON(generatedBytes []byte, expectedBytes []byte, t *testing.T) 
 	}
 }
 
-func checkResult(generatedBytes []byte, expectedDataFileName string, t *testing.T) bool {
+func checkResult(t *testing.T, generatedBytes []byte, expectedDataFileName string) bool {
 	expectedBytes, err := readTestFile(expectedDataFileName)
 	if err != nil {
 		t.Fatalf("can not read test file '%s': %s", expectedDataFileName, err.Error())
 	}
-	assertEqualJSON(generatedBytes, expectedBytes, t)
+	assertEqualJSON(t, generatedBytes, expectedBytes)
 	return true
 }
 
@@ -579,7 +586,7 @@ func TestGenerator_JsonSchema(t *testing.T) {
 	if err := writeLastRun("test_ResponseJsonSchema_last_run.json", jsonSchemaJSON); err != nil {
 		t.Fatalf("Failed write last run data to a file: %s", err.Error())
 	}
-	checkResult(jsonSchemaJSON, "test_ResponseJsonSchema.json", t)
+	checkResult(t, jsonSchemaJSON, "test_ResponseJsonSchema.json")
 
 	jsonSchema, err = gen.ParamJSONSchema(obj.Parameters[0])
 	if err != nil {
@@ -593,5 +600,27 @@ func TestGenerator_JsonSchema(t *testing.T) {
 	if err := writeLastRun("test_Param0JsonSchema_last_run.json", jsonSchemaJSON); err != nil {
 		t.Fatalf("Failed write last run data to a file: %s", err.Error())
 	}
-	checkResult(jsonSchemaJSON, "test_Param0JsonSchema.json", t)
+	checkResult(t, jsonSchemaJSON, "test_Param0JsonSchema.json")
+}
+
+func TestGenerator_GenDocument_StructCollision(t *testing.T) {
+	gen := NewGenerator()
+	gen.SetHost("localhost")
+	gen.SetInfo("swgen title", "swgen description", "term", "2.0")
+	gen.IndentJSON(true)
+	gen.ReflectGoTypes(true)
+
+	info := PathItemInfo{
+		Method:   http.MethodPost,
+		Path:     "/any",
+		Request:  new(experiment.PostRequest),
+		Response: new(experiment.Entity),
+	}
+	gen.SetPathItem(info)
+
+	generatedBytes, err := gen.GenDocument()
+	assert.NoError(t, err)
+
+	assert.NoError(t, writeLastRun("struct_collision_last_run.json", generatedBytes))
+	checkResult(t, generatedBytes, "struct_collision.json")
 }

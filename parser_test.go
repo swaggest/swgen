@@ -378,5 +378,5 @@ func TestSwaggerDef(t *testing.T) {
 }
 `)
 
-	assertEqualJSON(swg, expected, t)
+	assertEqualJSON(t, swg, expected)
 }

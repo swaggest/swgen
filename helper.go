@@ -21,6 +21,8 @@ func ReflectTypeReliableName(t reflect.Type) string {
 		}
 	}
 	if t.Name() != "" {
+		// todo consider optionally processing package
+		// return path.Base(t.PkgPath()) + t.Name()
 		return t.Name()
 	}
 	return fmt.Sprintf("anon_%08x", ReflectTypeHash(t))

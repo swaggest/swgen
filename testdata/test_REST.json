@@ -1276,7 +1276,7 @@
             "name": "body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/TestSampleStructType2"
+              "$ref": "#/definitions/TestSampleStruct"
             },
             "required": true
           }
@@ -1285,7 +1285,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/TestSampleStructType2"
+              "$ref": "#/definitions/TestSampleStruct"
             }
           }
         },
@@ -1383,16 +1383,30 @@
         "simple_string": {
           "type": "string",
           "x-go-type": "string"
+        },
+        "sub": {
+          "$ref": "#/definitions/TestSubStruct"
+        },
+        "sub_slice": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TestSubStruct"
+          },
+          "x-go-type": "[]github.com/swaggest/swgen.TestSubStruct"
         }
       },
       "x-go-type": "github.com/swaggest/swgen.TestSampleStruct",
       "x-go-property-names": {
         "simple_int": "SimpleInt",
-        "simple_string": "SimpleString"
+        "simple_string": "SimpleString",
+        "sub": "Sub",
+        "sub_slice": "SubSlice"
       },
       "x-go-property-types": {
         "simple_int": "int",
-        "simple_string": "string"
+        "simple_string": "string",
+        "sub": "github.com/swaggest/swgen.TestSubStruct",
+        "sub_slice": "[]github.com/swaggest/swgen.TestSubStruct"
       }
     },
     "TestSampleStructType2": {
@@ -1406,16 +1420,64 @@
           "type": "number",
           "format": "double",
           "x-go-type": "float64"
+        },
+        "sub": {
+          "$ref": "#/definitions/TestSubStructType2"
+        },
+        "sub_slice": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TestSubStructType2"
+          },
+          "x-go-type": "[]github.com/swaggest/swgen/sample.TestSubStruct"
         }
       },
       "x-go-type": "github.com/swaggest/swgen/sample.TestSampleStruct",
       "x-go-property-names": {
         "simple_bool": "SimpleBool",
-        "simple_float64": "SimpleFloat64"
+        "simple_float64": "SimpleFloat64",
+        "sub": "Sub",
+        "sub_slice": "SubSlice"
       },
       "x-go-property-types": {
         "simple_bool": "bool",
-        "simple_float64": "float64"
+        "simple_float64": "float64",
+        "sub": "github.com/swaggest/swgen/sample.TestSubStruct",
+        "sub_slice": "[]github.com/swaggest/swgen/sample.TestSubStruct"
+      }
+    },
+    "TestSubStruct": {
+      "type": "object",
+      "properties": {
+        "sample_int": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-type": "int"
+        }
+      },
+      "x-go-type": "github.com/swaggest/swgen.TestSubStruct",
+      "x-go-property-names": {
+        "sample_int": "SubInt"
+      },
+      "x-go-property-types": {
+        "sample_int": "int"
+      }
+    },
+    "TestSubStructType2": {
+      "type": "object",
+      "properties": {
+        "sample_int": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-type": "int"
+        }
+      },
+      "x-go-type": "github.com/swaggest/swgen/sample.TestSubStruct",
+      "x-go-property-names": {
+        "sample_int": "SubInt"
+      },
+      "x-go-property-types": {
+        "sample_int": "int"
       }
     },
     "Unknown": {

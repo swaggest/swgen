@@ -8,16 +8,6 @@ import (
 	"strings"
 )
 
-// ServiceType data type for type of your service
-type ServiceType string
-
-const (
-	// ServiceTypeRest define service type for RESTful service
-	ServiceTypeRest ServiceType = "rest"
-	// ServiceTypeJSONRPC define service type for JSON-RPC service
-	ServiceTypeJSONRPC ServiceType = "json-rpc"
-)
-
 // Document represent for a document object of swagger data
 // see http://swagger.io/specification/
 type Document struct {
@@ -78,19 +68,19 @@ type PathItem struct {
 // HasMethod returns true if in path item already have operation for given method
 func (pi PathItem) HasMethod(method string) bool {
 	switch strings.ToUpper(method) {
-	case "GET":
+	case http.MethodGet:
 		return pi.Get != nil
-	case "POST":
+	case http.MethodPost:
 		return pi.Post != nil
-	case "PUT":
+	case http.MethodPut:
 		return pi.Put != nil
-	case "DELETE":
+	case http.MethodDelete:
 		return pi.Delete != nil
-	case "OPTIONS":
+	case http.MethodOptions:
 		return pi.Options != nil
-	case "HEAD":
+	case http.MethodHead:
 		return pi.Head != nil
-	case "PATCH":
+	case http.MethodPatch:
 		return pi.Patch != nil
 	}
 
@@ -305,11 +295,28 @@ func (s SwaggerData) Param() ParamObj {
 }
 
 type shared struct {
+	Title       string      `json:"title,omitempty"`
 	Description string      `json:"description,omitempty"`
 	Default     interface{} `json:"default,omitempty"`
 	Type        string      `json:"type,omitempty"`
 	Pattern     string      `json:"pattern,omitempty"`
 	Format      string      `json:"format,omitempty"`
+
+	MultipleOf float64 `json:"multipleOf,omitempty"`
+	Maximum    float64 `json:"maximum,omitempty"`
+	Minimum    float64 `json:"minimum,omitempty"`
+
+	MaxLength     int64 `json:"maxLength,omitempty"`
+	MinLength     int64 `json:"minLength,omitempty"`
+	MaxItems      int64 `json:"maxItems,omitempty"`
+	MinItems      int64 `json:"minItems,omitempty"`
+	MaxProperties int64 `json:"maxProperties,omitempty"`
+	MinProperties int64 `json:"minProperties,omitempty"`
+
+	ExclusiveMaximum bool `json:"exclusiveMaximum,omitempty"`
+	ExclusiveMinimum bool `json:"exclusiveMinimum,omitempty"`
+	UniqueItems      bool `json:"uniqueItems,omitempty"`
+
 	Enum
 }
 
@@ -431,28 +438,28 @@ func NewSchemaObj(jsonType, typeName string) (so *SchemaObj) {
 // (exported) properties, an array without elements, or in other cases when it has neither regular nor additional
 // properties, and format is not specified. SwaggerData objects that describe common types ("string", "integer", "boolean" etc.)
 // are always considered non-empty. Same is true for "schema reference objects" (objects that have a non-empty Ref field).
-func (so *SchemaObj) isEmpty() bool {
-	if isCommonName(so.TypeName) || so.Ref != "" {
+func (o *SchemaObj) isEmpty() bool {
+	if isCommonName(o.TypeName) || o.Ref != "" {
 		return false
 	}
 
-	switch so.Type {
+	switch o.Type {
 	case "object":
-		return len(so.Properties) == 0
+		return len(o.Properties) == 0
 	case "array":
-		return so.Items == nil
+		return o.Items == nil
 	default:
-		return len(so.Properties) == 0 && so.AdditionalProperties == nil && so.Format == ""
+		return len(o.Properties) == 0 && o.AdditionalProperties == nil && o.Format == ""
 	}
 }
 
 // Export returns a "schema reference object" corresponding to this schema object. A "schema reference object" is an abridged
 // version of the original SchemaObj, having only two non-empty fields: Ref and TypeName. "SwaggerData reference objects"
 // are used to refer original schema objects from other schemas.
-func (so SchemaObj) Export() SchemaObj {
+func (o SchemaObj) Export() SchemaObj {
 	return SchemaObj{
-		Ref:      so.Ref,
-		TypeName: so.TypeName,
+		Ref:      o.Ref,
+		TypeName: o.TypeName,
 	}
 }
 

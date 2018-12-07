@@ -11,8 +11,9 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/swaggest/swgen/sample"
-	"github.com/swaggest/swgen/sample/experiment"
+	"github.com/swaggest/swgen/internal/sample"
+	"github.com/swaggest/swgen/internal/sample/experiment"
+	"github.com/swaggest/swgen/internal/sample/experiment/variation"
 	"github.com/yudai/gojsondiff"
 	"github.com/yudai/gojsondiff/formatter"
 )
@@ -101,7 +102,7 @@ type testSubTypes struct {
 }
 
 type testPathParam struct {
-	ID  uint64 `json:"id" path:"id" required:"-"`
+	ID  uint64 `json:"id" path:"id" required:"false"`
 	Cat string `json:"category" path:"category"`
 }
 
@@ -111,12 +112,12 @@ type simpleTestReplacement struct {
 }
 
 type deepReplacementTag struct {
-	TestField1 string `json:"test_field_1" swgen_type:"double"`
+	TestField1 string `json:"test_field_1" type:"number" format:"double"`
 }
 
 type testWrapParams struct {
 	SimpleTestReplacement simpleTestReplacement `json:"simple_test_replacement"`
-	ReplaceByTag          int                   `json:"should_be_sting" swgen_type:"string"`
+	ReplaceByTag          int                   `json:"should_be_sting" type:"string" format:"-"`
 	DeepReplacementTag    deepReplacementTag    `json:"deep_replacement"`
 }
 
@@ -136,11 +137,6 @@ type paramStructMap struct {
 	Field1 int                   `query:"field1"`
 	Field2 string                `query:"field2"`
 	Field3 simpleTestReplacement `query:"field3"`
-}
-type paramStructMapJSON struct {
-	Field1 int                   `json:"field1"`
-	Field2 string                `json:"field2"`
-	Field3 simpleTestReplacement `json:"field3"`
 }
 
 type AnonymousField struct {
@@ -204,7 +200,7 @@ type sliceType []testSimpleStruct
 type NullFloat64 struct{}
 
 func (NullFloat64) SwaggerDef() SwaggerData {
-	typeDef := SchemaFromCommonName(CommonNameFloat)
+	typeDef := schemaFromCommonName(commonNameFloat)
 	typeDef.TypeName = "NullFloat64"
 	return SwaggerData{
 		shared:    typeDef.shared,
@@ -215,7 +211,7 @@ func (NullFloat64) SwaggerDef() SwaggerData {
 type NullBool struct{}
 
 func (NullBool) SwaggerDef() SwaggerData {
-	typeDef := SchemaFromCommonName(CommonNameBoolean)
+	typeDef := schemaFromCommonName(commonNameBoolean)
 	typeDef.TypeName = "NullBool"
 	return SwaggerData{
 		shared:    typeDef.shared,
@@ -226,7 +222,7 @@ func (NullBool) SwaggerDef() SwaggerData {
 type NullString struct{}
 
 func (NullString) SwaggerDef() SwaggerData {
-	typeDef := SchemaFromCommonName(CommonNameString)
+	typeDef := schemaFromCommonName(commonNameString)
 	typeDef.TypeName = "NullString"
 	return SwaggerData{
 		shared:    typeDef.shared,
@@ -237,7 +233,7 @@ func (NullString) SwaggerDef() SwaggerData {
 type NullInt64 struct{}
 
 func (NullInt64) SwaggerDef() SwaggerData {
-	typeDef := SchemaFromCommonName(CommonNameLong)
+	typeDef := schemaFromCommonName(commonNameLong)
 	typeDef.TypeName = "NullInt64"
 	return SwaggerData{
 		shared:    typeDef.shared,
@@ -248,7 +244,7 @@ func (NullInt64) SwaggerDef() SwaggerData {
 type NullDateTime struct{}
 
 func (NullDateTime) SwaggerDef() SwaggerData {
-	typeDef := SchemaFromCommonName(CommonNameDateTime)
+	typeDef := schemaFromCommonName(commonNameDateTime)
 	typeDef.TypeName = "NullDateTime"
 	return SwaggerData{
 		shared:    typeDef.shared,
@@ -259,7 +255,7 @@ func (NullDateTime) SwaggerDef() SwaggerData {
 type NullDate struct{}
 
 func (NullDate) SwaggerDef() SwaggerData {
-	typeDef := SchemaFromCommonName(CommonNameDate)
+	typeDef := schemaFromCommonName(commonNameDate)
 	typeDef.TypeName = "NullDate"
 	return SwaggerData{
 		shared:    typeDef.shared,
@@ -270,7 +266,7 @@ func (NullDate) SwaggerDef() SwaggerData {
 type NullTimestamp struct{}
 
 func (NullTimestamp) SwaggerDef() SwaggerData {
-	typeDef := SchemaFromCommonName(CommonNameLong)
+	typeDef := schemaFromCommonName(commonNameLong)
 	typeDef.TypeName = "NullTimestamp"
 	return SwaggerData{
 		shared:    typeDef.shared,
@@ -335,7 +331,6 @@ func TestREST(t *testing.T) {
 		SetInfo("swgen title", "swgen description", "term", "2.0").
 		SetLicense("BEER-WARE", "https://fedoraproject.org/wiki/Licensing/Beerware").
 		SetContact("Dylan Noblitt", "http://example.com", "dylan.noblitt@example.com").
-		AddExtendedField("x-service-type", ServiceTypeRest).
 		ReflectGoTypes(true).
 		IndentJSON(true)
 
@@ -411,68 +406,6 @@ func TestREST(t *testing.T) {
 	}
 
 	assert.True(t, checkResult(t, bytes, "test_REST.json"))
-}
-
-func TestJsonRpc(t *testing.T) {
-	gen := NewGenerator()
-	gen.SetHost("localhost")
-	gen.SetInfo("swgen title", "swgen description", "term", "2.0")
-	gen.SetLicense("BEER-WARE", "https://fedoraproject.org/wiki/Licensing/Beerware")
-	gen.SetContact("Dylan Noblitt", "http://example.com", "dylan.noblitt@example.com")
-	gen.AddExtendedField("x-service-type", ServiceTypeJSONRPC)
-	gen.AddTypeMap(simpleTestReplacement{}, "")
-	gen.AddTypeMap(sliceType{}, "")
-	gen.IndentJSON(true)
-
-	var emptyInterface interface{}
-
-	gen.SetPathItem(createPathItemInfo("/V1/test1", "POST", "test1 name", "test1 description", "v1", true, emptyInterface, testSimpleStruct{}))
-	gen.SetPathItem(createPathItemInfo("/V1/test2", "POST", "test2 name", "test2 description", "v1", true, testSimpleQueryStruct{}, testSimpleSlices{}))
-	gen.SetPathItem(createPathItemInfo("/V1/test3", "POST", "test3 name", "test3 description", "v1", true, testSimpleSlices{}, testSimpleMaps{}))
-	gen.SetPathItem(createPathItemInfo("/V1/test4", "POST", "test4 name", "test4 description", "v1", true, testSimpleMaps{}, testSimpleMapList{}))
-	gen.SetPathItem(createPathItemInfo("/V1/test5", "POST", "test5 name", "test5 description", "v1", true, testSimpleMapList{}, testSubTypes{}))
-	gen.SetPathItem(createPathItemInfo("/V1/test6", "POST", "test6 name", "test6 description", "v1", true, testSubTypes{}, testSimpleStruct{}))
-	gen.SetPathItem(createPathItemInfo("/V1/test7", "POST", "test7 name", "test7 description", "v1", true, emptyInterface, testSimpleSlices{}))
-	gen.SetPathItem(createPathItemInfo("/V1/test8", "POST", "test8v1 name", "test8v1 description", "v1", true, paramStructMapJSON{}, map[string]testSimpleStruct{}))
-	gen.SetPathItem(createPathItemInfo("/V1/test9", "POST", "test9 name", "test9 description", "v1", true, mixedStruct{}, map[string]testSimpleStruct{}))
-	gen.SetPathItem(createPathItemInfo("/V1/test10", "POST", "test10 name", "test10 description", "v1", true, mixedStructWithEnumer{}, map[string]testSimpleStruct{}))
-
-	gen.SetPathItem(createPathItemInfo("/V1/typeReplacement1", "POST", "test9 name", "test9 description", "v1", false, testSubTypes{}, testWrapParams{}))
-
-	//anonymous types:
-	gen.SetPathItem(createPathItemInfo("/V1/anonymous1", "POST", "test10 name", "test10 description", "v1", false, emptyInterface, map[string]int64{}))
-	gen.SetPathItem(createPathItemInfo("/V1/anonymous2", "POST", "test11 name", "test11 description", "v1", false, emptyInterface, map[float64]string{}))
-	gen.SetPathItem(createPathItemInfo("/V1/anonymous3", "POST", "test12 name", "test12 description", "v1", false, emptyInterface, []string{}))
-	gen.SetPathItem(createPathItemInfo("/V1/anonymous4", "POST", "test13 name", "test13 description", "v1", false, emptyInterface, []int{}))
-	gen.SetPathItem(createPathItemInfo("/V1/anonymous5", "POST", "test14 name", "test14 description", "v1", false, emptyInterface, ""))
-	gen.SetPathItem(createPathItemInfo("/V1/anonymous6", "POST", "test15 name", "test15 description", "v1", false, emptyInterface, true))
-	gen.SetPathItem(createPathItemInfo("/V1/anonymous7", "POST", "test16 name", "test16 description", "v1", false, emptyInterface, map[string]testSimpleStruct{}))
-
-	gen.SetPathItem(createPathItemInfo("/V1/date1", "POST", "test date 1 name", "test date 1 description", "v1", false, emptyInterface, simpleDateTime{}))
-	gen.SetPathItem(createPathItemInfo("/V1/date2", "POST", "test date 2 name", "test date 2 description", "v1", false, emptyInterface, sliceDateTime{}))
-	gen.SetPathItem(createPathItemInfo("/V1/date3", "POST", "test date 3 name", "test date 3 description", "v1", false, emptyInterface, mapDateTime{}))
-	gen.SetPathItem(createPathItemInfo("/V1/date4", "POST", "test date 4 name", "test date 4 description", "v1", false, emptyInterface, []mapDateTime{}))
-
-	gen.SetPathItem(createPathItemInfo("/V1/slice1", "POST", "test slice 1 name", "test slice 1 description", "v1", false, emptyInterface, []mapDateTime{}))
-	gen.SetPathItem(createPathItemInfo("/V1/slice2", "POST", "test slice 2 name", "test slice 2 description", "v1", false, emptyInterface, sliceType{}))
-
-	gen.SetPathItem(createPathItemInfo("/V1/primitiveTypes1", "POST", "testPrimitives", "test Primitives", "v1", false, "", 10))
-	gen.SetPathItem(createPathItemInfo("/V1/primitiveTypes2", "POST", "testPrimitives", "test Primitives", "v1", false, true, 1.1))
-	gen.SetPathItem(createPathItemInfo("/V1/primitiveTypes3", "POST", "testPrimitives", "test Primitives", "v1", false, int64(10), ""))
-	gen.SetPathItem(createPathItemInfo("/V1/primitiveTypes4", "POST", "testPrimitives", "test Primitives", "v1", false, int64(10), ""))
-
-	gen.SetPathItem(createPathItemInfo("/V1/defaults1", "POST", "default", "test defaults", "v1", false, emptyInterface, testDefaults{}))
-
-	bytes, err := gen.GenDocument()
-	if err != nil {
-		t.Fatalf("can not generate document: %s", err.Error())
-	}
-
-	if err := writeLastRun("test_JSON-RPC_last_run.json", bytes); err != nil {
-		t.Fatalf("Failed write last run data to a file: %s", err.Error())
-	}
-
-	assert.True(t, checkResult(t, bytes, "test_JSON-RPC.json"))
 }
 
 func getTestDataDir(filename string) string {
@@ -624,4 +557,37 @@ func TestGenerator_GenDocument_StructCollision(t *testing.T) {
 
 	assert.NoError(t, writeLastRun("struct_collision_last_run.json", generatedBytes))
 	checkResult(t, generatedBytes, "struct_collision.json")
+}
+
+type (
+	experimentEntity            experiment.Entity
+	experimentMetadata          experiment.Metadata
+	experimentVariationEntity   variation.Entity
+	experimentVariationMetadata variation.Metadata
+)
+
+func TestGenerator_GenDocument_StructCollisionWithExplicitRemapping(t *testing.T) {
+	gen := NewGenerator()
+	gen.SetHost("localhost")
+	gen.SetInfo("swgen title", "swgen description", "term", "2.0")
+	gen.IndentJSON(true)
+	//gen.ReflectGoTypes(true)
+	gen.AddTypeMap(new(experiment.Entity), new(experimentEntity))
+	gen.AddTypeMap(new(variation.Entity), new(experimentVariationEntity))
+	gen.AddTypeMap(new(experiment.Metadata), new(experimentMetadata))
+	gen.AddTypeMap(new(variation.Metadata), new(experimentVariationMetadata))
+
+	info := PathItemInfo{
+		Method:   http.MethodPost,
+		Path:     "/any",
+		Request:  new(experiment.PostRequest),
+		Response: new(experiment.Entity),
+	}
+	gen.SetPathItem(info)
+
+	generatedBytes, err := gen.GenDocument()
+	assert.NoError(t, err)
+
+	assert.NoError(t, writeLastRun("struct_collision_mapped_last_run.json", generatedBytes))
+	checkResult(t, generatedBytes, "struct_collision_mapped.json")
 }

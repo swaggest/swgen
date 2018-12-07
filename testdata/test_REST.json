@@ -619,6 +619,7 @@
             "format": "int64",
             "name": "id",
             "in": "path",
+            "required": true,
             "x-go-name": "ID",
             "x-go-type": "uint64"
           },
@@ -885,7 +886,6 @@
             "type": "string",
             "name": "simple_string",
             "in": "query",
-            "required": true,
             "x-go-name": "SimpleString",
             "x-go-type": "string"
           },
@@ -894,7 +894,6 @@
             "format": "int32",
             "name": "simple_int",
             "in": "query",
-            "required": true,
             "x-go-name": "SimpleInt",
             "x-go-type": "int"
           },
@@ -903,7 +902,6 @@
             "format": "int32",
             "name": "simple_int32",
             "in": "query",
-            "required": true,
             "x-go-name": "SimpleInt32",
             "x-go-type": "int32"
           },
@@ -912,7 +910,6 @@
             "format": "int64",
             "name": "simple_int64",
             "in": "query",
-            "required": true,
             "x-go-name": "SimpleInt64",
             "x-go-type": "int64"
           },
@@ -921,7 +918,6 @@
             "format": "int64",
             "name": "simple_uint32",
             "in": "query",
-            "required": true,
             "x-go-name": "SimpleUInt32",
             "x-go-type": "uint32"
           },
@@ -930,7 +926,6 @@
             "format": "int64",
             "name": "simple_uint64",
             "in": "query",
-            "required": true,
             "x-go-name": "SimpleUInt64",
             "x-go-type": "uint64"
           },
@@ -939,7 +934,6 @@
             "format": "float",
             "name": "simple_float32",
             "in": "query",
-            "required": true,
             "x-go-name": "SimpleFloat32",
             "x-go-type": "float32"
           },
@@ -948,7 +942,6 @@
             "format": "double",
             "name": "simple_float64",
             "in": "query",
-            "required": true,
             "x-go-name": "SimpleFloat64",
             "x-go-type": "float64"
           },
@@ -956,7 +949,6 @@
             "type": "boolean",
             "name": "simple_bool",
             "in": "query",
-            "required": true,
             "x-go-name": "SimpleBool",
             "x-go-type": "bool"
           }
@@ -1114,7 +1106,6 @@
             "format": "int32",
             "name": "field1",
             "in": "query",
-            "required": true,
             "x-go-name": "Field1",
             "x-go-type": "int"
           },
@@ -1122,7 +1113,6 @@
             "type": "string",
             "name": "field2",
             "in": "query",
-            "required": true,
             "x-go-name": "Field2",
             "x-go-type": "string"
           },
@@ -1130,7 +1120,6 @@
             "type": "string",
             "name": "field3",
             "in": "query",
-            "required": true,
             "x-go-name": "Field3",
             "x-go-type": "github.com/swaggest/swgen.simpleTestReplacement"
           }
@@ -1163,7 +1152,6 @@
             "format": "int32",
             "name": "fieldQuery",
             "in": "query",
-            "required": true,
             "x-go-name": "FieldQuery",
             "x-go-type": "int"
           },
@@ -1289,7 +1277,7 @@
             }
           }
         },
-        "x-request-go-type": "github.com/swaggest/swgen/sample.TestSampleStruct"
+        "x-request-go-type": "github.com/swaggest/swgen/internal/sample.TestSampleStruct"
       }
     }
   },
@@ -1412,6 +1400,9 @@
     "TestSampleStructType2": {
       "type": "object",
       "properties": {
+        "anon_type_struct": {
+          "$ref": "#/definitions/anon_b66e03cc"
+        },
         "simple_bool": {
           "type": "boolean",
           "x-go-type": "bool"
@@ -1429,21 +1420,23 @@
           "items": {
             "$ref": "#/definitions/TestSubStructType2"
           },
-          "x-go-type": "[]github.com/swaggest/swgen/sample.TestSubStruct"
+          "x-go-type": "[]github.com/swaggest/swgen/internal/sample.TestSubStruct"
         }
       },
-      "x-go-type": "github.com/swaggest/swgen/sample.TestSampleStruct",
+      "x-go-type": "github.com/swaggest/swgen/internal/sample.TestSampleStruct",
       "x-go-property-names": {
+        "anon_type_struct": "AnonTypeStruct",
         "simple_bool": "SimpleBool",
         "simple_float64": "SimpleFloat64",
         "sub": "Sub",
         "sub_slice": "SubSlice"
       },
       "x-go-property-types": {
+        "anon_type_struct": "::struct { FieldOne int \"json:\\\"int\\\"\" }",
         "simple_bool": "bool",
         "simple_float64": "float64",
-        "sub": "github.com/swaggest/swgen/sample.TestSubStruct",
-        "sub_slice": "[]github.com/swaggest/swgen/sample.TestSubStruct"
+        "sub": "github.com/swaggest/swgen/internal/sample.TestSubStruct",
+        "sub_slice": "[]github.com/swaggest/swgen/internal/sample.TestSubStruct"
       }
     },
     "TestSubStruct": {
@@ -1472,7 +1465,7 @@
           "x-go-type": "int"
         }
       },
-      "x-go-type": "github.com/swaggest/swgen/sample.TestSubStruct",
+      "x-go-type": "github.com/swaggest/swgen/internal/sample.TestSubStruct",
       "x-go-property-names": {
         "sample_int": "SubInt"
       },
@@ -1498,6 +1491,23 @@
       "x-go-property-types": {
         "anything": "::interface {}",
         "whatever": "*[]uint8"
+      }
+    },
+    "anon_b66e03cc": {
+      "type": "object",
+      "properties": {
+        "int": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-type": "int"
+        }
+      },
+      "x-go-type": "::struct { FieldOne int \"json:\\\"int\\\"\" }",
+      "x-go-property-names": {
+        "int": "FieldOne"
+      },
+      "x-go-property-types": {
+        "int": "int"
       }
     },
     "deepReplacementTag": {
@@ -2189,6 +2199,5 @@
         "m": "github.com/swaggest/swgen.typeMap"
       }
     }
-  },
-  "x-service-type": "rest"
+  }
 }

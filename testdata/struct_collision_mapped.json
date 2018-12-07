@@ -1,0 +1,139 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "swgen title",
+    "description": "swgen description",
+    "termsOfService": "term",
+    "contact": {
+      "name": ""
+    },
+    "license": {
+      "name": ""
+    },
+    "version": "2.0"
+  },
+  "host": "localhost",
+  "basePath": "/",
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "paths": {
+    "/any": {
+      "post": {
+        "summary": "",
+        "description": "",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "country",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/PostRequest"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/experimentEntity"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Period": {
+      "type": "object",
+      "properties": {
+        "end": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "PostRequest": {
+      "type": "object",
+      "properties": {
+        "metadata": {
+          "$ref": "#/definitions/experimentMetadata"
+        },
+        "variations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/VariationData"
+          }
+        }
+      }
+    },
+    "VariationData": {
+      "type": "object",
+      "properties": {
+        "metadata": {
+          "$ref": "#/definitions/experimentVariationMetadata"
+        },
+        "some_key": {
+          "type": "string"
+        }
+      }
+    },
+    "experimentEntity": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "variation": {
+          "$ref": "#/definitions/experimentVariationEntity"
+        },
+        "variations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/experimentVariationEntity"
+          }
+        }
+      }
+    },
+    "experimentMetadata": {
+      "type": "object",
+      "properties": {
+        "allocation_period": {
+          "$ref": "#/definitions/Period"
+        }
+      }
+    },
+    "experimentVariationEntity": {
+      "type": "object",
+      "properties": {
+        "metadata": {
+          "$ref": "#/definitions/experimentVariationMetadata"
+        }
+      }
+    },
+    "experimentVariationMetadata": {
+      "type": "object",
+      "properties": {
+        "courses": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      }
+    }
+  }
+}

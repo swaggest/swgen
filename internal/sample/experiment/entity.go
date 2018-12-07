@@ -3,7 +3,7 @@ package experiment
 import (
 	"time"
 
-	"github.com/swaggest/swgen/sample/experiment/variation"
+	"github.com/swaggest/swgen/internal/sample/experiment/variation"
 )
 
 type (
@@ -25,16 +25,19 @@ type (
 		End   time.Time `json:"end" db:"-"`
 	}
 
+	// PostRequest is a test dummy
 	PostRequest struct {
 		Country string `path:"country"`
-		Data    `json:"data"`
+		Data
 	}
 
+	// Data is a test dummy
 	Data struct {
 		Metadata   Metadata        `json:"metadata"`
 		Variations []VariationData `json:"variations"`
 	}
 
+	// VariationData is a test dummy
 	VariationData struct {
 		SomeKey  string             `json:"some_key"`
 		Metadata variation.Metadata `json:"metadata"`

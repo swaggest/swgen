@@ -136,6 +136,7 @@ type ObjectJSONSchema struct {
 	Properties map[string]map[string]interface{} `json:"properties"`
 }
 
+// ToMap converts ObjectJSONSchema to a map
 func (o ObjectJSONSchema) ToMap() (map[string]interface{}, error) {
 	return jsonRecode(o)
 }

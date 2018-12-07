@@ -260,8 +260,8 @@ type bodyWithCustom struct {
 }
 
 type paramsWithCustom struct {
-	ID int    `query:"id"`
-	C  custom `query:"c"`
+	ID int    `query:"id" required:"true"`
+	C  custom `query:"c" required:"true"`
 }
 
 func TestSwaggerDef(t *testing.T) {

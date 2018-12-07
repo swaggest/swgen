@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"strings"
 	"sync"
+
+	"github.com/swaggest/swgen/refl"
 )
 
 // Generator create swagger document
@@ -21,7 +23,7 @@ type Generator struct {
 	definitions      defMap                  // list of all definition objects
 	defQueue         map[string]reflect.Type // queue of reflect.Type objects waiting for analysis
 	paths            map[string]PathItem     // list all of paths object
-	typesMap         map[reflect.Type]interface{}
+	typesMap         map[string]interface{}
 	defaultResponses map[int]interface{}
 
 	indentJSON     bool
@@ -59,7 +61,7 @@ func NewGenerator() *Generator {
 
 	g.defQueue = make(map[string]reflect.Type)
 	g.paths = make(map[string]PathItem) // list all of paths object
-	g.typesMap = make(map[reflect.Type]interface{})
+	g.typesMap = make(map[string]interface{})
 
 	g.doc.Schemes = []string{"http", "https"}
 	g.doc.Paths = make(map[string]PathItem)
@@ -197,27 +199,20 @@ func (g *Generator) AddSecurityDefinition(name string, def SecurityDef) *Generat
 	return g
 }
 
-// AddTypeMap add rule to use dst interface instead of src
-func (g *Generator) AddTypeMap(src interface{}, dst interface{}) *Generator {
+// AddTypeMap adds mapping relation to treat values of same type as source as they were of same type as destination
+func (g *Generator) AddTypeMap(source interface{}, destination interface{}) *Generator {
 	g.mu.Lock()
-	g.typesMap[reflect.TypeOf(src)] = dst
+
+	goTypeName := refl.GoType(refl.DeepIndirect(reflect.TypeOf(source)))
+	g.typesMap[goTypeName] = destination
 	g.mu.Unlock()
 	return g
 }
 
 func (g *Generator) getMappedType(t reflect.Type) (dst interface{}, found bool) {
-	dst, found = g.typesMap[t]
+	goTypeName := refl.GoType(refl.DeepIndirect(t))
+	dst, found = g.typesMap[goTypeName]
 	return
-}
-
-func (g *Generator) isJSONRPC() bool {
-	serviceType, found := g.doc.data["x-service-type"]
-	if !found {
-		return false
-	}
-
-	t, isServiceType := serviceType.(ServiceType)
-	return isServiceType && t == ServiceTypeJSONRPC
 }
 
 // genDocument returns document specification in JSON string (in []byte)
@@ -240,20 +235,7 @@ func (g *Generator) genDocument(host *string) ([]byte, error) {
 	}
 	g.doc.Paths = make(map[string]PathItem)
 
-	isJSONRPC := g.isJSONRPC()
 	for path, item := range g.paths {
-		if isJSONRPC {
-			if !item.HasMethod("POST") {
-				continue
-			}
-
-			item.Get = nil
-			item.Put = nil
-			item.Delete = nil
-			item.Options = nil
-			item.Head = nil
-			item.Patch = nil
-		}
 		g.doc.Paths[path] = item
 	}
 

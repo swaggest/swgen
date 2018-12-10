@@ -265,8 +265,7 @@ func (g *Generator) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	g.writeCORSHeaders(w)
 
-	//nolint:errcheck
-	w.Write(data)
+	_, _ = w.Write(data)
 }
 
 // Document is an accessor to generated document

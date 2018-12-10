@@ -56,13 +56,13 @@ func isCommonName(typeName string) (ok bool) {
 func schemaFromCommonName(name commonName) SchemaObj {
 	data, ok := commonNamesMap[name]
 	if ok {
-		return SchemaObj{shared: shared{
+		return SchemaObj{CommonFields: CommonFields{
 			Type:   data.Type,
 			Format: data.Format,
 		}}
 	}
 
-	return SchemaObj{shared: shared{
+	return SchemaObj{CommonFields: CommonFields{
 		Type: string(name),
 	}}
 }

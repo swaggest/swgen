@@ -203,8 +203,8 @@ func (NullFloat64) SwaggerDef() SwaggerData {
 	typeDef := schemaFromCommonName(commonNameFloat)
 	typeDef.TypeName = "NullFloat64"
 	return SwaggerData{
-		shared:    typeDef.shared,
-		SchemaObj: typeDef,
+		CommonFields: typeDef.CommonFields,
+		SchemaObj:    typeDef,
 	}
 }
 
@@ -214,8 +214,8 @@ func (NullBool) SwaggerDef() SwaggerData {
 	typeDef := schemaFromCommonName(commonNameBoolean)
 	typeDef.TypeName = "NullBool"
 	return SwaggerData{
-		shared:    typeDef.shared,
-		SchemaObj: typeDef,
+		CommonFields: typeDef.CommonFields,
+		SchemaObj:    typeDef,
 	}
 }
 
@@ -225,8 +225,8 @@ func (NullString) SwaggerDef() SwaggerData {
 	typeDef := schemaFromCommonName(commonNameString)
 	typeDef.TypeName = "NullString"
 	return SwaggerData{
-		shared:    typeDef.shared,
-		SchemaObj: typeDef,
+		CommonFields: typeDef.CommonFields,
+		SchemaObj:    typeDef,
 	}
 }
 
@@ -236,8 +236,8 @@ func (NullInt64) SwaggerDef() SwaggerData {
 	typeDef := schemaFromCommonName(commonNameLong)
 	typeDef.TypeName = "NullInt64"
 	return SwaggerData{
-		shared:    typeDef.shared,
-		SchemaObj: typeDef,
+		CommonFields: typeDef.CommonFields,
+		SchemaObj:    typeDef,
 	}
 }
 
@@ -247,8 +247,8 @@ func (NullDateTime) SwaggerDef() SwaggerData {
 	typeDef := schemaFromCommonName(commonNameDateTime)
 	typeDef.TypeName = "NullDateTime"
 	return SwaggerData{
-		shared:    typeDef.shared,
-		SchemaObj: typeDef,
+		CommonFields: typeDef.CommonFields,
+		SchemaObj:    typeDef,
 	}
 }
 
@@ -258,8 +258,8 @@ func (NullDate) SwaggerDef() SwaggerData {
 	typeDef := schemaFromCommonName(commonNameDate)
 	typeDef.TypeName = "NullDate"
 	return SwaggerData{
-		shared:    typeDef.shared,
-		SchemaObj: typeDef,
+		CommonFields: typeDef.CommonFields,
+		SchemaObj:    typeDef,
 	}
 }
 
@@ -269,8 +269,8 @@ func (NullTimestamp) SwaggerDef() SwaggerData {
 	typeDef := schemaFromCommonName(commonNameLong)
 	typeDef.TypeName = "NullTimestamp"
 	return SwaggerData{
-		shared:    typeDef.shared,
-		SchemaObj: typeDef,
+		CommonFields: typeDef.CommonFields,
+		SchemaObj:    typeDef,
 	}
 }
 
@@ -304,7 +304,7 @@ var _ SchemaDefinition = definitionExample{}
 type definitionExample struct{}
 
 func (defEx definitionExample) SwaggerDef() SwaggerData {
-	return SwaggerData{shared: shared{
+	return SwaggerData{CommonFields: CommonFields{
 		Type:   "string",
 		Format: "byte",
 	}}
@@ -340,61 +340,103 @@ func TestREST(t *testing.T) {
 
 	var emptyInterface interface{}
 
-	gen.SetPathItem(createPathItemInfo("/V1/test1", "GET", "test1 name", "test1 description", "v1", false, emptyInterface, testSimpleStruct{}))
-	gen.SetPathItem(createPathItemInfo("/V1/test2", "GET", "test2 name", "test2 description", "v1", false, testSimpleQueryStruct{}, testSimpleSlices{}))
-	gen.SetPathItem(createPathItemInfo("/V1/test3", "PUT", "test3 name", "test3 description", "v1", false, testSimpleSlices{}, testSimpleMaps{}))
-	gen.SetPathItem(createPathItemInfo("/V1/test4", "POST", "test4 name", "test4 description", "v1", false, testSimpleMaps{}, testSimpleMapList{}))
-	gen.SetPathItem(createPathItemInfo("/V1/test5", "DELETE", "test5 name", "test5 description", "v1", false, testSimpleMapList{}, testSubTypes{}))
-	gen.SetPathItem(createPathItemInfo("/V1/test6", "PATCH", "test6 name", "test6 description", "v1", false, testSubTypes{}, testSimpleStruct{}))
-	gen.SetPathItem(createPathItemInfo("/V1/test7", "OPTIONS", "test7 name", "test7 description", "v1", false, emptyInterface, testSimpleSlices{}))
-	gen.SetPathItem(createPathItemInfo("/V1/test8", "GET", "test8v1 name", "test8v1 description", "v1", false, paramStructMap{}, map[string]testSimpleStruct{}))
-	gen.SetPathItem(createPathItemInfo("/V1/test9", "POST", "test9 name", "test9 description", "v1", false, mixedStruct{}, map[string]testSimpleStruct{}))
+	gen.SetPathItem(createPathItemInfo("/V1/test1", "GET", "test1 name",
+		"test1 description", "v1", false, emptyInterface, testSimpleStruct{}))
+	gen.SetPathItem(createPathItemInfo("/V1/test2", "GET", "test2 name",
+		"test2 description", "v1", false, testSimpleQueryStruct{}, testSimpleSlices{}))
+	gen.SetPathItem(createPathItemInfo("/V1/test3", "PUT", "test3 name",
+		"test3 description", "v1", false, testSimpleSlices{}, testSimpleMaps{}))
+	gen.SetPathItem(createPathItemInfo("/V1/test4", "POST", "test4 name",
+		"test4 description", "v1", false, testSimpleMaps{}, testSimpleMapList{}))
+	gen.SetPathItem(createPathItemInfo("/V1/test5", "DELETE", "test5 name",
+		"test5 description", "v1", false, testSimpleMapList{}, testSubTypes{}))
+	gen.SetPathItem(createPathItemInfo("/V1/test6", "PATCH", "test6 name",
+		"test6 description", "v1", false, testSubTypes{}, testSimpleStruct{}))
+	gen.SetPathItem(createPathItemInfo("/V1/test7", "OPTIONS", "test7 name",
+		"test7 description", "v1", false, emptyInterface, testSimpleSlices{}))
+	gen.SetPathItem(createPathItemInfo("/V1/test8", "GET", "test8v1 name",
+		"test8v1 description", "v1", false, paramStructMap{}, map[string]testSimpleStruct{}))
+	gen.SetPathItem(createPathItemInfo("/V1/test9", "POST", "test9 name",
+		"test9 description", "v1", false, mixedStruct{}, map[string]testSimpleStruct{}))
 
-	gen.SetPathItem(createPathItemInfo("/V1/combine", "GET", "test1 name", "test1 description", "v1", true, emptyInterface, testSimpleStruct{}))
-	gen.SetPathItem(createPathItemInfo("/V1/combine", "PUT", "test3 name", "test3 description", "v1", true, testSimpleSlices{}, testSimpleMaps{}))
-	gen.SetPathItem(createPathItemInfo("/V1/combine", "POST", "test4 name", "test4 description", "v1", true, testSimpleMaps{}, testSimpleMapList{}))
-	gen.SetPathItem(createPathItemInfo("/V1/combine", "DELETE", "test5 name", "test5 description", "v1", true, testSimpleMapList{}, testSubTypes{}))
-	gen.SetPathItem(createPathItemInfo("/V1/combine", "PATCH", "test6 name", "test6 description", "v1", true, testSubTypes{}, testSimpleStruct{}))
-	gen.SetPathItem(createPathItemInfo("/V1/combine", "OPTIONS", "test7 name", "test7 description", "v1", true, testSubTypes{}, testSimpleStruct{}))
+	gen.SetPathItem(createPathItemInfo("/V1/combine", "GET", "test1 name",
+		"test1 description", "v1", true, emptyInterface, testSimpleStruct{}))
+	gen.SetPathItem(createPathItemInfo("/V1/combine", "PUT", "test3 name",
+		"test3 description", "v1", true, testSimpleSlices{}, testSimpleMaps{}))
+	gen.SetPathItem(createPathItemInfo("/V1/combine", "POST", "test4 name",
+		"test4 description", "v1", true, testSimpleMaps{}, testSimpleMapList{}))
+	gen.SetPathItem(createPathItemInfo("/V1/combine", "DELETE", "test5 name",
+		"test5 description", "v1", true, testSimpleMapList{}, testSubTypes{}))
+	gen.SetPathItem(createPathItemInfo("/V1/combine", "PATCH", "test6 name",
+		"test6 description", "v1", true, testSubTypes{}, testSimpleStruct{}))
+	gen.SetPathItem(createPathItemInfo("/V1/combine", "OPTIONS", "test7 name",
+		"test7 description", "v1", true, testSubTypes{}, testSimpleStruct{}))
 
-	gen.SetPathItem(createPathItemInfo("/V1/pathParams/{category:[a-zA-Z]{32}}/{id:[0-9]+}", "GET", "test8 name", "test8 description", "V1", false, testPathParam{}, testSimpleStruct{}))
+	gen.SetPathItem(createPathItemInfo("/V1/pathParams/{category:[a-zA-Z]{32}}/{id:[0-9]+}", "GET", "test8 name",
+		"test8 description", "V1", false, testPathParam{}, testSimpleStruct{}))
 
 	//anonymous types:
-	gen.SetPathItem(createPathItemInfo("/V1/anonymous1", "POST", "test10 name", "test10 description", "v1", false, testSimpleStruct{}, map[string]int64{}))
-	gen.SetPathItem(createPathItemInfo("/V1/anonymous2", "POST", "test11 name", "test11 description", "v1", false, testSimpleStruct{}, map[float64]string{}))
-	gen.SetPathItem(createPathItemInfo("/V1/anonymous3", "POST", "test12 name", "test12 description", "v1", false, testSimpleStruct{}, []string{}))
-	gen.SetPathItem(createPathItemInfo("/V1/anonymous4", "POST", "test13 name", "test13 description", "v1", false, testSimpleStruct{}, []int{}))
-	gen.SetPathItem(createPathItemInfo("/V1/anonymous5", "POST", "test14 name", "test14 description", "v1", false, testSimpleStruct{}, ""))
-	gen.SetPathItem(createPathItemInfo("/V1/anonymous6", "POST", "test15 name", "test15 description", "v1", false, testSimpleStruct{}, true))
-	gen.SetPathItem(createPathItemInfo("/V1/anonymous7", "POST", "test16 name", "test16 description", "v1", false, testSimpleStruct{}, map[string]testSimpleStruct{}))
+	gen.SetPathItem(createPathItemInfo("/V1/anonymous1", "POST", "test10 name",
+		"test10 description", "v1", false, testSimpleStruct{}, map[string]int64{}))
+	gen.SetPathItem(createPathItemInfo("/V1/anonymous2", "POST", "test11 name",
+		"test11 description", "v1", false, testSimpleStruct{}, map[float64]string{}))
+	gen.SetPathItem(createPathItemInfo("/V1/anonymous3", "POST", "test12 name",
+		"test12 description", "v1", false, testSimpleStruct{}, []string{}))
+	gen.SetPathItem(createPathItemInfo("/V1/anonymous4", "POST", "test13 name",
+		"test13 description", "v1", false, testSimpleStruct{}, []int{}))
+	gen.SetPathItem(createPathItemInfo("/V1/anonymous5", "POST", "test14 name",
+		"test14 description", "v1", false, testSimpleStruct{}, ""))
+	gen.SetPathItem(createPathItemInfo("/V1/anonymous6", "POST", "test15 name",
+		"test15 description", "v1", false, testSimpleStruct{}, true))
+	gen.SetPathItem(createPathItemInfo("/V1/anonymous7", "POST", "test16 name",
+		"test16 description", "v1", false, testSimpleStruct{}, map[string]testSimpleStruct{}))
 
-	gen.SetPathItem(createPathItemInfo("/V1/typeReplacement1", "POST", "test9 name", "test9 description", "v1", false, testSubTypes{}, testWrapParams{}))
+	gen.SetPathItem(createPathItemInfo("/V1/typeReplacement1", "POST", "test9 name",
+		"test9 description", "v1", false, testSubTypes{}, testWrapParams{}))
 
-	gen.SetPathItem(createPathItemInfo("/V1/date1", "POST", "test date 1 name", "test date 1 description", "v1", false, testSimpleStruct{}, simpleDateTime{}))
-	gen.SetPathItem(createPathItemInfo("/V1/date2", "POST", "test date 2 name", "test date 2 description", "v1", false, testSimpleStruct{}, sliceDateTime{}))
-	gen.SetPathItem(createPathItemInfo("/V1/date3", "POST", "test date 3 name", "test date 3 description", "v1", false, testSimpleStruct{}, mapDateTime{}))
-	gen.SetPathItem(createPathItemInfo("/V1/date4", "POST", "test date 4 name", "test date 4 description", "v1", false, testSimpleStruct{}, []mapDateTime{}))
+	gen.SetPathItem(createPathItemInfo("/V1/date1", "POST", "test date 1 name",
+		"test date 1 description", "v1", false, testSimpleStruct{}, simpleDateTime{}))
+	gen.SetPathItem(createPathItemInfo("/V1/date2", "POST", "test date 2 name",
+		"test date 2 description", "v1", false, testSimpleStruct{}, sliceDateTime{}))
+	gen.SetPathItem(createPathItemInfo("/V1/date3", "POST", "test date 3 name",
+		"test date 3 description", "v1", false, testSimpleStruct{}, mapDateTime{}))
+	gen.SetPathItem(createPathItemInfo("/V1/date4", "POST", "test date 4 name",
+		"test date 4 description", "v1", false, testSimpleStruct{}, []mapDateTime{}))
 
-	gen.SetPathItem(createPathItemInfo("/V1/slice1", "POST", "test slice 1 name", "test slice 1 description", "v1", false, testSimpleStruct{}, []mapDateTime{}))
-	gen.SetPathItem(createPathItemInfo("/V1/slice2", "POST", "test slice 2 name", "test slice 2 description", "v1", false, testSimpleStruct{}, sliceType{}))
+	gen.SetPathItem(createPathItemInfo("/V1/slice1", "POST", "test slice 1 name",
+		"test slice 1 description", "v1", false, testSimpleStruct{}, []mapDateTime{}))
+	gen.SetPathItem(createPathItemInfo("/V1/slice2", "POST", "test slice 2 name",
+		"test slice 2 description", "v1", false, testSimpleStruct{}, sliceType{}))
 
-	gen.SetPathItem(createPathItemInfo("/V1/IDefinition1", "POST", "test IDefinition1 name", "test IDefinition1 description", "v1", false, definitionExample{}, definitionExample{}))
-	gen.SetPathItem(createPathItemInfo("/V1/nullTypes", "POST", "test nulltypes", "test nulltypes", "v1", false, NullTypes{}, NullTypes{}))
+	gen.SetPathItem(createPathItemInfo("/V1/IDefinition1", "POST", "test IDefinition1 name",
+		"test IDefinition1 description", "v1", false, definitionExample{}, definitionExample{}))
+	gen.SetPathItem(createPathItemInfo("/V1/nullTypes", "POST", "test nulltypes",
+		"test nulltypes", "v1", false, NullTypes{}, NullTypes{}))
 
-	gen.SetPathItem(createPathItemInfo("/V1/primitiveTypes1", "POST", "testPrimitives", "test Primitives", "v1", false, "", 10))
-	gen.SetPathItem(createPathItemInfo("/V1/primitiveTypes2", "POST", "testPrimitives", "test Primitives", "v1", false, true, 1.1))
-	gen.SetPathItem(createPathItemInfo("/V1/primitiveTypes3", "POST", "testPrimitives", "test Primitives", "v1", false, int64(10), ""))
-	gen.SetPathItem(createPathItemInfo("/V1/primitiveTypes4", "POST", "testPrimitives", "test Primitives", "v1", false, int64(10), ""))
+	gen.SetPathItem(createPathItemInfo("/V1/primitiveTypes1", "POST", "testPrimitives",
+		"test Primitives", "v1", false, "", 10))
+	gen.SetPathItem(createPathItemInfo("/V1/primitiveTypes2", "POST", "testPrimitives",
+		"test Primitives", "v1", false, true, 1.1))
+	gen.SetPathItem(createPathItemInfo("/V1/primitiveTypes3", "POST", "testPrimitives",
+		"test Primitives", "v1", false, int64(10), ""))
+	gen.SetPathItem(createPathItemInfo("/V1/primitiveTypes4", "POST", "testPrimitives",
+		"test Primitives", "v1", false, int64(10), ""))
 
-	gen.SetPathItem(createPathItemInfo("/V1/defaults1", "GET", "default", "test defaults", "v1", false, emptyInterface, testDefaults{}))
-	gen.SetPathItem(createPathItemInfo("/V1/unknown", "POST", "test unknown types", "test unknown types", "v1", false, Unknown{}, Unknown{}))
+	gen.SetPathItem(createPathItemInfo("/V1/defaults1", "GET", "default",
+		"test defaults", "v1", false, emptyInterface, testDefaults{}))
+	gen.SetPathItem(createPathItemInfo("/V1/unknown", "POST", "test unknown types",
+		"test unknown types", "v1", false, Unknown{}, Unknown{}))
 
-	gen.SetPathItem(createPathItemInfo("/V1/empty", "POST", "test empty struct", "test empty struct", "v1", false, testEmptyStruct{}, testEmptyStruct{}))
+	gen.SetPathItem(createPathItemInfo("/V1/empty", "POST", "test empty struct",
+		"test empty struct", "v1", false, testEmptyStruct{}, testEmptyStruct{}))
 
-	gen.SetPathItem(createPathItemInfo("/V1/struct-collision", "POST", "test struct name collision", "test struct name collision", "v1", false, TestSampleStruct{}, TestSampleStruct{}))
-	gen.SetPathItem(createPathItemInfo("/V2/struct-collision", "POST", "test struct name collision", "test struct name collision", "v2", false, sample.TestSampleStruct{}, sample.TestSampleStruct{}))
+	gen.SetPathItem(createPathItemInfo("/V1/struct-collision", "POST", "test struct name collision",
+		"test struct name collision", "v1", false, TestSampleStruct{}, TestSampleStruct{}))
+	gen.SetPathItem(createPathItemInfo("/V2/struct-collision", "POST", "test struct name collision",
+		"test struct name collision", "v2", false, sample.TestSampleStruct{}, sample.TestSampleStruct{}))
 
-	gen.SetPathItem(createPathItemInfo("/V1/type-map", "POST", "test type mapping", "test type mapping", "v1", false, nil, typeMapHolder{}))
+	gen.SetPathItem(createPathItemInfo("/V1/type-map", "POST", "test type mapping",
+		"test type mapping", "v1", false, nil, typeMapHolder{}))
 
 	bytes, err := gen.GenDocument()
 	if err != nil {
@@ -590,4 +632,23 @@ func TestGenerator_GenDocument_StructCollisionWithExplicitRemapping(t *testing.T
 
 	assert.NoError(t, writeLastRun("struct_collision_mapped_last_run.json", generatedBytes))
 	checkResult(t, generatedBytes, "struct_collision_mapped.json")
+}
+
+func TestGenerator_GenDocument_CorrectRef(t *testing.T) {
+	gen := NewGenerator()
+	gen.IndentJSON(true)
+	gen.ReflectGoTypes(true)
+
+	gen.SetPathItem(createPathItemInfo("/V1/struct-collision", "POST", "test struct name collision", "test struct name collision", "v1", false, TestSampleStruct{}, TestSampleStruct{}))
+	gen.SetPathItem(createPathItemInfo("/V2/struct-collision", "POST", "test struct name collision", "test struct name collision", "v2", false, sample.TestSampleStruct{}, sample.TestSampleStruct{}))
+
+	bytes, err := gen.GenDocument()
+	assert.NoError(t, err)
+
+	if err := writeLastRun("struct_collision_correct_ref_last_run.json", bytes); err != nil {
+		t.Fatalf("Failed write last run data to a file: %s", err.Error())
+	}
+
+	assert.True(t, checkResult(t, bytes, "struct_collision_correct_ref.json"))
+
 }

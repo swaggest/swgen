@@ -63,12 +63,12 @@
           "x-go-type": "int"
         },
         "variation": {
-          "$ref": "#/definitions/EntityType2"
+          "$ref": "#/definitions/VariationEntity"
         },
         "variations": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/EntityType2"
+            "$ref": "#/definitions/VariationEntity"
           },
           "x-go-type": "[]github.com/swaggest/swgen/internal/sample/experiment/variation.Entity"
         }
@@ -85,19 +85,19 @@
         "variations": "[]github.com/swaggest/swgen/internal/sample/experiment/variation.Entity"
       }
     },
-    "EntityType2": {
+    "ExperimentMetadata": {
       "type": "object",
       "properties": {
-        "metadata": {
-          "$ref": "#/definitions/Metadata"
+        "allocation_period": {
+          "$ref": "#/definitions/Period"
         }
       },
-      "x-go-type": "github.com/swaggest/swgen/internal/sample/experiment/variation.Entity",
+      "x-go-type": "github.com/swaggest/swgen/internal/sample/experiment.Metadata",
       "x-go-property-names": {
-        "metadata": "Metadata"
+        "allocation_period": "SomePeriod"
       },
       "x-go-property-types": {
-        "metadata": "github.com/swaggest/swgen/internal/sample/experiment/variation.Metadata"
+        "allocation_period": "github.com/swaggest/swgen/internal/sample/experiment.Period"
       }
     },
     "Metadata": {
@@ -119,21 +119,6 @@
       },
       "x-go-property-types": {
         "courses": "[]int"
-      }
-    },
-    "MetadataType2": {
-      "type": "object",
-      "properties": {
-        "allocation_period": {
-          "$ref": "#/definitions/Period"
-        }
-      },
-      "x-go-type": "github.com/swaggest/swgen/internal/sample/experiment.Metadata",
-      "x-go-property-names": {
-        "allocation_period": "SomePeriod"
-      },
-      "x-go-property-types": {
-        "allocation_period": "github.com/swaggest/swgen/internal/sample/experiment.Period"
       }
     },
     "Period": {
@@ -164,7 +149,7 @@
       "type": "object",
       "properties": {
         "metadata": {
-          "$ref": "#/definitions/MetadataType2"
+          "$ref": "#/definitions/ExperimentMetadata"
         },
         "variations": {
           "type": "array",
@@ -203,6 +188,21 @@
       "x-go-property-types": {
         "metadata": "github.com/swaggest/swgen/internal/sample/experiment/variation.Metadata",
         "some_key": "string"
+      }
+    },
+    "VariationEntity": {
+      "type": "object",
+      "properties": {
+        "metadata": {
+          "$ref": "#/definitions/Metadata"
+        }
+      },
+      "x-go-type": "github.com/swaggest/swgen/internal/sample/experiment/variation.Entity",
+      "x-go-property-names": {
+        "metadata": "Metadata"
+      },
+      "x-go-property-types": {
+        "metadata": "github.com/swaggest/swgen/internal/sample/experiment/variation.Metadata"
       }
     }
   }

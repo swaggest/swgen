@@ -272,7 +272,7 @@ func (enum *Enum) LoadFromField(field reflect.StructField) {
 
 // SwaggerData holds parameter and schema information for swagger definition
 type SwaggerData struct {
-	shared
+	CommonFields
 	ParamObj
 	SchemaObj
 }
@@ -284,17 +284,18 @@ func (s SwaggerData) SwaggerDef() SwaggerData {
 
 // Schema returns schema object
 func (s SwaggerData) Schema() SchemaObj {
-	s.SchemaObj.shared = s.shared
+	s.SchemaObj.CommonFields = s.CommonFields
 	return s.SchemaObj
 }
 
 // Param returns parameter object
 func (s SwaggerData) Param() ParamObj {
-	s.ParamObj.shared = s.shared
+	s.ParamObj.CommonFields = s.CommonFields
 	return s.ParamObj
 }
 
-type shared struct {
+// CommonFields keeps fields shared between ParamObj and SchemaObj
+type CommonFields struct {
 	Title       string      `json:"title,omitempty"`
 	Description string      `json:"description,omitempty"`
 	Default     interface{} `json:"default,omitempty"`
@@ -342,7 +343,7 @@ func (o OperationObj) MarshalJSON() ([]byte, error) {
 // ParamObj describes a single operation parameter
 // see http://swagger.io/specification/#parameterObject
 type ParamObj struct {
-	shared
+	CommonFields
 	Name             string        `json:"name,omitempty"`
 	In               string        `json:"in,omitempty"`               // Possible values are "query", "header", "path", "formData" or "body"
 	Items            *ParamItemObj `json:"items,omitempty"`            // Required if type is "array"
@@ -407,7 +408,7 @@ type ResponseObj struct {
 
 // SchemaObj describes a schema for json format
 type SchemaObj struct {
-	shared
+	CommonFields
 	Ref                  string               `json:"$ref,omitempty"`
 	Title                string               `json:"title,omitempty"`
 	Items                *SchemaObj           `json:"items,omitempty"`                // if type is array

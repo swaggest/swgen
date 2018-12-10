@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"path"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -43,8 +44,16 @@ func (g *Generator) makeNameForType(t reflect.Type, baseTypeName string) string 
 	allocatedType, isAllocated := g.definitionAlloc[baseTypeName]
 	if isAllocated && allocatedType != goTypeName {
 		typeIndex := 2
+		pkgPath := t.PkgPath()
+		pref := strings.Title(path.Base(pkgPath))
 		for {
-			typeName := fmt.Sprintf("%sType%d", baseTypeName, typeIndex)
+			typeName := ""
+			if pkgPath != "" {
+				typeName = pref + baseTypeName
+			} else {
+				typeName = fmt.Sprintf("%sType%d", baseTypeName, typeIndex)
+				typeIndex++
+			}
 			allocatedType, isAllocated := g.definitionAlloc[typeName]
 
 			if !isAllocated || allocatedType == goTypeName {
@@ -52,6 +61,8 @@ func (g *Generator) makeNameForType(t reflect.Type, baseTypeName string) string 
 				break
 			}
 			typeIndex++
+			pref = strings.Title(path.Base(pkgPath)) + pref
+			pkgPath = path.Dir(pkgPath)
 		}
 	}
 	g.definitionAlloc[baseTypeName] = goTypeName
@@ -149,7 +160,7 @@ func (g *Generator) ParseDefinition(i interface{}) SchemaObj {
 
 	t = refl.DeepIndirect(t)
 
-	name := refl.GoType(t)
+	name := refl.GoType(t) // todo remove
 	_ = name
 
 	switch t.Kind() {
@@ -163,6 +174,7 @@ func (g *Generator) ParseDefinition(i interface{}) SchemaObj {
 			typeDef.TypeName = typeName
 		}
 		typeDef.TypeName = g.makeNameForType(t, typeDef.TypeName)
+		typeDef.Ref = refDefinitionPrefix + typeDef.TypeName
 		typeDef.Properties = g.parseDefinitionProperties(v, &typeDef)
 
 	case reflect.Slice, reflect.Array:
@@ -211,6 +223,7 @@ func (g *Generator) ParseDefinition(i interface{}) SchemaObj {
 	}
 
 	if typeDef.TypeName != "" { // non-anonymous types should be added to definitions map and returned "in-place" as references
+		typeDef.TypeName = g.makeNameForType(t, typeDef.TypeName)
 		g.addDefinition(t, &typeDef)
 		return typeDef.Export()
 	}
@@ -300,7 +313,7 @@ func (g *Generator) parseDefinitionProperties(v reflect.Value, parent *SchemaObj
 			parent.GoPropertyTypes[propName] = refl.GoType(oft)
 		}
 
-		readSharedTags(field.Tag, &obj.shared)
+		readSharedTags(field.Tag, &obj.CommonFields)
 
 		properties[propName] = obj
 	}
@@ -515,7 +528,7 @@ func (g *Generator) ParseParameters(i interface{}) (string, []ParamObj) {
 				panic("unsupported field " + field.Name + " in request type " + refl.GoType(v.Type()))
 			}
 
-			param.shared = schemaObj.shared
+			param.CommonFields = schemaObj.CommonFields
 
 			if schemaObj.Type == "array" && schemaObj.Items != nil {
 				if schemaObj.Items.Ref != "" || schemaObj.Items.Type == "array" {
@@ -538,7 +551,7 @@ func (g *Generator) ParseParameters(i interface{}) (string, []ParamObj) {
 		param.Name = paramName
 
 		param.Enum.LoadFromField(field)
-		readSharedTags(field.Tag, &param.shared)
+		readSharedTags(field.Tag, &param.CommonFields)
 
 		if in == "path" { // always true for path
 			param.Required = true
@@ -556,7 +569,7 @@ func (g *Generator) ParseParameters(i interface{}) (string, []ParamObj) {
 	return name, params
 }
 
-func readSharedTags(tag reflect.StructTag, param *shared) {
+func readSharedTags(tag reflect.StructTag, param *CommonFields) {
 	readStringTag(tag, "type", &param.Type)
 	readStringTag(tag, "title", &param.Title)
 	readStringTag(tag, "description", &param.Description)
@@ -796,7 +809,7 @@ func (g *Generator) parseResponseObject(operationObj *OperationObj, statusCode i
 	} else {
 		operationObj.Responses[statusCode] = ResponseObj{
 			//Description: "request success",
-			Schema: &SchemaObj{shared: shared{Type: "null"}},
+			Schema: &SchemaObj{CommonFields: CommonFields{Type: "null"}},
 		}
 	}
 }

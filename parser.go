@@ -395,13 +395,21 @@ func (g *Generator) genSchemaForType(t reflect.Type) SchemaObj {
 	t = refl.DeepIndirect(t)
 	smObj := SchemaObj{TypeName: t.Name()}
 
+	var floatZero float64
+
 	switch t.Kind() {
 	case reflect.Bool:
 		smObj = schemaFromCommonName(commonNameBoolean)
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Uint, reflect.Uint8, reflect.Uint16:
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32:
 		smObj = schemaFromCommonName(commonNameInteger)
-	case reflect.Int64, reflect.Uint32, reflect.Uint64:
+	case reflect.Uint, reflect.Uint8, reflect.Uint16:
+		smObj = schemaFromCommonName(commonNameInteger)
+		smObj.Minimum = &floatZero
+	case reflect.Int64:
 		smObj = schemaFromCommonName(commonNameLong)
+	case reflect.Uint32, reflect.Uint64:
+		smObj = schemaFromCommonName(commonNameLong)
+		smObj.Minimum = &floatZero
 	case reflect.Float32:
 		smObj = schemaFromCommonName(commonNameFloat)
 	case reflect.Float64:
@@ -565,6 +573,7 @@ func (g *Generator) ParseParameters(i interface{}) (string, []ParamObj) {
 
 		param.Enum.LoadFromField(field)
 		readSharedTags(field.Tag, &param.CommonFields)
+		//readStringTag(field.Tag)
 
 		if in == "path" { // always true for path
 			param.Required = true
@@ -589,21 +598,20 @@ func readSharedTags(tag reflect.StructTag, param *CommonFields) {
 	readStringTag(tag, "format", &param.Format)
 	readStringTag(tag, "pattern", &param.Pattern)
 
-	readIntTag(tag, "maxLength", &param.MaxLength)
-	readIntTag(tag, "minLength", &param.MinLength)
-	readIntTag(tag, "maxItems", &param.MaxItems)
-	readIntTag(tag, "minItems", &param.MinItems)
-	readIntTag(tag, "maxProperties", &param.MaxProperties)
-	readIntTag(tag, "minProperties", &param.MaxProperties)
+	readIntPtrTag(tag, "maxLength", &param.MaxLength)
+	readIntPtrTag(tag, "minLength", &param.MinLength)
+	readIntPtrTag(tag, "maxItems", &param.MaxItems)
+	readIntPtrTag(tag, "minItems", &param.MinItems)
+	readIntPtrTag(tag, "maxProperties", &param.MaxProperties)
+	readIntPtrTag(tag, "minProperties", &param.MaxProperties)
 
 	readFloatTag(tag, "multipleOf", &param.MultipleOf)
-	readFloatTag(tag, "maximum", &param.Maximum)
-	readFloatTag(tag, "minimum", &param.Minimum)
+	readFloatPtrTag(tag, "maximum", &param.Maximum)
+	readFloatPtrTag(tag, "minimum", &param.Minimum)
 
 	readBoolTag(tag, "exclusiveMaximum", &param.ExclusiveMaximum)
 	readBoolTag(tag, "exclusiveMinimum", &param.ExclusiveMinimum)
 	readBoolTag(tag, "uniqueItems", &param.UniqueItems)
-
 }
 
 func readStringTag(tag reflect.StructTag, name string, holder *string) {
@@ -637,6 +645,18 @@ func readIntTag(tag reflect.StructTag, name string, holder *int64) {
 		}
 		*holder = v
 	}
+}
+
+func readIntPtrTag(tag reflect.StructTag, name string, holder **int64) {
+	value, ok := tag.Lookup(name)
+	if ok {
+		v, err := strconv.ParseInt(value, 10, 64)
+		if err != nil {
+			panic("failed to parse int value " + value + " in tag " + name + ": " + err.Error())
+		}
+		*holder = new(int64)
+		**holder = v
+	}
 
 }
 
@@ -649,7 +669,18 @@ func readFloatTag(tag reflect.StructTag, name string, holder *float64) {
 		}
 		*holder = v
 	}
+}
 
+func readFloatPtrTag(tag reflect.StructTag, name string, holder **float64) {
+	value, ok := tag.Lookup(name)
+	if ok {
+		v, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			panic("failed to parse float value " + value + " in tag " + name + ": " + err.Error())
+		}
+		*holder = new(float64)
+		**holder = v
+	}
 }
 
 // ResetPaths remove all current paths
@@ -821,8 +852,7 @@ func (g *Generator) parseResponseObject(operationObj *OperationObj, statusCode i
 		}
 	} else {
 		operationObj.Responses[statusCode] = ResponseObj{
-			//Description: "request success",
-			Schema: &SchemaObj{CommonFields: CommonFields{Type: "null"}},
+			Description: http.StatusText(statusCode),
 		}
 	}
 }

@@ -303,16 +303,16 @@ type CommonFields struct {
 	Pattern     string      `json:"pattern,omitempty"`
 	Format      string      `json:"format,omitempty"`
 
-	MultipleOf float64 `json:"multipleOf,omitempty"`
-	Maximum    float64 `json:"maximum,omitempty"`
-	Minimum    float64 `json:"minimum,omitempty"`
+	MultipleOf float64  `json:"multipleOf,omitempty"`
+	Maximum    *float64 `json:"maximum,omitempty"`
+	Minimum    *float64 `json:"minimum,omitempty"`
 
-	MaxLength     int64 `json:"maxLength,omitempty"`
-	MinLength     int64 `json:"minLength,omitempty"`
-	MaxItems      int64 `json:"maxItems,omitempty"`
-	MinItems      int64 `json:"minItems,omitempty"`
-	MaxProperties int64 `json:"maxProperties,omitempty"`
-	MinProperties int64 `json:"minProperties,omitempty"`
+	MaxLength     *int64 `json:"maxLength,omitempty"`
+	MinLength     *int64 `json:"minLength,omitempty"`
+	MaxItems      *int64 `json:"maxItems,omitempty"`
+	MinItems      *int64 `json:"minItems,omitempty"`
+	MaxProperties *int64 `json:"maxProperties,omitempty"`
+	MinProperties *int64 `json:"minProperties,omitempty"`
 
 	ExclusiveMaximum bool `json:"exclusiveMaximum,omitempty"`
 	ExclusiveMinimum bool `json:"exclusiveMinimum,omitempty"`

@@ -617,6 +617,7 @@
           {
             "type": "integer",
             "format": "int64",
+            "minimum": 0,
             "name": "id",
             "in": "path",
             "required": true,
@@ -916,6 +917,7 @@
           {
             "type": "integer",
             "format": "int64",
+            "minimum": 0,
             "name": "simple_uint32",
             "in": "query",
             "x-go-name": "SimpleUInt32",
@@ -924,6 +926,7 @@
           {
             "type": "integer",
             "format": "int64",
+            "minimum": 0,
             "name": "simple_uint64",
             "in": "query",
             "x-go-name": "SimpleUInt64",
@@ -1666,6 +1669,7 @@
           "default": 25,
           "type": "integer",
           "format": "int32",
+          "minimum": 0,
           "x-go-type": "*uint"
         }
       },
@@ -1792,6 +1796,7 @@
             "additionalProperties": {
               "type": "integer",
               "format": "int64",
+              "minimum": 0,
               "x-go-type": "uint32"
             },
             "x-go-type": "map[string]uint32"
@@ -1805,6 +1810,7 @@
             "additionalProperties": {
               "type": "integer",
               "format": "int64",
+              "minimum": 0,
               "x-go-type": "uint64"
             },
             "x-go-type": "map[string]uint64"
@@ -1905,6 +1911,7 @@
           "additionalProperties": {
             "type": "integer",
             "format": "int64",
+            "minimum": 0,
             "x-go-type": "uint32"
           },
           "x-go-type": "map[string]uint32"
@@ -1914,6 +1921,7 @@
           "additionalProperties": {
             "type": "integer",
             "format": "int64",
+            "minimum": 0,
             "x-go-type": "uint64"
           },
           "x-go-type": "map[string]uint64"
@@ -2012,6 +2020,7 @@
           "items": {
             "type": "integer",
             "format": "int64",
+            "minimum": 0,
             "x-go-type": "uint32"
           },
           "x-go-type": "[]uint32"
@@ -2021,6 +2030,7 @@
           "items": {
             "type": "integer",
             "format": "int64",
+            "minimum": 0,
             "x-go-type": "uint64"
           },
           "x-go-type": "[]uint64"
@@ -2089,11 +2099,13 @@
         "simple_uint32": {
           "type": "integer",
           "format": "int64",
+          "minimum": 0,
           "x-go-type": "uint32"
         },
         "simple_uint64": {
           "type": "integer",
           "format": "int64",
+          "minimum": 0,
           "x-go-type": "uint64"
         }
       },

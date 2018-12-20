@@ -303,16 +303,16 @@ type CommonFields struct {
 	Pattern     string      `json:"pattern,omitempty"`
 	Format      string      `json:"format,omitempty"`
 
-	MultipleOf float64 `json:"multipleOf,omitempty"`
-	Maximum    float64 `json:"maximum,omitempty"`
-	Minimum    float64 `json:"minimum,omitempty"`
+	MultipleOf float64  `json:"multipleOf,omitempty"`
+	Maximum    *float64 `json:"maximum,omitempty"`
+	Minimum    *float64 `json:"minimum,omitempty"`
 
-	MaxLength     int64 `json:"maxLength,omitempty"`
-	MinLength     int64 `json:"minLength,omitempty"`
-	MaxItems      int64 `json:"maxItems,omitempty"`
-	MinItems      int64 `json:"minItems,omitempty"`
-	MaxProperties int64 `json:"maxProperties,omitempty"`
-	MinProperties int64 `json:"minProperties,omitempty"`
+	MaxLength     *int64 `json:"maxLength,omitempty"`
+	MinLength     *int64 `json:"minLength,omitempty"`
+	MaxItems      *int64 `json:"maxItems,omitempty"`
+	MinItems      *int64 `json:"minItems,omitempty"`
+	MaxProperties *int64 `json:"maxProperties,omitempty"`
+	MinProperties *int64 `json:"minProperties,omitempty"`
 
 	ExclusiveMaximum bool `json:"exclusiveMaximum,omitempty"`
 	ExclusiveMinimum bool `json:"exclusiveMinimum,omitempty"`
@@ -344,12 +344,20 @@ func (o OperationObj) MarshalJSON() ([]byte, error) {
 // see http://swagger.io/specification/#parameterObject
 type ParamObj struct {
 	CommonFields
-	Name             string        `json:"name,omitempty"`
-	In               string        `json:"in,omitempty"`               // Possible values are "query", "header", "path", "formData" or "body"
-	Items            *ParamItemObj `json:"items,omitempty"`            // Required if type is "array"
-	Schema           *SchemaObj    `json:"schema,omitempty"`           // Required if type is "body"
-	CollectionFormat string        `json:"collectionFormat,omitempty"` // "multi" - this is valid only for parameters in "query" or "formData"
-	Required         bool          `json:"required,omitempty"`
+	Name   string        `json:"name,omitempty"`
+	In     string        `json:"in,omitempty"`     // Possible values are "query", "header", "path", "formData" or "body"
+	Items  *ParamItemObj `json:"items,omitempty"`  // Required if type is "array"
+	Schema *SchemaObj    `json:"schema,omitempty"` // Required if type is "body"
+
+	// CollectionFormat defines serialization:
+	// "multi" is valid only for parameters in "query" or "formData": foo=value&foo=another_value
+	// "csv" is comma-separated values: "foo,bar,baz"
+	// "ssv" is space-separated values: "foo bar baz"
+	// "tsv" is tab-separated values: "foo\tbar\tbaz"
+	// "pipes" is pipe-separated values: "foo|bar|baz"
+	CollectionFormat string `json:"collectionFormat,omitempty"`
+
+	Required bool `json:"required,omitempty"`
 	additionalData
 }
 

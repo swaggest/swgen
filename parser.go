@@ -821,8 +821,7 @@ func (g *Generator) parseResponseObject(operationObj *OperationObj, statusCode i
 		}
 	} else {
 		operationObj.Responses[statusCode] = ResponseObj{
-			//Description: "request success",
-			Schema: &SchemaObj{CommonFields: CommonFields{Type: "null"}},
+			Description: http.StatusText(statusCode),
 		}
 	}
 }

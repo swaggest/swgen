@@ -1,0 +1,209 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "swgen title",
+    "description": "swgen description",
+    "termsOfService": "term",
+    "contact": {
+      "name": ""
+    },
+    "license": {
+      "name": ""
+    },
+    "version": "2.0"
+  },
+  "host": "localhost",
+  "basePath": "/",
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "paths": {
+    "/any": {
+      "post": {
+        "summary": "",
+        "description": "",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "country",
+            "in": "path",
+            "required": true,
+            "x-go-name": "Country",
+            "x-go-type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/ExperimentPostRequest"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ExperimentEntity"
+            }
+          }
+        },
+        "x-request-go-type": "*github.com/swaggest/swgen/internal/sample/experiment.PostRequest"
+      }
+    }
+  },
+  "definitions": {
+    "ExperimentEntity": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-type": "int"
+        },
+        "variation": {
+          "$ref": "#/definitions/VariationEntity"
+        },
+        "variations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/VariationEntity"
+          },
+          "x-go-type": "[]github.com/swaggest/swgen/internal/sample/experiment/variation.Entity"
+        }
+      },
+      "x-go-type": "*github.com/swaggest/swgen/internal/sample/experiment.Entity",
+      "x-go-property-names": {
+        "id": "ID",
+        "variation": "Variation",
+        "variations": "Variations"
+      },
+      "x-go-property-types": {
+        "id": "int",
+        "variation": "github.com/swaggest/swgen/internal/sample/experiment/variation.Entity",
+        "variations": "[]github.com/swaggest/swgen/internal/sample/experiment/variation.Entity"
+      }
+    },
+    "ExperimentMetadata": {
+      "type": "object",
+      "properties": {
+        "allocation_period": {
+          "$ref": "#/definitions/ExperimentPeriod"
+        }
+      },
+      "x-go-type": "github.com/swaggest/swgen/internal/sample/experiment.Metadata",
+      "x-go-property-names": {
+        "allocation_period": "SomePeriod"
+      },
+      "x-go-property-types": {
+        "allocation_period": "github.com/swaggest/swgen/internal/sample/experiment.Period"
+      }
+    },
+    "ExperimentPeriod": {
+      "type": "object",
+      "properties": {
+        "end": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-type": "time.Time"
+        },
+        "start": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-type": "time.Time"
+        }
+      },
+      "x-go-type": "github.com/swaggest/swgen/internal/sample/experiment.Period",
+      "x-go-property-names": {
+        "end": "End",
+        "start": "Start"
+      },
+      "x-go-property-types": {
+        "end": "time.Time",
+        "start": "time.Time"
+      }
+    },
+    "ExperimentPostRequest": {
+      "type": "object",
+      "properties": {
+        "metadata": {
+          "$ref": "#/definitions/ExperimentMetadata"
+        },
+        "variations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ExperimentVariationData"
+          },
+          "x-go-type": "[]github.com/swaggest/swgen/internal/sample/experiment.VariationData"
+        }
+      },
+      "x-go-type": "*github.com/swaggest/swgen/internal/sample/experiment.PostRequest",
+      "x-go-property-names": {
+        "metadata": "Metadata",
+        "variations": "Variations"
+      },
+      "x-go-property-types": {
+        "metadata": "github.com/swaggest/swgen/internal/sample/experiment.Metadata",
+        "variations": "[]github.com/swaggest/swgen/internal/sample/experiment.VariationData"
+      }
+    },
+    "ExperimentVariationData": {
+      "type": "object",
+      "properties": {
+        "metadata": {
+          "$ref": "#/definitions/VariationMetadata"
+        },
+        "some_key": {
+          "type": "string",
+          "x-go-type": "string"
+        }
+      },
+      "x-go-type": "github.com/swaggest/swgen/internal/sample/experiment.VariationData",
+      "x-go-property-names": {
+        "metadata": "Metadata",
+        "some_key": "SomeKey"
+      },
+      "x-go-property-types": {
+        "metadata": "github.com/swaggest/swgen/internal/sample/experiment/variation.Metadata",
+        "some_key": "string"
+      }
+    },
+    "VariationEntity": {
+      "type": "object",
+      "properties": {
+        "metadata": {
+          "$ref": "#/definitions/VariationMetadata"
+        }
+      },
+      "x-go-type": "github.com/swaggest/swgen/internal/sample/experiment/variation.Entity",
+      "x-go-property-names": {
+        "metadata": "Metadata"
+      },
+      "x-go-property-types": {
+        "metadata": "github.com/swaggest/swgen/internal/sample/experiment/variation.Metadata"
+      }
+    },
+    "VariationMetadata": {
+      "type": "object",
+      "properties": {
+        "courses": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32",
+            "x-go-type": "int"
+          },
+          "x-go-type": "[]int"
+        }
+      },
+      "x-go-type": "github.com/swaggest/swgen/internal/sample/experiment/variation.Metadata",
+      "x-go-property-names": {
+        "courses": "Courses"
+      },
+      "x-go-property-types": {
+        "courses": "[]int"
+      }
+    }
+  }
+}

@@ -41,10 +41,23 @@ func (f SchemaDefinitionFunc) SwaggerDef() SwaggerData {
 func (g *Generator) makeNameForType(t reflect.Type, baseTypeName string) string {
 	goTypeName := refl.GoType(t)
 
+	for typeName, allocatedGoTypeName := range g.definitionAlloc {
+		if goTypeName == allocatedGoTypeName {
+			return typeName
+		}
+	}
+
+	pkgPath := t.PkgPath()
+
+	if g.addPackagePrefix && pkgPath != "" {
+		pref := strings.Title(path.Base(pkgPath))
+		baseTypeName = pref + baseTypeName
+		pkgPath = path.Dir(pkgPath)
+	}
+
 	allocatedType, isAllocated := g.definitionAlloc[baseTypeName]
 	if isAllocated && allocatedType != goTypeName {
 		typeIndex := 2
-		pkgPath := t.PkgPath()
 		pref := strings.Title(path.Base(pkgPath))
 		for {
 			typeName := ""

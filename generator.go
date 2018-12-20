@@ -26,8 +26,9 @@ type Generator struct {
 	typesMap         map[string]interface{}
 	defaultResponses map[int]interface{}
 
-	indentJSON     bool
-	reflectGoTypes bool
+	indentJSON       bool
+	reflectGoTypes   bool
+	addPackagePrefix bool
 
 	mu sync.Mutex // mutex for Generator's public API
 }
@@ -88,6 +89,15 @@ func (g *Generator) IndentJSON(enabled bool) *Generator {
 func (g *Generator) ReflectGoTypes(enabled bool) *Generator {
 	g.mu.Lock()
 	g.reflectGoTypes = enabled
+	g.mu.Unlock()
+	return g
+}
+
+// AddPackagePrefix controls prefixing definition name with package.
+// With option enabled type `some/package.Entity` will have "PackageEntity" key in definitions, "Entity" otherwise.
+func (g *Generator) AddPackagePrefix(enabled bool) *Generator {
+	g.mu.Lock()
+	g.addPackagePrefix = enabled
 	g.mu.Unlock()
 	return g
 }

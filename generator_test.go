@@ -601,6 +601,29 @@ func TestGenerator_GenDocument_StructCollision(t *testing.T) {
 	checkResult(t, generatedBytes, "struct_collision.json")
 }
 
+func TestGenerator_GenDocument_StructCollisionPackagePrefix(t *testing.T) {
+	gen := NewGenerator()
+	gen.SetHost("localhost")
+	gen.SetInfo("swgen title", "swgen description", "term", "2.0")
+	gen.IndentJSON(true)
+	gen.ReflectGoTypes(true)
+	gen.AddPackagePrefix(true)
+
+	info := PathItemInfo{
+		Method:   http.MethodPost,
+		Path:     "/any",
+		Request:  new(experiment.PostRequest),
+		Response: new(experiment.Entity),
+	}
+	gen.SetPathItem(info)
+
+	generatedBytes, err := gen.GenDocument()
+	assert.NoError(t, err)
+
+	assert.NoError(t, writeLastRun("struct_collision_package_prefix_last_run.json", generatedBytes))
+	checkResult(t, generatedBytes, "struct_collision_package_prefix.json")
+}
+
 type (
 	experimentEntity            experiment.Entity
 	experimentMetadata          experiment.Metadata

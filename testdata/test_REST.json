@@ -1125,6 +1125,18 @@
             "in": "query",
             "x-go-name": "Field3",
             "x-go-type": "github.com/swaggest/swgen.simpleTestReplacement"
+          },
+          {
+            "type": "array",
+            "name": "field4",
+            "in": "query",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv",
+            "x-go-name": "Field4",
+            "x-go-type": "[]int64"
           }
         ],
         "responses": {

@@ -137,6 +137,7 @@ type paramStructMap struct {
 	Field1 int                   `query:"field1"`
 	Field2 string                `query:"field2"`
 	Field3 simpleTestReplacement `query:"field3"`
+	Field4 []int64               `query:"field4" collectionFormat:"csv"`
 }
 
 type AnonymousField struct {

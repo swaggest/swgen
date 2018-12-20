@@ -344,12 +344,20 @@ func (o OperationObj) MarshalJSON() ([]byte, error) {
 // see http://swagger.io/specification/#parameterObject
 type ParamObj struct {
 	CommonFields
-	Name             string        `json:"name,omitempty"`
-	In               string        `json:"in,omitempty"`               // Possible values are "query", "header", "path", "formData" or "body"
-	Items            *ParamItemObj `json:"items,omitempty"`            // Required if type is "array"
-	Schema           *SchemaObj    `json:"schema,omitempty"`           // Required if type is "body"
-	CollectionFormat string        `json:"collectionFormat,omitempty"` // "multi" - this is valid only for parameters in "query" or "formData"
-	Required         bool          `json:"required,omitempty"`
+	Name   string        `json:"name,omitempty"`
+	In     string        `json:"in,omitempty"`     // Possible values are "query", "header", "path", "formData" or "body"
+	Items  *ParamItemObj `json:"items,omitempty"`  // Required if type is "array"
+	Schema *SchemaObj    `json:"schema,omitempty"` // Required if type is "body"
+
+	// CollectionFormat defines serialization:
+	// "multi" is valid only for parameters in "query" or "formData": foo=value&foo=another_value
+	// "csv" is comma-separated values: "foo,bar,baz"
+	// "ssv" is space-separated values: "foo bar baz"
+	// "tsv" is tab-separated values: "foo\tbar\tbaz"
+	// "pipes" is pipe-separated values: "foo|bar|baz"
+	CollectionFormat string `json:"collectionFormat,omitempty"`
+
+	Required bool `json:"required,omitempty"`
 	additionalData
 }
 

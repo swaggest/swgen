@@ -573,7 +573,7 @@ func (g *Generator) ParseParameters(i interface{}) (string, []ParamObj) {
 
 		param.Enum.LoadFromField(field)
 		readSharedTags(field.Tag, &param.CommonFields)
-		//readStringTag(field.Tag)
+		readStringTag(field.Tag, "collectionFormat", &param.CollectionFormat)
 
 		if in == "path" { // always true for path
 			param.Required = true

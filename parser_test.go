@@ -327,9 +327,7 @@ func TestSwaggerDef(t *testing.T) {
         ],
         "responses": {
           "200": {
-            "schema": {
-              "type": "null"
-            }
+            "description": "OK"
           }
         }
       },
@@ -348,9 +346,7 @@ func TestSwaggerDef(t *testing.T) {
         ],
         "responses": {
           "200": {
-            "schema": {
-              "type": "null"
-            }
+            "description": "OK"
           }
         }
       }

@@ -172,7 +172,7 @@ func (g *Generator) GetJSONSchemaRequestGroups(op *OperationObj, cfg ...JSONSche
 
 // WalkJSONSchemaRequestGroups iterates over all request parameters grouped by path, method and in into an instance of JSON Schema
 func (g *Generator) WalkJSONSchemaRequestGroups(function func(path, method, in string, schema ObjectJSONSchema)) error {
-	for path, pi := range g.doc.Paths {
+	for path, pi := range g.paths {
 		for method, op := range pi.Map() {
 			requestSchemas, err := g.GetJSONSchemaRequestGroups(op)
 			if err != nil {
@@ -189,9 +189,12 @@ func (g *Generator) WalkJSONSchemaRequestGroups(function func(path, method, in s
 
 // WalkJSONSchemaResponses iterates over all responses grouped by path, method and status code into an instance of JSON Schema
 func (g *Generator) WalkJSONSchemaResponses(function func(path, method string, statusCode int, schema map[string]interface{})) error {
-	for path, pi := range g.doc.Paths {
+	for path, pi := range g.paths {
 		for method, op := range pi.Map() {
 			for statusCode, resp := range op.Responses {
+				if resp.Schema == nil {
+					continue
+				}
 				schema, err := g.JSONSchema(*resp.Schema)
 				if err != nil {
 					return errors.Wrapf(err, "failed to get response schema for %s %s %d", method, path, statusCode)

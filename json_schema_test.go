@@ -102,3 +102,71 @@ func TestGenerator_JSONSchemaWithCustomConfig(t *testing.T) {
  }
 }`, string(js))
 }
+
+func TestGenerator_WalkJSONSchemaResponses(t *testing.T) {
+	gen := swgen.NewGenerator()
+
+	pathItem := swgen.PathItemInfo{
+		Request:  new(foo),
+		Method:   http.MethodPost,
+		Path:     "/one/{id}/two",
+		Response: new(baz),
+	}
+	pathItem.AddResponse(http.StatusNoContent, nil)
+	gen.SetPathItem(pathItem)
+
+	err := gen.WalkJSONSchemaResponses(func(path, method string, statusCode int, schema map[string]interface{}) {
+		assert.Equal(t, "/one/{id}/two", path)
+		assert.Equal(t, http.MethodPost, method)
+		assert.Equal(t, http.StatusOK, statusCode)
+		assert.Equal(t, map[string]interface{}{
+			"$schema": "http://json-schema.org/draft-04/schema#",
+			"$ref":    "#/definitions/baz",
+			"definitions": map[string]interface{}{
+				"baz": map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"barrr": map[string]interface{}{"$ref": "#/definitions/bar"},
+						"name":  map[string]interface{}{"type": "string"},
+					},
+				},
+				"bar": map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"yes": map[string]interface{}{"type": "boolean"},
+					},
+				},
+			},
+		}, schema)
+	})
+	assert.NoError(t, err)
+}
+
+func TestGenerator_WalkJSONSchemaRequestGroups(t *testing.T) {
+	gen := swgen.NewGenerator()
+
+	pathItem := swgen.PathItemInfo{
+		Request:  new(foo),
+		Method:   http.MethodPost,
+		Path:     "/one/{id}/two",
+		Response: new(baz),
+	}
+	pathItem.AddResponse(http.StatusNoContent, nil)
+	gen.SetPathItem(pathItem)
+
+	found := map[string]swgen.ObjectJSONSchema{}
+
+	err := gen.WalkJSONSchemaRequestGroups(func(path, method, in string, schema swgen.ObjectJSONSchema) {
+		assert.Equal(t, "/one/{id}/two", path)
+		assert.Equal(t, http.MethodPost, method)
+		_, exists := found[in]
+		assert.False(t, exists)
+		found[in] = schema
+
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(found))
+	assert.Equal(t, []string{"id"}, found["path"].Required)
+	assert.Equal(t, map[string]interface{}{"type": "integer", "format": "int64", "minimum": 1000.0}, found["path"].Properties["id"])
+	assert.Equal(t, []string{"body"}, found["body"].Required)
+}

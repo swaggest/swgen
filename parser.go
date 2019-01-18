@@ -40,6 +40,9 @@ func (f SchemaDefinitionFunc) SwaggerDef() SwaggerData {
 
 func (g *Generator) makeNameForType(t reflect.Type, baseTypeName string) string {
 	goTypeName := refl.GoType(t)
+	if g.capitalizeDefinitions {
+		baseTypeName = strings.Title(baseTypeName)
+	}
 
 	for typeName, allocatedGoTypeName := range g.definitionAlloc {
 		if goTypeName == allocatedGoTypeName {

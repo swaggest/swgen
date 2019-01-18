@@ -376,3 +376,19 @@ func TestSwaggerDef(t *testing.T) {
 
 	assertEqualJSON(t, swg, expected)
 }
+
+func TestGenerator_CapitalizeDefinitions(t *testing.T) {
+	g := NewGenerator()
+	g.CapitalizeDefinitions(true)
+	g.SetPathItem(PathItemInfo{
+		Method:   http.MethodPost,
+		Path:     "/some",
+		Response: new(testEmptyStruct),
+	})
+
+	expected := []byte(`{"swagger":"2.0","info":{"title":"","description":"","termsOfService":"","contact":{"name":""},"license":{"name":""},"version":""},"basePath":"/","schemes":["http","https"],"paths":{"/some":{"post":{"summary":"","description":"","responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/TestEmptyStruct"}}}}}},"definitions":{"TestEmptyStruct":{"type":"object"}}}`)
+
+	swg, err := g.GenDocument()
+	assert.NoError(t, err)
+	assertEqualJSON(t, swg, expected)
+}

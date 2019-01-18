@@ -2,6 +2,8 @@ package swgen
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDefinition(t *testing.T) {
@@ -11,5 +13,5 @@ func TestDefinition(t *testing.T) {
 	obj.TypeName = "MyName"
 
 	typeDef := obj.SwaggerDef()
-	assertTrue(typeDef.TypeName == "MyName", t)
+	assert.Equal(t, "MyName", typeDef.TypeName)
 }

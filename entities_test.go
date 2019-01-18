@@ -1,41 +1,33 @@
 package swgen
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestPathItemHasMethod(t *testing.T) {
 	item := PathItem{}
 	item.Get = &OperationObj{}
 
-	assertTrue(item.HasMethod("GET"), t)
-	assertFalse(item.HasMethod("POST"), t)
-	assertFalse(item.HasMethod("PUT"), t)
-	assertFalse(item.HasMethod("HEAD"), t)
-	assertFalse(item.HasMethod("DELETE"), t)
-	assertFalse(item.HasMethod("OPTIONS"), t)
-	assertFalse(item.HasMethod("PATCH"), t)
-	assertFalse(item.HasMethod(""), t)
+	assert.True(t, item.HasMethod("GET"))
+	assert.False(t, item.HasMethod("POST"))
+	assert.False(t, item.HasMethod("PUT"))
+	assert.False(t, item.HasMethod("HEAD"))
+	assert.False(t, item.HasMethod("DELETE"))
+	assert.False(t, item.HasMethod("OPTIONS"))
+	assert.False(t, item.HasMethod("PATCH"))
+	assert.False(t, item.HasMethod(""))
 }
 
 func TestAdditionalDataJSONMarshal(t *testing.T) {
 	// empty object
 	obj := additionalData{}
 	_, err := obj.marshalJSONWithStruct(nil)
-	assertTrue(err == nil, t)
+	assert.NoError(t, err)
 
 	obj.AddExtendedField("x-custom-field", 1)
 	data, err := obj.marshalJSONWithStruct(struct{}{})
-	assertTrue(err == nil, t)
-	assertTrue(string(data) == `{"x-custom-field":1}`, t)
-}
-
-func assertTrue(v bool, t *testing.T) {
-	if !v {
-		t.Fatal("value must return true")
-	}
-}
-
-func assertFalse(v bool, t *testing.T) {
-	if v {
-		t.Fatal("value must return false")
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, `{"x-custom-field":1}`, string(data))
 }

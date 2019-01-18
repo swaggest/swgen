@@ -2,6 +2,7 @@ package swgen
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -440,15 +441,12 @@ func TestREST(t *testing.T) {
 		"test type mapping", "v1", false, nil, typeMapHolder{}))
 
 	bytes, err := gen.GenDocument()
-	if err != nil {
-		t.Fatalf("Failed to generate Swagger JSON document: %s", err.Error())
-	}
+	assert.NoError(t, err)
 
-	if err := writeLastRun("test_REST_last_run.json", bytes); err != nil {
-		t.Fatalf("Failed write last run data to a file: %s", err.Error())
-	}
+	assert.NoError(t, writeLastRun("test_REST_last_run.json", bytes))
 
-	assert.True(t, checkResult(t, bytes, "test_REST.json"))
+	expected := readTestFile(t, "test_REST.json")
+	assert.JSONEq(t, expected, string(bytes), coloredJSONDiff(expected, string(bytes)))
 }
 
 func getTestDataDir(filename string) string {
@@ -464,29 +462,29 @@ func writeLastRun(filename string, data []byte) error {
 	return ioutil.WriteFile(getTestDataDir(filename), data, os.ModePerm)
 }
 
-func readTestFile(filename string) ([]byte, error) {
+func readTestFile(t *testing.T, filename string) string {
 	bytes, readError := ioutil.ReadFile(getTestDataDir(filename))
-	if readError != nil {
-		return []byte{}, readError
-	}
+	assert.NoError(t, readError)
 
-	return bytes, nil
+	return string(bytes)
 }
 
-func assertEqualJSON(t *testing.T, generatedBytes []byte, expectedBytes []byte) {
+func coloredJSONDiff(expected, generated string) string {
 	expectedData := make(map[string]interface{})
 	generatedData := make(map[string]interface{})
+	expectedBytes := []byte(expected)
+	generatedBytes := []byte(generated)
 
 	if err := json.Unmarshal(expectedBytes, &expectedData); err != nil {
-		t.Fatalf("can not unmarshal expected data: %s", err.Error())
+		return fmt.Sprintf("can not unmarshal expected data: %s", err.Error())
 	}
 	if err := json.Unmarshal(generatedBytes, &generatedData); err != nil {
-		t.Fatalf("can not unmarshal generated data: %s", err.Error())
+		return fmt.Sprintf("can not unmarshal generated data: %s", err.Error())
 	}
 
 	diff, err := gojsondiff.New().Compare(expectedBytes, generatedBytes)
 	if err != nil {
-		t.Fatal(err.Error())
+		return err.Error()
 	}
 
 	if diff.Modified() {
@@ -497,17 +495,9 @@ func assertEqualJSON(t *testing.T, generatedBytes []byte, expectedBytes []byte) 
 
 		f := formatter.NewAsciiFormatter(expectedData, config)
 		diffString, _ := f.Format(diff)
-		t.Fatalf("Unexpected result: %s", diffString)
+		return diffString
 	}
-}
-
-func checkResult(t *testing.T, generatedBytes []byte, expectedDataFileName string) bool {
-	expectedBytes, err := readTestFile(expectedDataFileName)
-	if err != nil {
-		t.Fatalf("can not read test file '%s': %s", expectedDataFileName, err.Error())
-	}
-	assertEqualJSON(t, generatedBytes, expectedBytes)
-	return true
+	return ""
 }
 
 func TestCORSSupport(t *testing.T) {
@@ -526,15 +516,13 @@ func TestCORSSupport(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	r, err := http.NewRequest("GET", "http://localhost:1234/docs/swagger.json", nil)
-	if err != nil {
-		t.Fatalf("error when create request: %v", err)
-	}
+	assert.NoError(t, err)
 
 	g.ServeHTTP(w, r)
 
-	assertTrue(w.Header().Get("Access-Control-Allow-Origin") == "*", t)
-	assertTrue(w.Header().Get("Access-Control-Allow-Methods") == "GET, POST, DELETE, PUT, PATCH, OPTIONS", t)
-	assertTrue(w.Header().Get("Access-Control-Allow-Headers") == "Content-Type, api_key, Authorization, X-ABC-Test", t)
+	assert.Equal(t, "*", w.Header().Get("Access-Control-Allow-Origin"))
+	assert.Equal(t, "GET, POST, DELETE, PUT, PATCH, OPTIONS", w.Header().Get("Access-Control-Allow-Methods"))
+	assert.Equal(t, "Content-Type, api_key, Authorization, X-ABC-Test", w.Header().Get("Access-Control-Allow-Headers"))
 }
 
 func TestGenerator_JsonSchema(t *testing.T) {
@@ -552,32 +540,23 @@ func TestGenerator_JsonSchema(t *testing.T) {
 	obj := gen.SetPathItem(info)
 
 	jsonSchema, err := gen.JSONSchema(*obj.Responses[http.StatusOK].Schema)
-	if err != nil {
-		t.Fatalf("error %v", err)
-	}
+	assert.NoError(t, err)
 	jsonSchemaJSON, err := json.MarshalIndent(jsonSchema, "", " ")
-	if err != nil {
-		t.Fatalf("error %v", err)
-	}
+	assert.NoError(t, err)
 
-	if err := writeLastRun("test_ResponseJsonSchema_last_run.json", jsonSchemaJSON); err != nil {
-		t.Fatalf("Failed write last run data to a file: %s", err.Error())
-	}
-	checkResult(t, jsonSchemaJSON, "test_ResponseJsonSchema.json")
+	assert.NoError(t, writeLastRun("test_ResponseJsonSchema_last_run.json", jsonSchemaJSON))
+
+	expected := readTestFile(t, "test_ResponseJsonSchema.json")
+	assert.JSONEq(t, expected, string(jsonSchemaJSON), coloredJSONDiff(expected, string(jsonSchemaJSON)))
 
 	jsonSchema, err = gen.ParamJSONSchema(obj.Parameters[0])
-	if err != nil {
-		t.Fatalf("error %v", err)
-	}
+	assert.NoError(t, err)
 	jsonSchemaJSON, err = json.MarshalIndent(jsonSchema, "", " ")
-	if err != nil {
-		t.Fatalf("error %v", err)
-	}
+	assert.NoError(t, err)
 
-	if err := writeLastRun("test_Param0JsonSchema_last_run.json", jsonSchemaJSON); err != nil {
-		t.Fatalf("Failed write last run data to a file: %s", err.Error())
-	}
-	checkResult(t, jsonSchemaJSON, "test_Param0JsonSchema.json")
+	assert.NoError(t, writeLastRun("test_Param0JsonSchema_last_run.json", jsonSchemaJSON))
+	expected = readTestFile(t, "test_Param0JsonSchema.json")
+	assert.JSONEq(t, expected, string(jsonSchemaJSON), coloredJSONDiff(expected, string(jsonSchemaJSON)))
 }
 
 func TestGenerator_GenDocument_StructCollision(t *testing.T) {
@@ -599,7 +578,9 @@ func TestGenerator_GenDocument_StructCollision(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.NoError(t, writeLastRun("struct_collision_last_run.json", generatedBytes))
-	checkResult(t, generatedBytes, "struct_collision.json")
+
+	expected := readTestFile(t, "struct_collision.json")
+	assert.JSONEq(t, expected, string(generatedBytes), coloredJSONDiff(expected, string(generatedBytes)))
 }
 
 func TestGenerator_GenDocument_StructCollisionPackagePrefix(t *testing.T) {
@@ -622,7 +603,8 @@ func TestGenerator_GenDocument_StructCollisionPackagePrefix(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.NoError(t, writeLastRun("struct_collision_package_prefix_last_run.json", generatedBytes))
-	checkResult(t, generatedBytes, "struct_collision_package_prefix.json")
+	expected := readTestFile(t, "struct_collision_package_prefix.json")
+	assert.JSONEq(t, expected, string(generatedBytes), coloredJSONDiff(expected, string(generatedBytes)))
 }
 
 type (
@@ -655,7 +637,8 @@ func TestGenerator_GenDocument_StructCollisionWithExplicitRemapping(t *testing.T
 	assert.NoError(t, err)
 
 	assert.NoError(t, writeLastRun("struct_collision_mapped_last_run.json", generatedBytes))
-	checkResult(t, generatedBytes, "struct_collision_mapped.json")
+	expected := readTestFile(t, "struct_collision_mapped.json")
+	assert.JSONEq(t, expected, string(generatedBytes), coloredJSONDiff(expected, string(generatedBytes)))
 }
 
 func TestGenerator_GenDocument_CorrectRef(t *testing.T) {
@@ -669,10 +652,8 @@ func TestGenerator_GenDocument_CorrectRef(t *testing.T) {
 	bytes, err := gen.GenDocument()
 	assert.NoError(t, err)
 
-	if err := writeLastRun("struct_collision_correct_ref_last_run.json", bytes); err != nil {
-		t.Fatalf("Failed write last run data to a file: %s", err.Error())
-	}
+	assert.NoError(t, writeLastRun("struct_collision_correct_ref_last_run.json", bytes))
 
-	assert.True(t, checkResult(t, bytes, "struct_collision_correct_ref.json"))
-
+	expected := readTestFile(t, "struct_collision_correct_ref.json")
+	assert.JSONEq(t, expected, string(bytes), coloredJSONDiff(expected, string(bytes)))
 }

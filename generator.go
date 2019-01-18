@@ -26,9 +26,10 @@ type Generator struct {
 	typesMap         map[string]interface{}
 	defaultResponses map[int]interface{}
 
-	indentJSON       bool
-	reflectGoTypes   bool
-	addPackagePrefix bool
+	indentJSON            bool
+	reflectGoTypes        bool
+	addPackagePrefix      bool
+	capitalizeDefinitions bool
 
 	mu sync.Mutex // mutex for Generator's public API
 }
@@ -98,6 +99,15 @@ func (g *Generator) ReflectGoTypes(enabled bool) *Generator {
 func (g *Generator) AddPackagePrefix(enabled bool) *Generator {
 	g.mu.Lock()
 	g.addPackagePrefix = enabled
+	g.mu.Unlock()
+	return g
+}
+
+// CapitalizeDefinitions enables first char capitalization for definition names.
+// With option enabled type `some/package.entity` will have "Entity" key in definitions, "entity" otherwise.
+func (g *Generator) CapitalizeDefinitions(enabled bool) *Generator {
+	g.mu.Lock()
+	g.capitalizeDefinitions = enabled
 	g.mu.Unlock()
 	return g
 }

@@ -1,13 +1,17 @@
 package swgen
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestSchemaFromCommonName(t *testing.T) {
 	so := schemaFromCommonName(commonNameInteger)
-	assertTrue(so.Type == "integer", t)
-	assertTrue(so.Format == "int32", t)
+	assert.Equal(t, "integer", so.Type)
+	assert.Equal(t, "int32", so.Format)
 
 	so = schemaFromCommonName("file")
-	assertTrue(so.Type == "file", t)
-	assertTrue(so.Format == "", t)
+	assert.Equal(t, "file", so.Type)
+	assert.Equal(t, "", so.Format)
 }

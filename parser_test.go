@@ -2,6 +2,7 @@ package swgen
 
 import (
 	"fmt"
+	"mime/multipart"
 	"net/http"
 	"reflect"
 	"testing"
@@ -50,14 +51,9 @@ func TestResetDefinitions(t *testing.T) {
 	gen := NewGenerator()
 	gen.ParseDefinition(ts)
 
-	if len(gen.definitions) == 0 {
-		t.Fatalf("len of gen.definitions must be greater than 0")
-	}
-
+	assert.NotEqual(t, 0, len(gen.definitions))
 	gen.ResetDefinitions()
-	if len(gen.definitions) != 0 {
-		t.Fatalf("len of gen.definitions must be equal to 0")
-	}
+	assert.Equal(t, 0, len(gen.definitions))
 }
 
 func TestParseDefinition(t *testing.T) {
@@ -93,13 +89,11 @@ func TestParseDefinitionWithEmbeddedStruct(t *testing.T) {
 	gen.ParseDefinition(ts)
 
 	if typeDef, found := gen.getDefinition(tt); !found {
-		t.Fatal("No definition for", tt)
+		assert.True(t, found)
 	} else {
 		propertiesCount := len(typeDef.Properties)
 		expectedPropertiesCount := 9
-		if propertiesCount != expectedPropertiesCount {
-			t.Fatalf("Expected %d properties, got %d : %#v", expectedPropertiesCount, propertiesCount, typeDef.Properties)
-		}
+		assert.Equalf(t, expectedPropertiesCount, propertiesCount, "%#v", typeDef.Properties)
 	}
 }
 
@@ -111,29 +105,23 @@ func TestParseDefinitionWithEmbeddedInterface(t *testing.T) {
 	gen.ParseDefinition(p)
 
 	if typeDef, found := gen.getDefinition(tt); !found {
-		t.Fatal("No definition for", tt)
+		assert.True(t, found)
 	} else {
-		if typeDef.Properties["manager"].Ref != "#/definitions/Employee" {
-			t.Fatalf("'manager' field was not parsed correctly.")
-		}
+		assert.Equal(t, "#/definitions/Employee", typeDef.Properties["manager"].Ref)
 	}
 }
 
 func TestParseDefinitionString(t *testing.T) {
 	typeDef := NewGenerator().ParseDefinition("string")
 	name := typeDef.TypeName
-	if name != "string" {
-		t.Fatalf("Wrong type name. Expect %q, got %q", "string", name)
-	}
+	assert.Equal(t, "string", name)
 }
 
 func TestParseDefinitionArray(t *testing.T) {
 	type Names []string
 	typeDef := NewGenerator().ParseDefinition(Names{})
 
-	if typeDef.TypeName != "Names" {
-		t.Fatalf("Wrong type name. Expected: Names, Obtained: %v", typeDef.TypeName)
-	}
+	assert.Equal(t, "Names", typeDef.TypeName)
 
 	// re-parse with pointer input
 	// should get from definition list
@@ -153,13 +141,8 @@ func TestParseParameter(t *testing.T) {
 	p := &PreferredWarehouseRequest{}
 	name, params := NewGenerator().ParseParameters(p)
 
-	if name != "PreferredWarehouseRequest" {
-		t.Fatalf("name of parameter is %s, expected is PreferredWarehouseRequest", name)
-	}
-
-	if len(params) != 2 {
-		t.Fatalf("number of parameter should be 2")
-	}
+	assert.Equal(t, "PreferredWarehouseRequest", name)
+	assert.Len(t, params, 2)
 }
 
 func TestParseParameterError(t *testing.T) {
@@ -188,15 +171,9 @@ func TestSetPathItem(t *testing.T) {
 		gen.SetPathItem(info)
 	}
 
-	if len(gen.paths) == 0 {
-		t.Fatalf("len of gen.paths must be greater than 0")
-	}
-
+	assert.NotEqual(t, 0, len(gen.paths))
 	gen.ResetPaths()
-	if len(gen.paths) != 0 {
-		t.Fatalf("len of gen.paths must be equal to 0")
-	}
-
+	assert.Equal(t, 0, len(gen.paths))
 }
 
 // testHandler can handle POST and GET request
@@ -280,10 +257,8 @@ func TestSwaggerDef(t *testing.T) {
 	})
 
 	swg, err := gen.GenDocument()
-	if err != nil {
-		t.Fatalf("error while generating swagger doc: %v", err)
-	}
-	expected := []byte(`
+	assert.NoError(t, err)
+	expected := `
 {
   "swagger": "2.0",
   "info": {
@@ -372,9 +347,8 @@ func TestSwaggerDef(t *testing.T) {
     }
   }
 }
-`)
-
-	assertEqualJSON(t, swg, expected)
+`
+	assert.JSONEq(t, expected, string(swg), coloredJSONDiff(expected, string(swg)))
 }
 
 func TestGenerator_CapitalizeDefinitions(t *testing.T) {
@@ -386,9 +360,45 @@ func TestGenerator_CapitalizeDefinitions(t *testing.T) {
 		Response: new(testEmptyStruct),
 	})
 
-	expected := []byte(`{"swagger":"2.0","info":{"title":"","description":"","termsOfService":"","contact":{"name":""},"license":{"name":""},"version":""},"basePath":"/","schemes":["http","https"],"paths":{"/some":{"post":{"summary":"","description":"","responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/TestEmptyStruct"}}}}}},"definitions":{"TestEmptyStruct":{"type":"object"}}}`)
+	expected := `{"swagger":"2.0","info":{"title":"","description":"","termsOfService":"","contact":{"name":""},"license":{"name":""},"version":""},"basePath":"/","schemes":["http","https"],"paths":{"/some":{"post":{"summary":"","description":"","responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/TestEmptyStruct"}}}}}},"definitions":{"TestEmptyStruct":{"type":"object"}}}`
 
 	swg, err := g.GenDocument()
 	assert.NoError(t, err)
-	assertEqualJSON(t, swg, expected)
+	assert.JSONEq(t, expected, string(swg), coloredJSONDiff(expected, string(swg)))
+}
+
+func TestGenerator_SetPathItem_typeFile(t *testing.T) {
+	type requestWithFileAndHeader struct {
+		Upload       multipart.File        `file:"upload"`
+		UploadHeader *multipart.FileHeader `file:"upload"`
+	}
+	type requestWithFile struct {
+		Upload multipart.File `file:"upload"`
+	}
+	type requestWithHeader struct {
+		UploadHeader *multipart.FileHeader `file:"upload"`
+	}
+
+	g := NewGenerator()
+	g.SetPathItem(PathItemInfo{
+		Method:  http.MethodPost,
+		Path:    "/withFileAndHeader",
+		Request: new(requestWithFileAndHeader),
+	})
+	g.SetPathItem(PathItemInfo{
+		Method:  http.MethodPost,
+		Path:    "/withFile",
+		Request: new(requestWithFile),
+	})
+	g.SetPathItem(PathItemInfo{
+		Method:  http.MethodPost,
+		Path:    "/withHeader",
+		Request: new(requestWithHeader),
+	})
+
+	expected := `{"swagger":"2.0","info":{"title":"","description":"","termsOfService":"","contact":{"name":""},"license":{"name":""},"version":""},"basePath":"/","schemes":["http","https"],"paths":{"/withFile":{"post":{"summary":"","description":"","parameters":[{"type":"file","name":"upload","in":"formData"}],"responses":{"200":{"description":"OK"}}}},"/withFileAndHeader":{"post":{"summary":"","description":"","parameters":[{"type":"file","name":"upload","in":"formData"}],"responses":{"200":{"description":"OK"}}}},"/withHeader":{"post":{"summary":"","description":"","parameters":[{"type":"file","name":"upload","in":"formData"}],"responses":{"200":{"description":"OK"}}}}}}`
+
+	swg, err := g.GenDocument()
+	assert.NoError(t, err)
+	assert.JSONEq(t, expected, string(swg), coloredJSONDiff(expected, string(swg)))
 }

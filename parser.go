@@ -397,6 +397,7 @@ func (g *Generator) genSchemaForType(t reflect.Type) SchemaObj {
 
 	t = refl.DeepIndirect(t)
 	smObj := SchemaObj{TypeName: t.Name()}
+	typeName := refl.GoType(t)
 
 	var floatZero float64
 
@@ -444,11 +445,14 @@ func (g *Generator) genSchemaForType(t reflect.Type) SchemaObj {
 			}
 		}
 	case reflect.Interface:
-		if t.NumMethod() > 0 {
-			panic("Non-empty interface is not supported: " + t.String())
+		if typeName == "mime/multipart.File" {
+			smObj = SchemaObj{}
+			smObj.Type = "file"
+		} else if t.NumMethod() > 0 {
+			panic("Non-empty interface is not supported: " + typeName)
 		}
 	default:
-		panic(fmt.Sprintf("type %s is not supported: %s", t.Kind(), t.String()))
+		panic(fmt.Sprintf("type %s is not supported: %s", t.Kind(), typeName))
 	}
 
 	if sd, ok := reflect.New(t).Interface().(SchemaDefinition); ok {
@@ -491,9 +495,12 @@ func (g *Generator) ParseParameters(i interface{}) (string, []ParamObj) {
 		return g.ParseParameters(mappedTo)
 	}
 
+	requestTypeName := refl.GoType(v.Type())
 	name := t.Name()
 	numField := t.NumField()
 	params := make([]ParamObj, 0, numField)
+
+	filesFound := map[string]bool{}
 
 	for i := 0; i < numField; i++ {
 		field := t.Field(i)
@@ -515,7 +522,7 @@ func (g *Generator) ParseParameters(i interface{}) (string, []ParamObj) {
 		}
 
 		if in == "" {
-			for _, tag := range []string{"path", "query", "header", "formData", "cookie"} {
+			for _, tag := range []string{"path", "query", "header", "formData", "cookie", "file"} {
 				tagValue := field.Tag.Get(tag)
 				if tagValue != "" && tagValue != "-" {
 					nameTag = tagValue
@@ -529,27 +536,36 @@ func (g *Generator) ParseParameters(i interface{}) (string, []ParamObj) {
 			continue
 		}
 
+		if in == "file" {
+			in = "formData"
+		}
+
 		paramName := strings.Split(nameTag, ",")[0]
 		param := ParamObj{}
 		if def, ok := reflect.Zero(field.Type).Interface().(SchemaDefinition); ok {
 			param = def.SwaggerDef().Param()
 		} else {
 			var schemaObj SchemaObj
-			if mappedTo, ok := g.getMappedType(field.Type); ok {
-				if def, ok := mappedTo.(SchemaDefinition); ok {
-					schemaObj = def.SwaggerDef().Schema()
-					if schemaObj.TypeName != "" {
-						name = schemaObj.TypeName
+			fieldTypeName := refl.GoType(field.Type)
+			if fieldTypeName == "*mime/multipart.FileHeader" {
+				schemaObj.Type = "file"
+			} else {
+				if mappedTo, ok := g.getMappedType(field.Type); ok {
+					if def, ok := mappedTo.(SchemaDefinition); ok {
+						schemaObj = def.SwaggerDef().Schema()
+						if schemaObj.TypeName != "" {
+							name = schemaObj.TypeName
+						}
+					} else {
+						schemaObj = g.genSchemaForType(reflect.TypeOf(mappedTo))
 					}
 				} else {
-					schemaObj = g.genSchemaForType(reflect.TypeOf(mappedTo))
+					schemaObj = g.genSchemaForType(field.Type)
 				}
-			} else {
-				schemaObj = g.genSchemaForType(field.Type)
 			}
 
 			if schemaObj.Type == "" {
-				panic("unsupported field " + field.Name + " in request type " + refl.GoType(v.Type()))
+				panic("unsupported field " + field.Name + " of type " + fieldTypeName + " in request of type " + requestTypeName)
 			}
 
 			param.CommonFields = schemaObj.CommonFields
@@ -588,6 +604,13 @@ func (g *Generator) ParseParameters(i interface{}) (string, []ParamObj) {
 		}
 
 		param.In = in
+		if param.Type == "file" {
+			if filesFound[param.Name] {
+				continue
+			} else {
+				filesFound[param.Name] = true
+			}
+		}
 		params = append(params, param)
 	}
 
@@ -634,17 +657,6 @@ func readBoolTag(tag reflect.StructTag, name string, holder *bool) {
 		v, err := strconv.ParseBool(value)
 		if err != nil {
 			panic("failed to parse bool value " + value + " in tag " + name + ": " + err.Error())
-		}
-		*holder = v
-	}
-}
-
-func readIntTag(tag reflect.StructTag, name string, holder *int64) {
-	value, ok := tag.Lookup(name)
-	if ok {
-		v, err := strconv.ParseInt(value, 10, 64)
-		if err != nil {
-			panic("failed to parse int value " + value + " in tag " + name + ": " + err.Error())
 		}
 		*holder = v
 	}

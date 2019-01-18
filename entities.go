@@ -17,7 +17,7 @@ type Document struct {
 	BasePath            string                 `json:"basePath,omitempty"`            // The base path on which the API is served, which is relative to the host
 	Schemes             []string               `json:"schemes,omitempty"`             // Values MUST be from the list: "http", "https", "ws", "wss"
 	Paths               map[string]PathItem    `json:"paths"`                         // The available paths and operations for the API
-	Definitions         map[string]SchemaObj   `json:"definitions"`                   // An object to hold data types produced and consumed by operations
+	Definitions         map[string]SchemaObj   `json:"definitions,omitempty"`         // An object to hold data types produced and consumed by operations
 	SecurityDefinitions map[string]SecurityDef `json:"securityDefinitions,omitempty"` // An object to hold available security mechanisms
 	additionalData
 }

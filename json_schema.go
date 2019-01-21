@@ -141,12 +141,29 @@ func (o ObjectJSONSchema) ToMap() (map[string]interface{}, error) {
 	return jsonRecode(o)
 }
 
-// GetJSONSchemaRequestGroups returns a map of object schemas converted from parameters, grouped by in
+// GetJSONSchemaRequestBody returns returns request body schema if any
+func (g *Generator) GetJSONSchemaRequestBody(op *OperationObj, cfg ...JSONSchemaConfig) (map[string]interface{}, error) {
+	for _, param := range op.Parameters {
+		if param.In == "body" {
+			schema, err := g.ParamJSONSchema(param, cfg...)
+			if err != nil {
+				return nil, err
+			}
+			return schema, nil
+		}
+	}
+	return nil, nil
+}
+
+// GetJSONSchemaRequestGroups returns a map of object schemas converted from parameters (excluding in body), grouped by in
 func (g *Generator) GetJSONSchemaRequestGroups(op *OperationObj, cfg ...JSONSchemaConfig) (map[string]ObjectJSONSchema, error) {
 	var err error
 	requestSchemas := map[string]ObjectJSONSchema{}
 
 	for _, param := range op.Parameters {
+		if param.In == "body" {
+			continue
+		}
 		if _, ok := requestSchemas[param.In]; !ok {
 			requestSchemas[param.In] = ObjectJSONSchema{
 				Schema:     "http://json-schema.org/draft-04/schema#",
@@ -181,6 +198,24 @@ func (g *Generator) WalkJSONSchemaRequestGroups(function func(path, method, in s
 
 			for in, schema := range requestSchemas {
 				function(path, method, in, schema)
+			}
+		}
+	}
+	return nil
+}
+
+// WalkJSONSchemaRequestGroups iterates over all request bodies
+func (g *Generator) WalkJSONSchemaRequestBodies(function func(path, method string, schema map[string]interface{})) error {
+	for path, pi := range g.paths {
+		for method, op := range pi.Map() {
+			for _, param := range op.Parameters {
+				if param.In == "body" {
+					schema, err := g.ParamJSONSchema(param)
+					if err != nil {
+						return err
+					}
+					function(path, method, schema)
+				}
 			}
 		}
 	}

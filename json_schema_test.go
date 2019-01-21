@@ -44,13 +44,15 @@ func TestGenerator_JSONSchemaWithCustomConfig(t *testing.T) {
 	g, err := gen.GetJSONSchemaRequestGroups(obj, cfg)
 	assert.NoError(t, err)
 
-	js, err := json.Marshal(g[`path`])
+	bodySchema, err := gen.GetJSONSchemaRequestBody(obj, cfg)
 	assert.NoError(t, err)
-	assert.Equal(t, `{"$schema":"http://json-schema.org/draft-04/schema#","type":"object","required":["id"],"properties":{"id":{"format":"int64","minimum":1000,"type":"integer"}}}`, string(js))
-
-	js, err = json.Marshal(g[`body`].Properties[`body`])
+	js, err := json.Marshal(bodySchema)
 	assert.NoError(t, err)
 	assert.Equal(t, `{"$ref":"#/components/schema/foo"}`, string(js))
+
+	js, err = json.Marshal(g[`path`])
+	assert.NoError(t, err)
+	assert.Equal(t, `{"$schema":"http://json-schema.org/draft-04/schema#","type":"object","required":["id"],"properties":{"id":{"format":"int64","minimum":1000,"type":"integer"}}}`, string(js))
 
 	obj = gen.SetPathItem(swgen.PathItemInfo{
 		Request: new(baz),
@@ -62,7 +64,9 @@ func TestGenerator_JSONSchemaWithCustomConfig(t *testing.T) {
 	g, err = gen.GetJSONSchemaRequestGroups(obj, cfg)
 	assert.NoError(t, err)
 
-	js, err = json.Marshal(g[`body`].Properties[`body`])
+	bodySchema, err = gen.GetJSONSchemaRequestBody(obj, cfg)
+	assert.NoError(t, err)
+	js, err = json.Marshal(bodySchema)
 	assert.NoError(t, err)
 	assert.Equal(t, `{"$ref":"#/components/schema/baz"}`, string(js))
 
@@ -162,11 +166,36 @@ func TestGenerator_WalkJSONSchemaRequestGroups(t *testing.T) {
 		_, exists := found[in]
 		assert.False(t, exists)
 		found[in] = schema
-
 	})
 	assert.NoError(t, err)
-	assert.Equal(t, 2, len(found))
+	assert.Equal(t, 1, len(found))
 	assert.Equal(t, []string{"id"}, found["path"].Required)
 	assert.Equal(t, map[string]interface{}{"type": "integer", "format": "int64", "minimum": 1000.0}, found["path"].Properties["id"])
-	assert.Equal(t, []string{"body"}, found["body"].Required)
+	_, hasBody := found["body"]
+	assert.False(t, hasBody)
+}
+
+func TestGenerator_WalkJSONSchemaRequestBodies(t *testing.T) {
+	gen := swgen.NewGenerator()
+
+	pathItem := swgen.PathItemInfo{
+		Request:  new(foo),
+		Method:   http.MethodPost,
+		Path:     "/one/{id}/two",
+		Response: new(baz),
+	}
+	pathItem.AddResponse(http.StatusNoContent, nil)
+	gen.SetPathItem(pathItem)
+
+	var bodySchema map[string]interface{}
+
+	err := gen.WalkJSONSchemaRequestBodies(func(path, method string, schema map[string]interface{}) {
+		assert.Equal(t, "/one/{id}/two", path)
+		assert.Equal(t, http.MethodPost, method)
+		bodySchema = schema
+	})
+	assert.NoError(t, err)
+	jsonBytes, err := json.Marshal(bodySchema)
+	assert.NoError(t, err)
+	assert.Equal(t, `{"$ref":"#/definitions/foo","definitions":{"bar":{"properties":{"yes":{"type":"boolean"}},"type":"object"},"foo":{"properties":{"bar":{"$ref":"#/definitions/bar"},"name":{"minLength":10,"type":"string"}},"type":"object"}}}`, string(jsonBytes))
 }

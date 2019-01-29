@@ -395,9 +395,7 @@ func (o SchemaObj) MarshalJSON() ([]byte, error) {
 // ParamItemObj describes an property object, in param object or property of definition
 // see http://swagger.io/specification/#itemsObject
 type ParamItemObj struct {
-	Ref              string        `json:"$ref,omitempty"`
-	Type             string        `json:"type"`
-	Format           string        `json:"format,omitempty"`
+	CommonFields
 	Items            *ParamItemObj `json:"items,omitempty"`            // Required if type is "array"
 	CollectionFormat string        `json:"collectionFormat,omitempty"` // "multi" - this is valid only for parameters in "query" or "formData"
 }

@@ -571,14 +571,25 @@ func (g *Generator) ParseParameters(i interface{}) (string, []ParamObj) {
 			param.CommonFields = schemaObj.CommonFields
 
 			if schemaObj.Type == "array" && schemaObj.Items != nil {
-				if schemaObj.Items.Ref != "" || schemaObj.Items.Type == "array" {
-					panic("unsupported array of struct or nested array in parameter")
+				if schemaObj.Items.Ref != "" {
+					fieldType := refl.DeepIndirect(field.Type)
+					if fieldType.Kind() == reflect.Slice || fieldType.Kind() == reflect.Array {
+						g.ParseDefinition(reflect.Zero(field.Type.Elem()).Interface())
+
+						if def, ok := g.getDefinition(field.Type.Elem()); ok {
+							schemaObj.Items = &def
+						}
+					}
 				}
 
-				param.Items = &ParamItemObj{
-					Type:   schemaObj.Items.Type,
-					Format: schemaObj.Items.Format,
+				if schemaObj.Items.Ref != "" || schemaObj.Items.Type == "array" || schemaObj.Items.Type == "object" {
+					panic("unsupported array of struct or nested array in parameter: " + fieldTypeName)
 				}
+
+				param.Items = &ParamItemObj{}
+				param.Items.CommonFields = schemaObj.Items.CommonFields
+				param.Items.Title = ""
+				param.Items.Description = ""
 				param.CollectionFormat = "multi" // default for now
 			}
 		}

@@ -402,3 +402,33 @@ func TestGenerator_SetPathItem_typeFile(t *testing.T) {
 	assert.NoError(t, err)
 	assert.JSONEq(t, expected, string(swg), coloredJSONDiff(expected, string(swg)))
 }
+
+type CountryCode string
+
+func (CountryCode) SwaggerDef() SwaggerData {
+	def := SwaggerData{}
+	def.Description = "Country Code"
+	def.Example = "us"
+	def.Type = "string"
+	def.Pattern = "^[a-zA-Z]{2}$"
+	return def
+}
+
+func TestGenerator_ParseParameters_namedSchemaParamItem(t *testing.T) {
+	type Req struct {
+		Codes []CountryCode `query:"countries" collectionFormat:"csv"`
+	}
+
+	g := NewGenerator()
+	pathItem := PathItemInfo{
+		Request: new(Req),
+		Method: http.MethodGet,
+		Path: "/some",
+	}
+	g.SetPathItem(pathItem)
+	expected := `{"swagger":"2.0","info":{"title":"","description":"","termsOfService":"","contact":{"name":""},"license":{"name":""},"version":""},"basePath":"/","schemes":["http","https"],"paths":{"/some":{"get":{"summary":"","description":"","parameters":[{"type":"array","name":"countries","in":"query","items":{"type":"string","pattern":"^[a-zA-Z]{2}$"},"collectionFormat":"csv"}],"responses":{"200":{"description":"OK"}}}}},"definitions":{"CountryCode":{"description":"Country Code","type":"string","pattern":"^[a-zA-Z]{2}$","example":"us"}}}`
+
+	swg, err := g.GenDocument()
+	assert.NoError(t, err)
+	assert.JSONEq(t, expected, string(swg), coloredJSONDiff(expected, string(swg)))
+}

@@ -179,6 +179,10 @@ type PathItemInfo struct {
 	// Output holds a sample of successful response, e.g. new(MyResponse)
 	Response interface{}
 
+	// MIME types of input and output
+	Produces []string
+	Consumes []string
+
 	Security       []string            // Names of security definitions
 	SecurityOAuth2 map[string][]string // Map of names of security definitions to required scopes
 
@@ -328,6 +332,8 @@ type OperationObj struct {
 	Summary     string                `json:"summary"`     // like a title, a short summary of what the operation does (120 chars)
 	Description string                `json:"description"` // A verbose explanation of the operation behavior
 	Parameters  []ParamObj            `json:"parameters,omitempty"`
+	Produces    []string              `json:"produces,omitempty"`
+	Consumes    []string              `json:"consumes,omitempty"`
 	Responses   Responses             `json:"responses"`
 	Security    []map[string][]string `json:"security,omitempty"`
 	Deprecated  bool                  `json:"deprecated,omitempty"`

@@ -765,6 +765,8 @@ func (g *Generator) SetPathItem(info PathItemInfo) *OperationObj {
 	operationObj.Summary = info.Title
 	operationObj.Description = info.Description
 	operationObj.Deprecated = info.Deprecated
+	operationObj.Produces = info.Produces
+	operationObj.Consumes = info.Consumes
 	operationObj.additionalData = info.additionalData
 	if info.Tag != "" {
 		operationObj.Tags = []string{info.Tag}

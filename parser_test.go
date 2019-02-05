@@ -245,9 +245,11 @@ func TestSwaggerDef(t *testing.T) {
 	gen := NewGenerator()
 
 	gen.SetPathItem(PathItemInfo{
-		Method:  http.MethodPost,
-		Path:    "/bla",
-		Request: new(bodyWithCustom),
+		Method:   http.MethodPost,
+		Path:     "/bla",
+		Request:  new(bodyWithCustom),
+		Consumes: []string{"application/json"},
+		Produces: []string{"text/csv"},
 	})
 
 	gen.SetPathItem(PathItemInfo{
@@ -308,6 +310,8 @@ func TestSwaggerDef(t *testing.T) {
       },
       "post": {
         "summary": "",
+        "produces": ["text/csv"],
+        "consumes": ["application/json"],
         "description": "",
         "parameters": [
           {
@@ -422,8 +426,8 @@ func TestGenerator_ParseParameters_namedSchemaParamItem(t *testing.T) {
 	g := NewGenerator()
 	pathItem := PathItemInfo{
 		Request: new(Req),
-		Method: http.MethodGet,
-		Path: "/some",
+		Method:  http.MethodGet,
+		Path:    "/some",
 	}
 	g.SetPathItem(pathItem)
 	expected := `{"swagger":"2.0","info":{"title":"","description":"","termsOfService":"","contact":{"name":""},"license":{"name":""},"version":""},"basePath":"/","schemes":["http","https"],"paths":{"/some":{"get":{"summary":"","description":"","parameters":[{"type":"array","name":"countries","in":"query","items":{"type":"string","pattern":"^[a-zA-Z]{2}$"},"collectionFormat":"csv"}],"responses":{"200":{"description":"OK"}}}}},"definitions":{"CountryCode":{"description":"Country Code","type":"string","pattern":"^[a-zA-Z]{2}$","example":"us"}}}`

@@ -416,7 +416,6 @@ type ResponseObj struct {
 type SchemaObj struct {
 	CommonFields
 	Ref                  string               `json:"$ref,omitempty"`
-	Title                string               `json:"title,omitempty"`
 	Items                *SchemaObj           `json:"items,omitempty"`                // if type is array
 	AdditionalProperties *SchemaObj           `json:"additionalProperties,omitempty"` // if type is object (map[])
 	Properties           map[string]SchemaObj `json:"properties,omitempty"`           // if type is object

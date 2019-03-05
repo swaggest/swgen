@@ -7,7 +7,7 @@ import (
 )
 
 type schemaBuilder struct {
-	refs map[string]bool
+	refs map[string]int64 // References counter
 	g    *Generator
 }
 
@@ -25,8 +25,9 @@ func (g *Generator) JSONSchema(s SchemaObj, option ...JSONSchemaConfig) (map[str
 		cfg = &option[0]
 	}
 
+	refs := make(map[string]int64)
 	sb := &schemaBuilder{
-		refs: make(map[string]bool),
+		refs: make(map[string]int64),
 		g:    g,
 	}
 	res, err := sb.jsonSchemaPlain(s, cfg)
@@ -35,10 +36,13 @@ func (g *Generator) JSONSchema(s SchemaObj, option ...JSONSchemaConfig) (map[str
 	}
 	allDef := g.definitions.GenDefinitions()
 
-	definitions := make(map[string]interface{})
+	definitions := make(map[string]map[string]interface{})
+
 	for len(sb.refs) > 0 {
-		refs := sb.refs
-		sb.refs = make(map[string]bool)
+		for ref, cnt := range sb.refs {
+			refs[ref] = refs[ref] + cnt
+		}
+		sb.refs = make(map[string]int64)
 
 		for ref := range refs {
 			ref := strings.TrimPrefix(ref, "#/definitions/")
@@ -56,17 +60,35 @@ func (g *Generator) JSONSchema(s SchemaObj, option ...JSONSchemaConfig) (map[str
 		}
 	}
 
+	// Expanding top-level reference
+	if ref, isString := res["$ref"].(string); isString && strings.HasPrefix(ref, "#/definitions/") {
+		defName := ref[len("#/definitions/"):]
+		def := definitions[defName]
+		if def != nil {
+			for k, v := range def {
+				res[k] = v
+			}
+			delete(res, "$ref")
+			// Delete root definition if only one (root) usage
+			if refs[ref] == 1 {
+				delete(definitions, defName)
+			}
+		}
+	}
+
+	// Inject definitions into result
 	if len(definitions) > 0 {
 		if cfg == nil || !cfg.StripDefinitions {
 			res["definitions"] = definitions
 		}
 	}
+
 	return res, nil
 }
 
 func (sb *schemaBuilder) jsonSchemaPlain(s SchemaObj, cfg *JSONSchemaConfig) (map[string]interface{}, error) {
 	if s.Ref != "" {
-		sb.refs[s.Ref] = true
+		sb.refs[s.Ref] = sb.refs[s.Ref] + 1
 		ref := s.Ref
 		if cfg != nil && cfg.DefinitionsPrefix != "" {
 			ref = cfg.DefinitionsPrefix + strings.TrimPrefix(ref, "#/definitions/")

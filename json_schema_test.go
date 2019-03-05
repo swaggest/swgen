@@ -125,16 +125,13 @@ func TestGenerator_WalkJSONSchemaResponses(t *testing.T) {
 		assert.Equal(t, http.StatusOK, statusCode)
 		assert.Equal(t, map[string]interface{}{
 			"$schema": "http://json-schema.org/draft-04/schema#",
-			"$ref":    "#/definitions/baz",
-			"definitions": map[string]interface{}{
-				"baz": map[string]interface{}{
-					"type": "object",
-					"properties": map[string]interface{}{
-						"barrr": map[string]interface{}{"$ref": "#/definitions/bar"},
-						"name":  map[string]interface{}{"type": "string"},
-					},
-				},
-				"bar": map[string]interface{}{
+			"type": "object",
+			"properties": map[string]interface{}{
+				"barrr": map[string]interface{}{"$ref": "#/definitions/bar"},
+				"name":  map[string]interface{}{"type": "string"},
+			},
+			"definitions": map[string]map[string]interface{}{
+				"bar": {
 					"type": "object",
 					"properties": map[string]interface{}{
 						"yes": map[string]interface{}{"type": "boolean"},
@@ -197,5 +194,5 @@ func TestGenerator_WalkJSONSchemaRequestBodies(t *testing.T) {
 	assert.NoError(t, err)
 	jsonBytes, err := json.Marshal(bodySchema)
 	assert.NoError(t, err)
-	assert.Equal(t, `{"$ref":"#/definitions/foo","definitions":{"bar":{"properties":{"yes":{"type":"boolean"}},"type":"object"},"foo":{"properties":{"bar":{"$ref":"#/definitions/bar"},"name":{"minLength":10,"type":"string"}},"type":"object"}}}`, string(jsonBytes))
+	assert.Equal(t, `{"definitions":{"bar":{"properties":{"yes":{"type":"boolean"}},"type":"object"}},"properties":{"bar":{"$ref":"#/definitions/bar"},"name":{"minLength":10,"type":"string"}},"type":"object"}`, string(jsonBytes))
 }

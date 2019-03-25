@@ -8,8 +8,7 @@ import (
 	"strings"
 )
 
-// Document represent for a document object of swagger data
-// see http://swagger.io/specification/
+// Document represent for a document object of swagger data, see http://swagger.io/specification/.
 type Document struct {
 	Version             string                 `json:"swagger"`                       // Specifies the Swagger Specification version being used
 	Info                InfoObj                `json:"info"`                          // Provides metadata about the API
@@ -22,13 +21,13 @@ type Document struct {
 	additionalData
 }
 
-// MarshalJSON marshal Document with additionalData inlined
+// MarshalJSON marshal Document with additionalData inlined.
 func (s Document) MarshalJSON() ([]byte, error) {
 	type i Document
 	return s.marshalJSONWithStruct(i(s))
 }
 
-// InfoObj provides metadata about the API
+// InfoObj provides metadata about the API.
 type InfoObj struct {
 	Title          string     `json:"title"` // The title of the application
 	Description    string     `json:"description"`
@@ -38,7 +37,7 @@ type InfoObj struct {
 	Version        string     `json:"version"`
 }
 
-// ContactObj contains contact information for the exposed API
+// ContactObj contains contact information for the exposed API.
 type ContactObj struct {
 	Name  string `json:"name"`
 	URL   string `json:"url,omitempty"`
@@ -51,8 +50,7 @@ type LicenseObj struct {
 	URL  string `json:"url,omitempty"`
 }
 
-// PathItem describes the operations available on a single path
-// see http://swagger.io/specification/#pathItemObject
+// PathItem describes the operations available on a single path, see http://swagger.io/specification/#pathItemObject.
 type PathItem struct {
 	Ref     string        `json:"$ref,omitempty"`
 	Get     *OperationObj `json:"get,omitempty"`
@@ -65,7 +63,7 @@ type PathItem struct {
 	Params  *ParamObj     `json:"parameters,omitempty"`
 }
 
-// HasMethod returns true if in path item already have operation for given method
+// HasMethod returns true if in path item already have operation for given method.
 func (pi PathItem) HasMethod(method string) bool {
 	switch strings.ToUpper(method) {
 	case http.MethodGet:
@@ -87,7 +85,7 @@ func (pi PathItem) HasMethod(method string) bool {
 	return false
 }
 
-// Map returns operations mapped by HTTP method
+// Map returns operations mapped by HTTP method.
 func (pi PathItem) Map() map[string]*OperationObj {
 	result := make(map[string]*OperationObj, 7)
 	if pi.Get != nil {
@@ -117,37 +115,37 @@ func (pi PathItem) Map() map[string]*OperationObj {
 type securityType string
 
 const (
-	// SecurityBasicAuth is a HTTP Basic Authentication security type
+	// SecurityBasicAuth is a HTTP Basic Authentication security type.
 	SecurityBasicAuth securityType = "basic"
-	// SecurityAPIKey is an API key security type
+	// SecurityAPIKey is an API key security type.
 	SecurityAPIKey securityType = "apiKey"
-	// SecurityOAuth2 is an OAuth2 security type
+	// SecurityOAuth2 is an OAuth2 security type.
 	SecurityOAuth2 securityType = "oauth2"
 )
 
 type apiKeyIn string
 
 const (
-	// APIKeyInHeader defines API key in header
+	// APIKeyInHeader defines API key in header.
 	APIKeyInHeader apiKeyIn = "header"
-	// APIKeyInQuery defines API key in query parameter
+	// APIKeyInQuery defines API key in query parameter.
 	APIKeyInQuery apiKeyIn = "query"
 )
 
 type oauthFlow string
 
 const (
-	// Oauth2AccessCode is access code Oauth2 flow
+	// Oauth2AccessCode is access code Oauth2 flow.
 	Oauth2AccessCode oauthFlow = "accessCode"
-	// Oauth2Application is application Oauth2 flow
+	// Oauth2Application is application Oauth2 flow.
 	Oauth2Application oauthFlow = "application"
-	// Oauth2Implicit is implicit Oauth2 flow
+	// Oauth2Implicit is implicit Oauth2 flow.
 	Oauth2Implicit oauthFlow = "implicit"
-	// Oauth2Password is password Oauth2 flow
+	// Oauth2Password is password Oauth2 flow.
 	Oauth2Password oauthFlow = "password"
 )
 
-// SecurityDef holds security definition
+// SecurityDef holds security definition.
 type SecurityDef struct {
 	Type securityType `json:"type"`
 
@@ -164,7 +162,7 @@ type SecurityDef struct {
 	Description string `json:"description,omitempty"`
 }
 
-// PathItemInfo some basic information of a path item and operation object
+// PathItemInfo some basic information of a path item and operation object.
 type PathItemInfo struct {
 	Path        string
 	Method      string
@@ -173,18 +171,18 @@ type PathItemInfo struct {
 	Tag         string
 	Deprecated  bool
 
-	// Request holds a sample of request structure, e.g. new(MyRequest)
+	// Request holds a sample of request structure, e.g. new(MyRequest).
 	Request interface{}
 
-	// Output holds a sample of successful response, e.g. new(MyResponse)
+	// Output holds a sample of successful response, e.g. new(MyResponse).
 	Response interface{}
 
 	// MIME types of input and output
 	Produces []string
 	Consumes []string
 
-	Security       []string            // Names of security definitions
-	SecurityOAuth2 map[string][]string // Map of names of security definitions to required scopes
+	Security       []string            // Names of security definitions.
+	SecurityOAuth2 map[string][]string // Map of names of security definitions to required scopes.
 
 	responses              map[int]interface{}
 	SuccessfulResponseCode int
@@ -192,7 +190,7 @@ type PathItemInfo struct {
 	additionalData
 }
 
-// RemoveResponse removes response with http status code and returns if it existed
+// RemoveResponse removes response with http status code and returns if it existed.
 func (p *PathItemInfo) RemoveResponse(statusCode int) bool {
 	if nil == p.responses {
 		return false
@@ -204,7 +202,7 @@ func (p *PathItemInfo) RemoveResponse(statusCode int) bool {
 	return false
 }
 
-// AddResponse adds response with http status code and output structure
+// AddResponse adds response with http status code and output structure.
 func (p *PathItemInfo) AddResponse(statusCode int, output interface{}) *PathItemInfo {
 	if nil == p.responses {
 		p.responses = make(map[int]interface{}, 1)
@@ -213,7 +211,7 @@ func (p *PathItemInfo) AddResponse(statusCode int, output interface{}) *PathItem
 	return p
 }
 
-// AddResponses adds multiple responses with WithStatusCode
+// AddResponses adds multiple responses with WithStatusCode.
 func (p *PathItemInfo) AddResponses(responses ...WithStatusCode) {
 	if len(responses) == 0 {
 		return
@@ -230,18 +228,18 @@ type description interface {
 	Description() string
 }
 
-// WithStatusCode is an interface to expose http status code
+// WithStatusCode is an interface to expose http status code.
 type WithStatusCode interface {
 	StatusCode() int
 }
 
-// Enum can be use for sending Enum data that need validate
+// Enum can be use for sending Enum data that need validate.
 type Enum struct {
 	Enum      []interface{} `json:"enum,omitempty"`
 	EnumNames []string      `json:"x-enum-names,omitempty"`
 }
 
-// LoadFromField loads enum from field tag: json array or comma-separated string
+// LoadFromField loads enum from field tag: json array or comma-separated string.
 func (enum *Enum) LoadFromField(field reflect.StructField) {
 	type namedEnum interface {
 		// NamedEnum return the const-name pair slice
@@ -274,71 +272,85 @@ func (enum *Enum) LoadFromField(field reflect.StructField) {
 	}
 }
 
-// SwaggerData holds parameter and schema information for swagger definition
+// SwaggerData holds parameter and schema information for swagger definition.
 type SwaggerData struct {
 	CommonFields
 	ParamObj
 	SchemaObj
 }
 
-// SwaggerDef returns schema object
+// SwaggerDef returns schema object.
 func (s SwaggerData) SwaggerDef() SwaggerData {
 	return s
 }
 
-// Schema returns schema object
+// Schema returns schema object.
 func (s SwaggerData) Schema() SchemaObj {
 	s.SchemaObj.CommonFields = s.CommonFields
 	return s.SchemaObj
 }
 
-// Param returns parameter object
+// Param returns parameter object.
 func (s SwaggerData) Param() ParamObj {
 	s.ParamObj.CommonFields = s.CommonFields
 	return s.ParamObj
 }
 
-// CommonFields keeps fields shared between ParamObj and SchemaObj
+// CommonFields keeps fields shared between ParamObj and SchemaObj.
+//
+// JSON Schema tags
+//
+// Values can be populated from field tags of original field:
+//   type MyObj struct {
+//      BoundedNumber `query:"boundedNumber" minimum:"-100" maximum:"100"`
+//      SpecialString `json:"specialString" pattern:"^[a-z]{4}$" minLength:"4" maxLength:"4"`
+//   }
+//
+// These tags can be used:
+//   - `title`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.6.1
+//   - `description`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.6.1
+//   - `default`, can be scalar or JSON value, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.6.2
+//   - `pattern`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.2.3
+//   - `format`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.7
+//   - `multipleOf`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.1.1
+//   - `maximum`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.1.2
+//   - `minimum`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.1.3
+//   - `maxLength`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.2.1
+//   - `minLength`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.2.2
+//   - `maxItems`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.3.2
+//   - `minItems`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.3.3
+//   - `maxProperties`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.4.1
+//   - `minProperties`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.4.2
+//   - `exclusiveMaximum`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.1.2
+//   - `exclusiveMinimum`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.1.3
+//   - `uniqueItems`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.3.4
+//   - `enum`, tag value must be a JSON or comma-separated list of strings, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.5.1
+//
 type CommonFields struct {
-	// Title is imported from tag `title`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.6.1.
-	Title string `json:"title,omitempty"`
-	// Description is imported from tag `description`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.6.1.
-	Description string `json:"description,omitempty"`
-	// Default is imported from tag `default`, can be scalar or JSON value, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.6.2.
-	Default interface{} `json:"default,omitempty"`
+	Title       string      `json:"title,omitempty"`
+	Description string      `json:"description,omitempty"`
+	Default     interface{} `json:"default,omitempty"`
+
 	// Type is defined with reflection.
 	Type string `json:"type,omitempty"`
-	// Pattern is imported from tag `pattern`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.2.3.
+
 	Pattern string `json:"pattern,omitempty"`
-	// Format is imported from tag `format`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.7.
-	Format string `json:"format,omitempty"`
+	Format  string `json:"format,omitempty"`
 
-	// MultipleOf is imported from tag `multipleOf`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.1.1.
-	MultipleOf float64 `json:"multipleOf,omitempty"`
-	// Maximum is imported from tag `maximum`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.1.2.
-	Maximum *float64 `json:"maximum,omitempty"`
-	// Minimum is imported from tag `minimum`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.1.3.
-	Minimum *float64 `json:"minimum,omitempty"`
+	MultipleOf float64  `json:"multipleOf,omitempty"`
+	Maximum    *float64 `json:"maximum,omitempty"`
+	Minimum    *float64 `json:"minimum,omitempty"`
 
-	// MaxLength is imported from tag `maxLength`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.2.1.
-	MaxLength *int64 `json:"maxLength,omitempty"`
-	// MinLength is imported from tag `minLength`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.2.2.
-	MinLength *int64 `json:"minLength,omitempty"`
-	// MaxItems is imported from tag `maxItems`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.3.2.
-	MaxItems *int64 `json:"maxItems,omitempty"`
-	// MinItems is imported from tag `minItems`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.3.3.
-	MinItems *int64 `json:"minItems,omitempty"`
-	// MaxProperties is imported from tag `maxProperties`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.4.1.
+	MaxLength     *int64 `json:"maxLength,omitempty"`
+	MinLength     *int64 `json:"minLength,omitempty"`
+	MaxItems      *int64 `json:"maxItems,omitempty"`
+	MinItems      *int64 `json:"minItems,omitempty"`
 	MaxProperties *int64 `json:"maxProperties,omitempty"`
-	// MinProperties is imported from tag `minProperties`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.4.2.
 	MinProperties *int64 `json:"minProperties,omitempty"`
 
-	// ExclusiveMaximum is imported from tag `exclusiveMaximum`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.1.2.
 	ExclusiveMaximum bool `json:"exclusiveMaximum,omitempty"`
-	// ExclusiveMinimum is imported from tag `exclusiveMinimum`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.1.3.
 	ExclusiveMinimum bool `json:"exclusiveMinimum,omitempty"`
-	// UniqueItems is imported from tag `uniqueItems`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.3.4.
-	UniqueItems bool `json:"uniqueItems,omitempty"`
+	UniqueItems      bool `json:"uniqueItems,omitempty"`
 
 	// Enum defines value enumeration.
 	//
@@ -347,13 +359,11 @@ type CommonFields struct {
 	// or
 	//   Enum() []interface{}
 	//
-	// Can be imported from tag `enum`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.5.1.
-	// Field tag value must be a JSON or comma-separated list of strings.
+	// Can be imported from tag `enum`.
 	Enum
 }
 
-// OperationObj describes a single API operation on a path
-// see http://swagger.io/specification/#operationObject
+// OperationObj describes a single API operation on a path, see http://swagger.io/specification/#operationObject.
 type OperationObj struct {
 	Tags        []string              `json:"tags,omitempty"`
 	Summary     string                `json:"summary"`     // like a title, a short summary of what the operation does (120 chars)
@@ -373,8 +383,7 @@ func (o OperationObj) MarshalJSON() ([]byte, error) {
 	return o.marshalJSONWithStruct(i(o))
 }
 
-// ParamObj describes a single operation parameter
-// see http://swagger.io/specification/#parameterObject
+// ParamObj describes a single operation parameter, see http://swagger.io/specification/#parameterObject.
 type ParamObj struct {
 	CommonFields
 	Name   string        `json:"name,omitempty"`
@@ -413,20 +422,19 @@ func jsonRecode(v interface{}) (map[string]interface{}, error) {
 	return nil, errors.New(`invalid json, map expected`)
 }
 
-// MarshalJSON marshal ParamObj with additionalData inlined
+// MarshalJSON marshal ParamObj with additionalData inlined.
 func (o ParamObj) MarshalJSON() ([]byte, error) {
 	type i ParamObj
 	return o.marshalJSONWithStruct(i(o))
 }
 
-// MarshalJSON marshal SchemaObj with additionalData inlined
+// MarshalJSON marshal SchemaObj with additionalData inlined.
 func (o SchemaObj) MarshalJSON() ([]byte, error) {
 	type i SchemaObj
 	return o.marshalJSONWithStruct(i(o))
 }
 
-// ParamItemObj describes an property object, in param object or property of definition
-// see http://swagger.io/specification/#itemsObject
+// ParamItemObj describes an property object, in param object or property of definition, see http://swagger.io/specification/#itemsObject.
 type ParamItemObj struct {
 	CommonFields
 	Items            *ParamItemObj `json:"items,omitempty"`            // Required if type is "array"
@@ -506,7 +514,7 @@ type additionalData struct {
 	data map[string]interface{}
 }
 
-// AddExtendedField add field to additional data map
+// AddExtendedField add field to additional data map.
 func (ad *additionalData) AddExtendedField(name string, value interface{}) {
 	if ad.data == nil {
 		ad.data = make(map[string]interface{})

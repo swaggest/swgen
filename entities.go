@@ -300,28 +300,55 @@ func (s SwaggerData) Param() ParamObj {
 
 // CommonFields keeps fields shared between ParamObj and SchemaObj
 type CommonFields struct {
-	Title       string      `json:"title,omitempty"`
-	Description string      `json:"description,omitempty"`
-	Default     interface{} `json:"default,omitempty"`
-	Type        string      `json:"type,omitempty"`
-	Pattern     string      `json:"pattern,omitempty"`
-	Format      string      `json:"format,omitempty"`
+	// Title is imported from tag `title`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.6.1.
+	Title string `json:"title,omitempty"`
+	// Description is imported from tag `description`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.6.1.
+	Description string `json:"description,omitempty"`
+	// Default is imported from tag `default`, can be scalar or JSON value, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.6.2.
+	Default interface{} `json:"default,omitempty"`
+	// Type is defined with reflection.
+	Type string `json:"type,omitempty"`
+	// Pattern is imported from tag `pattern`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.2.3.
+	Pattern string `json:"pattern,omitempty"`
+	// Format is imported from tag `format`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.7.
+	Format string `json:"format,omitempty"`
 
-	MultipleOf float64  `json:"multipleOf,omitempty"`
-	Maximum    *float64 `json:"maximum,omitempty"`
-	Minimum    *float64 `json:"minimum,omitempty"`
+	// MultipleOf is imported from tag `multipleOf`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.1.1.
+	MultipleOf float64 `json:"multipleOf,omitempty"`
+	// Maximum is imported from tag `maximum`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.1.2.
+	Maximum *float64 `json:"maximum,omitempty"`
+	// Minimum is imported from tag `minimum`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.1.3.
+	Minimum *float64 `json:"minimum,omitempty"`
 
-	MaxLength     *int64 `json:"maxLength,omitempty"`
-	MinLength     *int64 `json:"minLength,omitempty"`
-	MaxItems      *int64 `json:"maxItems,omitempty"`
-	MinItems      *int64 `json:"minItems,omitempty"`
+	// MaxLength is imported from tag `maxLength`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.2.1.
+	MaxLength *int64 `json:"maxLength,omitempty"`
+	// MinLength is imported from tag `minLength`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.2.2.
+	MinLength *int64 `json:"minLength,omitempty"`
+	// MaxItems is imported from tag `maxItems`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.3.2.
+	MaxItems *int64 `json:"maxItems,omitempty"`
+	// MinItems is imported from tag `minItems`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.3.3.
+	MinItems *int64 `json:"minItems,omitempty"`
+	// MaxProperties is imported from tag `maxProperties`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.4.1.
 	MaxProperties *int64 `json:"maxProperties,omitempty"`
+	// MinProperties is imported from tag `minProperties`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.4.2.
 	MinProperties *int64 `json:"minProperties,omitempty"`
 
+	// ExclusiveMaximum is imported from tag `exclusiveMaximum`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.1.2.
 	ExclusiveMaximum bool `json:"exclusiveMaximum,omitempty"`
+	// ExclusiveMinimum is imported from tag `exclusiveMinimum`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.1.3.
 	ExclusiveMinimum bool `json:"exclusiveMinimum,omitempty"`
-	UniqueItems      bool `json:"uniqueItems,omitempty"`
+	// UniqueItems is imported from tag `uniqueItems`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.3.4.
+	UniqueItems bool `json:"uniqueItems,omitempty"`
 
+	// Enum defines value enumeration.
+	//
+	// Can be populated from
+	//   NamedEnum() ([]interface{}, []string)
+	// or
+	//   Enum() []interface{}
+	//
+	// Can be imported from tag `enum`, https://json-schema.org/draft-04/json-schema-validation.html#rfc.section.5.5.1.
+	// Field tag value must be a JSON or comma-separated list of strings.
 	Enum
 }
 

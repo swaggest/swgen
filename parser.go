@@ -504,8 +504,15 @@ func (g *Generator) ParseParameters(i interface{}) (string, []ParamObj) {
 
 	for i := 0; i < numField; i++ {
 		field := t.Field(i)
-		// we can't access the value of un-exportable or anonymous fields
-		if field.PkgPath != "" || field.Anonymous {
+		// we can't access the value of un-exportable fields
+		if field.PkgPath != "" {
+			continue
+		}
+
+		if field.Anonymous {
+			anonValue := reflect.New(field.Type).Interface()
+			_, anonParams := g.ParseParameters(anonValue)
+			params = append(params, anonParams...)
 			continue
 		}
 

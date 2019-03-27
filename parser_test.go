@@ -436,3 +436,24 @@ func TestGenerator_ParseParameters_namedSchemaParamItem(t *testing.T) {
 	assert.NoError(t, err)
 	assert.JSONEq(t, expected, string(swg), coloredJSONDiff(expected, string(swg)))
 }
+
+func TestGenerator_ParseParameters(t *testing.T) {
+	type Emb struct {
+		P1 string `query:"p1"`
+	}
+
+	type Req struct {
+		P0 int `path:"p0"`
+		Emb
+	}
+
+	g := NewGenerator()
+
+	name, params := g.ParseParameters(new(Req))
+	assert.Equal(t, "Req", name)
+	assert.Len(t, params, 2)
+	assert.Equal(t, "p0", params[0].Name)
+	assert.Equal(t, "integer", params[0].Type)
+	assert.Equal(t, "p1", params[1].Name)
+	assert.Equal(t, "string", params[1].Type)
+}

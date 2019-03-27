@@ -811,8 +811,11 @@ func (g *Generator) SetPathItem(info PathItemInfo) *OperationObj {
 			g.parseResponseObject(operationObj, statusCode, r)
 		}
 	}
-	if response != nil || operationObj.Responses == nil {
+	if response != nil || operationObj.Responses == nil || info.SuccessfulResponseCode != 0 {
 		statusCode := http.StatusOK
+		if response == nil {
+			statusCode = http.StatusNoContent
+		}
 		if info.SuccessfulResponseCode != 0 {
 			statusCode = info.SuccessfulResponseCode
 		}

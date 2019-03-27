@@ -303,8 +303,8 @@ func TestSwaggerDef(t *testing.T) {
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         }
       },
@@ -324,8 +324,8 @@ func TestSwaggerDef(t *testing.T) {
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         }
       }
@@ -400,7 +400,7 @@ func TestGenerator_SetPathItem_typeFile(t *testing.T) {
 		Request: new(requestWithHeader),
 	})
 
-	expected := `{"swagger":"2.0","info":{"title":"","description":"","termsOfService":"","contact":{"name":""},"license":{"name":""},"version":""},"basePath":"/","schemes":["http","https"],"paths":{"/withFile":{"post":{"summary":"","description":"","parameters":[{"type":"file","name":"upload","in":"formData"}],"responses":{"200":{"description":"OK"}}}},"/withFileAndHeader":{"post":{"summary":"","description":"","parameters":[{"type":"file","name":"upload","in":"formData"}],"responses":{"200":{"description":"OK"}}}},"/withHeader":{"post":{"summary":"","description":"","parameters":[{"type":"file","name":"upload","in":"formData"}],"responses":{"200":{"description":"OK"}}}}}}`
+	expected := `{"swagger":"2.0","info":{"title":"","description":"","termsOfService":"","contact":{"name":""},"license":{"name":""},"version":""},"basePath":"/","schemes":["http","https"],"paths":{"/withFile":{"post":{"summary":"","description":"","parameters":[{"type":"file","name":"upload","in":"formData"}],"responses":{"204":{"description":"No Content"}}}},"/withFileAndHeader":{"post":{"summary":"","description":"","parameters":[{"type":"file","name":"upload","in":"formData"}],"responses":{"204":{"description":"No Content"}}}},"/withHeader":{"post":{"summary":"","description":"","parameters":[{"type":"file","name":"upload","in":"formData"}],"responses":{"204":{"description":"No Content"}}}}}}`
 
 	swg, err := g.GenDocument()
 	assert.NoError(t, err)
@@ -430,7 +430,7 @@ func TestGenerator_ParseParameters_namedSchemaParamItem(t *testing.T) {
 		Path:    "/some",
 	}
 	g.SetPathItem(pathItem)
-	expected := `{"swagger":"2.0","info":{"title":"","description":"","termsOfService":"","contact":{"name":""},"license":{"name":""},"version":""},"basePath":"/","schemes":["http","https"],"paths":{"/some":{"get":{"summary":"","description":"","parameters":[{"type":"array","name":"countries","in":"query","items":{"type":"string","pattern":"^[a-zA-Z]{2}$"},"collectionFormat":"csv"}],"responses":{"200":{"description":"OK"}}}}},"definitions":{"CountryCode":{"description":"Country Code","type":"string","pattern":"^[a-zA-Z]{2}$","example":"us"}}}`
+	expected := `{"swagger":"2.0","info":{"title":"","description":"","termsOfService":"","contact":{"name":""},"license":{"name":""},"version":""},"basePath":"/","schemes":["http","https"],"paths":{"/some":{"get":{"summary":"","description":"","parameters":[{"type":"array","name":"countries","in":"query","items":{"type":"string","pattern":"^[a-zA-Z]{2}$"},"collectionFormat":"csv"}],"responses":{"204":{"description":"No Content"}}}}},"definitions":{"CountryCode":{"description":"Country Code","type":"string","pattern":"^[a-zA-Z]{2}$","example":"us"}}}`
 
 	swg, err := g.GenDocument()
 	assert.NoError(t, err)

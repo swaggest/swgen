@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"reflect"
+	"sort"
 	"strings"
 )
 
@@ -459,7 +460,8 @@ type SchemaObj struct {
 	Ref                  string               `json:"$ref,omitempty"`
 	Items                *SchemaObj           `json:"items,omitempty"`                // if type is array
 	AdditionalProperties *SchemaObj           `json:"additionalProperties,omitempty"` // if type is object (map[])
-	Properties           map[string]SchemaObj `json:"properties,omitempty"`           // if type is object
+	Required             []string             `json:"required,omitempty"`
+	Properties           map[string]SchemaObj `json:"properties,omitempty"` // if type is object
 	Example              interface{}          `json:"example,omitempty"`
 	Nullable             bool                 `json:"x-nullable,omitempty"`
 	TypeName             string               `json:"-"` // for internal using, passing typeName
@@ -467,6 +469,19 @@ type SchemaObj struct {
 	GoPropertyNames      map[string]string    `json:"x-go-property-names,omitempty"`
 	GoPropertyTypes      map[string]string    `json:"x-go-property-types,omitempty"`
 	additionalData
+	isRequired bool
+}
+
+func (o *SchemaObj) setProperties(properties map[string]SchemaObj) {
+	required := make([]string, 0, len(properties))
+	for name, prop := range properties {
+		if prop.isRequired {
+			required = append(required, name)
+		}
+	}
+	sort.Strings(required)
+	o.Required = required
+	o.Properties = properties
 }
 
 // NewSchemaObj Constructor function for SchemaObj struct type

@@ -35,7 +35,7 @@ type testEmptyStruct struct{}
 
 type testSimpleStruct struct {
 	SimpleString  string  `json:"simple_string"`
-	SimpleInt     int     `json:"simple_int"`
+	SimpleInt     int     `json:"simple_int" required:"true"`
 	SimpleInt32   int32   `json:"simple_int32"`
 	SimpleInt64   int64   `json:"simple_int64"`
 	SimpleUInt32  uint32  `json:"simple_uint32"`

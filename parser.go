@@ -191,7 +191,7 @@ func (g *Generator) ParseDefinition(i interface{}) SchemaObj {
 		}
 		typeDef.TypeName = g.makeNameForType(t, typeDef.TypeName)
 		typeDef.Ref = refDefinitionPrefix + typeDef.TypeName
-		typeDef.Properties = g.parseDefinitionProperties(v, &typeDef)
+		typeDef.setProperties(g.parseDefinitionProperties(v, &typeDef))
 
 	case reflect.Slice, reflect.Array:
 		elemType := refl.DeepIndirect(t.Elem())
@@ -205,7 +205,7 @@ func (g *Generator) ParseDefinition(i interface{}) SchemaObj {
 			itemSchema = g.genSchemaForType(elemType)
 		} else {
 			itemSchema = *NewSchemaObj("object", elemType.Name())
-			itemSchema.Properties = g.parseDefinitionProperties(v.Elem(), &itemSchema)
+			itemSchema.setProperties(g.parseDefinitionProperties(v.Elem(), &itemSchema))
 		}
 
 		typeDef = *NewSchemaObj("array", t.Name())
@@ -330,6 +330,7 @@ func (g *Generator) parseDefinitionProperties(v reflect.Value, parent *SchemaObj
 		}
 
 		readSharedTags(field.Tag, &obj.CommonFields)
+		readBoolTag(field.Tag, "required", &obj.isRequired)
 
 		properties[propName] = obj
 	}

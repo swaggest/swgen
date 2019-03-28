@@ -42,6 +42,9 @@
           "type": "integer"
         }
       },
+      "required": [
+        "simple_int"
+      ],
       "type": "object"
     }
   },

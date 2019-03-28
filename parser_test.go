@@ -12,7 +12,7 @@ import (
 
 type Person struct {
 	Name       *PersonName `json:"name"`
-	SecondName PersonName  `json:"second_name"`
+	SecondName PersonName  `json:"second_name" required:"true"`
 	Age        uint        `json:"age"`
 	Children   []Person    `json:"children"`
 	Tags       []string    `json:"tags"`

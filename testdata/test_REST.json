@@ -2074,6 +2074,9 @@
     },
     "testSimpleStruct": {
       "type": "object",
+      "required": [
+        "simple_int"
+      ],
       "properties": {
         "simple_bool": {
           "type": "boolean",

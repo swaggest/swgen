@@ -144,6 +144,9 @@ func (g *Generator) ParamJSONSchema(p ParamObj, cfg ...JSONSchemaConfig) (map[st
 	p.In = ""
 	p.Required = false
 	p.CollectionFormat = ""
+	if p.Type == "file" {
+		p.Type = ""
+	}
 
 	res, err := jsonRecode(p)
 	return res, err

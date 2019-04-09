@@ -2,6 +2,7 @@ package swgen_test
 
 import (
 	"encoding/json"
+	"mime/multipart"
 	"net/http"
 	"testing"
 
@@ -195,4 +196,27 @@ func TestGenerator_WalkJSONSchemaRequestBodies(t *testing.T) {
 	jsonBytes, err := json.Marshal(bodySchema)
 	assert.NoError(t, err)
 	assert.Equal(t, `{"definitions":{"bar":{"properties":{"yes":{"type":"boolean"}},"type":"object"}},"properties":{"bar":{"$ref":"#/definitions/bar"},"name":{"minLength":10,"type":"string"}},"type":"object"}`, string(jsonBytes))
+}
+
+func TestGenerator_ParamJSONSchema(t *testing.T) {
+	gen := swgen.NewGenerator()
+
+	type Req struct {
+		F *multipart.FileHeader `file:"upload" description:"File Upload"`
+	}
+
+	pathItem := swgen.PathItemInfo{
+		Request:  new(Req),
+		Method:   http.MethodPost,
+		Path:     "/one/{id}/two",
+		Response: new(baz),
+	}
+	obj := gen.SetPathItem(pathItem)
+
+	schema, err := gen.ParamJSONSchema(obj.Parameters[0])
+	assert.NoError(t, err)
+	jsonBytes, err := json.Marshal(schema)
+	assert.NoError(t, err)
+	assert.Equal(t, `{"description":"File Upload"}`, string(jsonBytes))
+
 }

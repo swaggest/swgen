@@ -240,6 +240,9 @@ func (g *Generator) ParseDefinition(i interface{}) SchemaObj {
 
 	if typeDef.TypeName != "" { // non-anonymous types should be added to definitions map and returned "in-place" as references
 		typeDef.TypeName = g.makeNameForType(t, typeDef.TypeName)
+		if typeDef.Ref != "" {
+			typeDef.Ref = refDefinitionPrefix + typeDef.TypeName
+		}
 		g.addDefinition(t, &typeDef)
 		return typeDef.Export()
 	}

@@ -457,3 +457,26 @@ func TestGenerator_ParseParameters(t *testing.T) {
 	assert.Equal(t, "p1", params[1].Name)
 	assert.Equal(t, "string", params[1].Type)
 }
+
+func TestGenerator_SetPathItem_bodyMap(t *testing.T) {
+	type (
+		Value struct {
+			S string `json:"s"`
+		}
+		Key string
+		Map map[Key]Value
+	)
+
+	g := NewGenerator()
+	g.AddPackagePrefix(true)
+	obj := g.SetPathItem(PathItemInfo{
+		Method:  http.MethodPost,
+		Path:    "/",
+		Request: new(Map),
+	})
+
+	assert.Len(t, obj.Parameters, 1)
+	swg, err := g.GenDocument()
+	assert.NoError(t, err)
+	assert.Equal(t, `{"swagger":"2.0","info":{"title":"","description":"","termsOfService":"","contact":{"name":""},"license":{"name":""},"version":""},"basePath":"/","schemes":["http","https"],"paths":{"/":{"post":{"summary":"","description":"","parameters":[{"name":"body","in":"body","schema":{"$ref":"#/definitions/SwgenMap"},"required":true}],"responses":{"204":{"description":"No Content"}}}}},"definitions":{"SwgenMap":{"type":"object","additionalProperties":{"$ref":"#/definitions/SwgenValue"}},"SwgenValue":{"type":"object","properties":{"s":{"type":"string"}}}}}`, string(swg))
+}

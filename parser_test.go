@@ -145,10 +145,6 @@ func TestParseParameter(t *testing.T) {
 	assert.Len(t, params, 2)
 }
 
-func TestParseParameterError(t *testing.T) {
-	assert.Panics(t, func() { NewGenerator().ParseParameters(true) })
-}
-
 //
 // test and data for TestSetPathItem
 //
@@ -479,4 +475,34 @@ func TestGenerator_SetPathItem_bodyMap(t *testing.T) {
 	swg, err := g.GenDocument()
 	assert.NoError(t, err)
 	assert.Equal(t, `{"swagger":"2.0","info":{"title":"","description":"","termsOfService":"","contact":{"name":""},"license":{"name":""},"version":""},"basePath":"/","schemes":["http","https"],"paths":{"/":{"post":{"summary":"","description":"","parameters":[{"name":"body","in":"body","schema":{"$ref":"#/definitions/SwgenMap"},"required":true}],"responses":{"204":{"description":"No Content"}}}}},"definitions":{"SwgenMap":{"type":"object","additionalProperties":{"$ref":"#/definitions/SwgenValue"}},"SwgenValue":{"type":"object","properties":{"s":{"type":"string"}}}}}`, string(swg))
+}
+
+func TestGenerator_SetPathItem_embeddedMap(t *testing.T) {
+	type (
+		Value struct {
+			S string `json:"s"`
+		}
+		Key string
+		Map map[Key]Value
+		EmbMap struct {
+			Map
+		}
+		Req struct {
+			P0 int `path:"p0" json:"-"`
+			EmbMap
+		}
+	)
+
+	g := NewGenerator()
+	g.AddPackagePrefix(true)
+	obj := g.SetPathItem(PathItemInfo{
+		Method:  http.MethodPost,
+		Path:    "/",
+		Request: new(Req),
+	})
+
+	assert.Len(t, obj.Parameters, 2)
+	swg, err := g.GenDocument()
+	assert.NoError(t, err)
+	assert.Equal(t, `{"swagger":"2.0","info":{"title":"","description":"","termsOfService":"","contact":{"name":""},"license":{"name":""},"version":""},"basePath":"/","schemes":["http","https"],"paths":{"/":{"post":{"summary":"","description":"","parameters":[{"type":"integer","format":"int32","name":"p0","in":"path","required":true},{"name":"body","in":"body","schema":{"$ref":"#/definitions/SwgenMap"},"required":true}],"responses":{"204":{"description":"No Content"}}}}},"definitions":{"SwgenMap":{"type":"object","additionalProperties":{"$ref":"#/definitions/SwgenValue"}},"SwgenValue":{"type":"object","properties":{"s":{"type":"string"}}}}}`, string(swg))
 }

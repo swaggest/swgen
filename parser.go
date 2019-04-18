@@ -179,6 +179,11 @@ func (g *Generator) ParseDefinition(i interface{}) SchemaObj {
 	name := refl.GoType(t) // todo remove
 	_ = name
 
+	// Shortcut on embedded map or slice.
+	if et := refl.FindEmbeddedSliceOrMap(i); et != nil {
+		t = et
+	}
+
 	switch t.Kind() {
 	case reflect.Struct:
 		if typeDef, found := g.getDefinition(t); found {
@@ -240,6 +245,9 @@ func (g *Generator) ParseDefinition(i interface{}) SchemaObj {
 
 	if typeDef.TypeName != "" { // non-anonymous types should be added to definitions map and returned "in-place" as references
 		typeDef.TypeName = g.makeNameForType(t, typeDef.TypeName)
+		if typeDef.Ref != "" {
+			typeDef.Ref = refDefinitionPrefix + typeDef.TypeName
+		}
 		g.addDefinition(t, &typeDef)
 		return typeDef.Export()
 	}
@@ -486,8 +494,9 @@ func (g *Generator) ParseParameters(i interface{}) (string, []ParamObj) {
 		v = v.Elem()
 	}
 
+	// Parameters are only parsed from struct.
 	if v.Kind() != reflect.Struct {
-		panic("struct expected for ParseParameters")
+		return "", nil
 	}
 
 	t := v.Type()
@@ -744,6 +753,7 @@ func (g *Generator) SetPathItem(info PathItemInfo) *OperationObj {
 			body = info.Request
 		} else if refl.HasTaggedFields(info.Request, "json") ||
 			refl.IsSliceOrMap(info.Request) ||
+			refl.FindEmbeddedSliceOrMap(info.Request) != nil ||
 			!refl.IsStruct(info.Request) {
 			body = info.Request
 		}

@@ -2,6 +2,7 @@ language: go
 
 go:
 - tip
+- 1.12.x
 
 install:
 - GO111MODULE=on go mod vendor

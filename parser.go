@@ -519,7 +519,7 @@ func (g *Generator) ParseParameters(i interface{}) (string, []ParamObj) {
 			continue
 		}
 
-		if field.Anonymous {
+		if field.Anonymous && field.Tag.Get("in") != "body" {
 			anonValue := reflect.New(field.Type).Interface()
 			_, anonParams := g.ParseParameters(anonValue)
 			params = append(params, anonParams...)

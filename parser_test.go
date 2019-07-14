@@ -482,8 +482,8 @@ func TestGenerator_SetPathItem_embeddedMap(t *testing.T) {
 		Value struct {
 			S string `json:"s"`
 		}
-		Key string
-		Map map[Key]Value
+		Key    string
+		Map    map[Key]Value
 		EmbMap struct {
 			Map
 		}
@@ -505,4 +505,117 @@ func TestGenerator_SetPathItem_embeddedMap(t *testing.T) {
 	swg, err := g.GenDocument()
 	assert.NoError(t, err)
 	assert.Equal(t, `{"swagger":"2.0","info":{"title":"","description":"","termsOfService":"","contact":{"name":""},"license":{"name":""},"version":""},"basePath":"/","schemes":["http","https"],"paths":{"/":{"post":{"summary":"","description":"","parameters":[{"type":"integer","format":"int32","name":"p0","in":"path","required":true},{"name":"body","in":"body","schema":{"$ref":"#/definitions/SwgenMap"},"required":true}],"responses":{"204":{"description":"No Content"}}}}},"definitions":{"SwgenMap":{"type":"object","additionalProperties":{"$ref":"#/definitions/SwgenValue"}},"SwgenValue":{"type":"object","properties":{"s":{"type":"string"}}}}}`, string(swg))
+}
+
+func TestGenerator_SetPathItem_emptyInterface(t *testing.T) {
+	type (
+		Req struct {
+			P0   int         `path:"p0" json:"-"`
+			Data interface{} `json:"reqData"`
+		}
+
+		Emb struct {
+			BB int `json:"bb"`
+		}
+
+		AnyThing interface{}
+
+		Res struct {
+			Emb
+			A    string      `json:"aa"`
+			Any  AnyThing    `json:"any"`
+			Data interface{} `json:"data"`
+		}
+	)
+
+	g := NewGenerator()
+	g.AddPackagePrefix(true)
+	obj := g.SetPathItem(PathItemInfo{
+		Method:   http.MethodPost,
+		Path:     "/{p0}/",
+		Request:  new(Req),
+		Response: new(Res),
+	})
+
+	assert.Len(t, obj.Parameters, 2)
+	swg, err := g.IndentJSON(true).GenDocument()
+	//println(string(swg))
+	assert.NoError(t, err)
+	expected := `{
+  "swagger": "2.0",
+  "info": {
+    "title": "",
+    "description": "",
+    "termsOfService": "",
+    "contact": {
+      "name": ""
+    },
+    "license": {
+      "name": ""
+    },
+    "version": ""
+  },
+  "basePath": "/",
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "paths": {
+    "/{p0}/": {
+      "post": {
+        "summary": "",
+        "description": "",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int32",
+            "name": "p0",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/SwgenReq"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SwgenRes"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "SwgenReq": {
+      "type": "object",
+      "properties": {
+        "reqData": {}
+      }
+    },
+    "SwgenRes": {
+      "type": "object",
+      "properties": {
+        "aa": {
+          "type": "string"
+        },
+        "any": {},
+        "bb": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "data": {}
+      }
+    }
+  }
+}
+`
+	assert.JSONEq(t, expected, string(swg))
 }

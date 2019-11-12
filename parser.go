@@ -657,7 +657,7 @@ func readSharedTags(tag reflect.StructTag, param *CommonFields) {
 	readIntPtrTag(tag, "maxItems", &param.MaxItems)
 	readIntPtrTag(tag, "minItems", &param.MinItems)
 	readIntPtrTag(tag, "maxProperties", &param.MaxProperties)
-	readIntPtrTag(tag, "minProperties", &param.MaxProperties)
+	readIntPtrTag(tag, "minProperties", &param.MinProperties)
 
 	readFloatTag(tag, "multipleOf", &param.MultipleOf)
 	readFloatPtrTag(tag, "maximum", &param.Maximum)

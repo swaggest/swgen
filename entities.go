@@ -191,6 +191,11 @@ type PathItemInfo struct {
 	additionalData
 }
 
+// Responses returns additional responses.
+func (p *PathItemInfo) Responses() map[int]interface{} {
+	return p.responses
+}
+
 // RemoveResponse removes response with http status code and returns if it existed.
 func (p *PathItemInfo) RemoveResponse(statusCode int) bool {
 	if nil == p.responses {

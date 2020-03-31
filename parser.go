@@ -190,7 +190,7 @@ func (g *Generator) ParseDefinition(i interface{}) SchemaObj {
 			return typeDef.Export()
 		}
 
-		typeDef = *NewSchemaObj("object", g.reflectTypeReliableName(t))
+		typeDef = *NewSchemaObj("object", g.reflectTypeReliableName(t, ""))
 		if typeDef.TypeName == "" {
 			typeDef.TypeName = typeName
 		}
@@ -207,7 +207,7 @@ func (g *Generator) ParseDefinition(i interface{}) SchemaObj {
 
 		var itemSchema SchemaObj
 		if elemType.Kind() != reflect.Struct || (elemType.Kind() == reflect.Struct && elemType.Name() != "") {
-			itemSchema = g.genSchemaForType(elemType)
+			itemSchema = g.genSchemaForType(elemType, "")
 		} else {
 			itemSchema = *NewSchemaObj("object", elemType.Name())
 			itemSchema.setProperties(g.parseDefinitionProperties(v.Elem(), &itemSchema))
@@ -226,13 +226,13 @@ func (g *Generator) ParseDefinition(i interface{}) SchemaObj {
 		}
 
 		typeDef = *NewSchemaObj("object", t.Name())
-		itemDef := g.genSchemaForType(elemType)
+		itemDef := g.genSchemaForType(elemType, "")
 		typeDef.AdditionalProperties = &itemDef
 		if typeDef.TypeName == "" {
 			typeDef.TypeName = typeName
 		}
 	default:
-		typeDef = g.genSchemaForType(t)
+		typeDef = g.genSchemaForType(t, "")
 		typeDef.TypeName = typeDef.Type
 		return typeDef
 	}
@@ -306,11 +306,11 @@ func (g *Generator) parseDefinitionProperties(v reflect.Value, parent *SchemaObj
 
 		if !objReady {
 			if field.Type.Kind() == reflect.Interface && v.Field(i).Elem().IsValid() {
-				obj = g.genSchemaForType(v.Field(i).Elem().Type())
+				obj = g.genSchemaForType(v.Field(i).Elem().Type(), parent.Ref+field.Name)
 			} else {
 				typeName := refl.GoType(field.Type)
 				_ = typeName
-				obj = g.genSchemaForType(field.Type)
+				obj = g.genSchemaForType(field.Type, parent.Ref+field.Name)
 			}
 		}
 
@@ -383,7 +383,7 @@ func (g *Generator) parseDefInQueue() {
 }
 
 // reflectTypeReliableName returns real name of given reflect.Type
-func (g *Generator) reflectTypeReliableName(t reflect.Type) string {
+func (g *Generator) reflectTypeReliableName(t reflect.Type, fallbackRef string) string {
 	if def, ok := reflect.Zero(t).Interface().(SchemaDefinition); ok {
 		typeDef := def.SwaggerDef()
 		if typeDef.TypeName != "" {
@@ -395,10 +395,13 @@ func (g *Generator) reflectTypeReliableName(t reflect.Type) string {
 		// return path.Base(t.PkgPath()) + t.Name()
 		return t.Name()
 	}
+	if fallbackRef != "" {
+		return strings.TrimPrefix(fallbackRef, "#/definitions/")
+	}
 	return fmt.Sprintf("anon_%08x", reflect.Indirect(reflect.ValueOf(t)).FieldByName("hash").Uint())
 }
 
-func (g *Generator) genSchemaForType(t reflect.Type) SchemaObj {
+func (g *Generator) genSchemaForType(t reflect.Type, fallbackRef string) SchemaObj {
 	mapped, found := g.getMappedType(t)
 	if found {
 		t = reflect.TypeOf(mapped)
@@ -432,12 +435,12 @@ func (g *Generator) genSchemaForType(t reflect.Type) SchemaObj {
 	case reflect.Array, reflect.Slice:
 		if t != typeOfJSONRawMsg {
 			smObj.Type = "array"
-			itemSchema := g.genSchemaForType(t.Elem())
+			itemSchema := g.genSchemaForType(t.Elem(), fallbackRef+"Items")
 			smObj.Items = &itemSchema
 		}
 	case reflect.Map:
 		smObj.Type = "object"
-		itemSchema := g.genSchemaForType(t.Elem())
+		itemSchema := g.genSchemaForType(t.Elem(), fallbackRef+"Items")
 		smObj.AdditionalProperties = &itemSchema
 	case reflect.Struct:
 		switch {
@@ -446,7 +449,7 @@ func (g *Generator) genSchemaForType(t reflect.Type) SchemaObj {
 		case reflect.PtrTo(t).Implements(typeOfTextUnmarshaler):
 			smObj.Type = "string"
 		default:
-			name := g.reflectTypeReliableName(t)
+			name := g.reflectTypeReliableName(t, fallbackRef)
 			name = g.makeNameForType(t, name)
 			smObj.Ref = refDefinitionPrefix + name
 			if !g.defExists(t) || !g.defInQueue(t) {
@@ -466,7 +469,7 @@ func (g *Generator) genSchemaForType(t reflect.Type) SchemaObj {
 
 	if sd, ok := reflect.New(t).Interface().(SchemaDefinition); ok {
 		smObj = sd.SwaggerDef().Schema()
-		name := g.reflectTypeReliableName(t)
+		name := g.reflectTypeReliableName(t, fallbackRef)
 		name = g.makeNameForType(t, name)
 		smObj = SchemaObj{Ref: refDefinitionPrefix + name}
 		if !g.defExists(t) || !g.defInQueue(t) {
@@ -574,10 +577,10 @@ func (g *Generator) ParseParameters(i interface{}) (string, []ParamObj) {
 							name = schemaObj.TypeName
 						}
 					} else {
-						schemaObj = g.genSchemaForType(reflect.TypeOf(mappedTo))
+						schemaObj = g.genSchemaForType(reflect.TypeOf(mappedTo), "")
 					}
 				} else {
-					schemaObj = g.genSchemaForType(field.Type)
+					schemaObj = g.genSchemaForType(field.Type, "")
 				}
 			}
 

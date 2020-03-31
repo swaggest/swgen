@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/swaggest/assertjson"
 	"github.com/swaggest/swgen"
 )
 
@@ -32,6 +33,15 @@ type (
 
 	Embedded struct {
 		A int `json:"a" query:"a"`
+	}
+
+	structWithInline struct {
+		Data struct {
+			Deeper struct {
+				B int `path:"b" json:"-"`
+				Embedded
+			} `json:"deeper"`
+		} `json:"data"`
 	}
 )
 
@@ -73,10 +83,17 @@ func TestGenerator_ParseDefinition_Embedded(t *testing.T) {
 		Response: new(structWithIgnoredEmbedded),
 	})
 
+	g.SetPathItem(swgen.PathItemInfo{
+		Method:   http.MethodPost,
+		Path:     "/structWithInline",
+		Response: new(structWithInline),
+	})
+
 	b, err = g.IndentJSON(true).GenDocument()
 	assert.NoError(t, err)
-	assert.JSONEq(t,
-		`{
+
+	assertjson.Equal(t,
+		[]byte(`{
   "swagger": "2.0",
   "info": {
     "title": "",
@@ -175,6 +192,20 @@ func TestGenerator_ParseDefinition_Embedded(t *testing.T) {
         }
       }
     },
+    "/structWithInline": {
+      "post": {
+        "summary": "",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/structWithInline"
+            }
+          }
+        }
+      }
+    },
     "/structWithTaggedEmbedded": {
       "post": {
         "summary": "",
@@ -221,6 +252,31 @@ func TestGenerator_ParseDefinition_Embedded(t *testing.T) {
     "structWithIgnoredEmbedded": {
       "type": "object"
     },
+    "structWithInline": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/structWithInlineData"
+        }
+      }
+    },
+    "structWithInlineData": {
+      "type": "object",
+      "properties": {
+        "deeper": {
+          "$ref": "#/definitions/structWithInlineDataDeeper"
+        }
+      }
+    },
+    "structWithInlineDataDeeper": {
+      "type": "object",
+      "properties": {
+        "a": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
     "structWithTaggedEmbedded": {
       "type": "object",
       "properties": {
@@ -230,7 +286,6 @@ func TestGenerator_ParseDefinition_Embedded(t *testing.T) {
       }
     }
   }
-}`,
-		string(b))
+}`), b)
 
 }

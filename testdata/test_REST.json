@@ -1379,7 +1379,7 @@
       "type": "object",
       "properties": {
         "anon_type_struct": {
-          "$ref": "#/definitions/anon_b66e03cc"
+          "$ref": "#/definitions/SampleTestSampleStructAnonTypeStruct"
         },
         "simple_bool": {
           "type": "boolean",
@@ -1415,6 +1415,23 @@
         "simple_float64": "float64",
         "sub": "github.com/swaggest/swgen/internal/sample.TestSubStruct",
         "sub_slice": "[]github.com/swaggest/swgen/internal/sample.TestSubStruct"
+      }
+    },
+    "SampleTestSampleStructAnonTypeStruct": {
+      "type": "object",
+      "properties": {
+        "int": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-type": "int"
+        }
+      },
+      "x-go-type": "::struct { FieldOne int \"json:\\\"int\\\"\" }",
+      "x-go-property-names": {
+        "int": "FieldOne"
+      },
+      "x-go-property-types": {
+        "int": "int"
       }
     },
     "SampleTestSubStruct": {
@@ -1506,23 +1523,6 @@
       "x-go-property-types": {
         "anything": "::interface {}",
         "whatever": "*[]uint8"
-      }
-    },
-    "anon_b66e03cc": {
-      "type": "object",
-      "properties": {
-        "int": {
-          "type": "integer",
-          "format": "int32",
-          "x-go-type": "int"
-        }
-      },
-      "x-go-type": "::struct { FieldOne int \"json:\\\"int\\\"\" }",
-      "x-go-property-names": {
-        "int": "FieldOne"
-      },
-      "x-go-property-types": {
-        "int": "int"
       }
     },
     "deepReplacementTag": {

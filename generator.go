@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/swaggest/swgen/refl"
+	"github.com/swaggest/refl"
 )
 
 // Generator create swagger document
@@ -19,11 +19,11 @@ type Generator struct {
 	corsEnabled      bool         // allow cross-origin HTTP request
 	corsAllowHeaders []string
 
-	definitionAlloc  map[string]string       // index of allocated TypeNames
-	definitions      defMap                  // list of all definition objects
-	defQueue         map[string]reflect.Type // queue of reflect.Type objects waiting for analysis
-	paths            map[string]PathItem     // list all of paths object
-	typesMap         map[string]interface{}
+	definitionAlloc  map[string]refl.TypeString       // index of allocated TypeNames
+	definitions      defMap                           // list of all definition objects
+	defQueue         map[refl.TypeString]reflect.Type // queue of reflect.Type objects waiting for analysis
+	paths            map[string]PathItem              // list all of paths object
+	typesMap         map[refl.TypeString]interface{}
 	defaultResponses map[int]interface{}
 
 	indentJSON            bool
@@ -34,7 +34,7 @@ type Generator struct {
 	mu sync.Mutex // mutex for Generator's public API
 }
 
-type defMap map[string]SchemaObj
+type defMap map[refl.TypeString]SchemaObj
 
 func (m *defMap) GenDefinitions() (result map[string]SchemaObj) {
 	if m == nil {
@@ -46,7 +46,7 @@ func (m *defMap) GenDefinitions() (result map[string]SchemaObj) {
 		typeDef.Ref = "" // first (top) level Swagger definitions are never references
 		if _, ok := result[typeDef.TypeName]; ok {
 			typeName := t
-			result[typeName] = typeDef
+			result[string(typeName)] = typeDef
 		} else {
 			result[typeDef.TypeName] = typeDef
 		}
@@ -58,12 +58,12 @@ func (m *defMap) GenDefinitions() (result map[string]SchemaObj) {
 func NewGenerator() *Generator {
 	g := &Generator{}
 
-	g.definitions = make(map[string]SchemaObj)
-	g.definitionAlloc = make(map[string]string)
+	g.definitions = make(map[refl.TypeString]SchemaObj)
+	g.definitionAlloc = make(map[string]refl.TypeString)
 
-	g.defQueue = make(map[string]reflect.Type)
+	g.defQueue = make(map[refl.TypeString]reflect.Type)
 	g.paths = make(map[string]PathItem) // list all of paths object
-	g.typesMap = make(map[string]interface{})
+	g.typesMap = make(map[refl.TypeString]interface{})
 
 	g.doc.Schemes = []string{"http", "https"}
 	g.doc.Paths = make(map[string]PathItem)

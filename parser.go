@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/swaggest/swgen/refl"
+	"github.com/swaggest/refl"
 )
 
 const (
@@ -45,7 +45,7 @@ func (g *Generator) makeNameForType(t reflect.Type, baseTypeName string) string 
 	}
 
 	for typeName, allocatedGoTypeName := range g.definitionAlloc {
-		if goTypeName == allocatedGoTypeName {
+		if goTypeName == refl.TypeString(allocatedGoTypeName) {
 			return typeName
 		}
 	}
@@ -59,7 +59,7 @@ func (g *Generator) makeNameForType(t reflect.Type, baseTypeName string) string 
 	}
 
 	allocatedType, isAllocated := g.definitionAlloc[baseTypeName]
-	if isAllocated && allocatedType != goTypeName {
+	if isAllocated && refl.TypeString(allocatedType) != goTypeName {
 		typeIndex := 2
 		pref := strings.Title(path.Base(pkgPath))
 		for {
@@ -131,7 +131,7 @@ func (g *Generator) deleteDefinition(t reflect.Type) {
 // ResetDefinitions will remove all exists definitions and init again
 func (g *Generator) ResetDefinitions() {
 	g.definitions = make(defMap)
-	g.defQueue = make(map[string]reflect.Type)
+	g.defQueue = make(map[refl.TypeString]reflect.Type)
 }
 
 // ParseDefinition create a DefObj from input object, it should be a non-nil pointer to anything
@@ -167,7 +167,7 @@ func (g *Generator) ParseDefinition(i interface{}) SchemaObj {
 		}
 		defer g.parseDefInQueue()
 		if g.reflectGoTypes {
-			typeDef.GoType = refl.GoType(t)
+			typeDef.GoType = string(refl.GoType(t))
 		}
 		g.addDefinition(t, &typeDef)
 
@@ -240,7 +240,7 @@ func (g *Generator) ParseDefinition(i interface{}) SchemaObj {
 	defer g.parseDefInQueue()
 
 	if g.reflectGoTypes {
-		typeDef.GoType = refl.GoType(ot)
+		typeDef.GoType = string(refl.GoType(ot))
 	}
 
 	if typeDef.TypeName != "" { // non-anonymous types should be added to definitions map and returned "in-place" as references
@@ -331,10 +331,10 @@ func (g *Generator) parseDefinitionProperties(v reflect.Value, parent *SchemaObj
 		}
 		if g.reflectGoTypes {
 			if obj.Ref == "" {
-				obj.GoType = refl.GoType(oft)
+				obj.GoType = string(refl.GoType(oft))
 			}
 			parent.GoPropertyNames[propName] = field.Name
-			parent.GoPropertyTypes[propName] = refl.GoType(oft)
+			parent.GoPropertyTypes[propName] = string(refl.GoType(oft))
 		}
 
 		readSharedTags(field.Tag, &obj.CommonFields)
@@ -478,7 +478,7 @@ func (g *Generator) genSchemaForType(t reflect.Type, fallbackRef string) SchemaO
 	}
 
 	if g.reflectGoTypes && smObj.Ref == "" {
-		smObj.GoType = refl.GoType(t)
+		smObj.GoType = string(refl.GoType(t))
 	}
 
 	return smObj
@@ -585,7 +585,7 @@ func (g *Generator) ParseParameters(i interface{}) (string, []ParamObj) {
 			}
 
 			if schemaObj.Type == "" {
-				panic("unsupported field " + field.Name + " of type " + fieldTypeName + " in request of type " + requestTypeName)
+				panic("unsupported field " + field.Name + " of type " + string(fieldTypeName) + " in request of type " + string(requestTypeName))
 			}
 
 			param.CommonFields = schemaObj.CommonFields

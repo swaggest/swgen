@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/swaggest/openapi-go/openapi3"
 	"github.com/swaggest/refl"
 )
 
@@ -736,8 +737,62 @@ func (g *Generator) ResetPaths() {
 
 var regexFindPathParameter = regexp.MustCompile(`\{([^}:]+)(:[^\/]+)?(?:\})`)
 
+func mustNotFail(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
+func setOpenAPIPathItem(info PathItemInfo, g *openapi3.Reflector) {
+	op := openapi3.Operation{}
+	if info.Request != nil {
+		mustNotFail(g.SetRequest(&op, info.Request, info.Method))
+	}
+
+	if info.Response != nil {
+		httpStatus := http.StatusOK
+		if info.SuccessfulResponseCode != 0 {
+			httpStatus = info.SuccessfulResponseCode
+		}
+		mustNotFail(g.SetJSONResponse(&op, info.Response, httpStatus))
+	}
+
+	for httpStatus, response := range info.Responses() {
+		mustNotFail(g.SetJSONResponse(&op, response, httpStatus))
+	}
+
+	if info.Deprecated {
+		op.WithDeprecated(true)
+	}
+	if info.Tag != "" {
+		op.WithTags(info.Tag)
+	}
+	if len(info.Security) > 0 {
+		for _, s := range info.Security {
+			op.WithSecurity(map[string][]string{
+				s: {},
+			})
+		}
+	}
+	if info.Title != "" {
+		op.WithSummary(info.Title)
+	}
+	if info.Description != "" {
+		op.WithDescription(info.Description)
+	}
+
+	pathItem, _ := g.Spec.Paths.MapOfPathItemValues[info.Path]
+	pathItem.WithOperation(info.Method, op)
+
+	g.Spec.Paths.WithMapOfPathItemValuesItem(info.Path, pathItem)
+}
+
 // SetPathItem register path item with some information and input, output
 func (g *Generator) SetPathItem(info PathItemInfo) *OperationObj {
+	if g.oas3Proxy != nil {
+		setOpenAPIPathItem(info, g.oas3Proxy)
+	}
+
 	var (
 		item  PathItem
 		found bool

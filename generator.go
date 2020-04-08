@@ -239,10 +239,14 @@ func (g *Generator) SetInfo(title, description, term, version string) *Generator
 	}
 
 	if g.oas3Proxy != nil {
-		g.oas3Proxy.Spec.Info.Title = title
-		g.oas3Proxy.Spec.Info.Description = &description
-		g.oas3Proxy.Spec.Info.Version = version
-		g.oas3Proxy.Spec.Info.TermsOfService = &term
+		g.oas3Proxy.SpecEns().Info.Title = title
+		if description != "" {
+			g.oas3Proxy.SpecEns().Info.Description = &description
+		}
+		g.oas3Proxy.SpecEns().Info.Version = version
+		if term != "" {
+			g.oas3Proxy.SpecEns().Info.TermsOfService = &term
+		}
 	}
 
 	return g

@@ -30,7 +30,7 @@
     "description": "test IDefinition1 description",
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -60,7 +60,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -93,7 +93,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -126,7 +126,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -159,7 +159,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -192,7 +192,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -222,7 +222,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -252,7 +252,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -285,7 +285,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -305,7 +305,7 @@
     "description": "test1 description",
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -334,7 +334,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -363,7 +363,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -392,7 +392,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -421,7 +421,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -452,7 +452,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -482,7 +482,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -512,7 +512,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -542,7 +542,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -566,7 +566,7 @@
     "description": "test defaults",
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -587,7 +587,7 @@
     "description": "test empty struct",
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -617,7 +617,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -657,7 +657,7 @@
     ],
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -678,7 +678,7 @@
     "description": "test Primitives",
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -699,7 +699,7 @@
     "description": "test Primitives",
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -720,7 +720,7 @@
     "description": "test Primitives",
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -741,7 +741,7 @@
     "description": "test Primitives",
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -771,7 +771,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -804,7 +804,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -834,7 +834,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -855,7 +855,7 @@
     "description": "test1 description",
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -943,7 +943,7 @@
     ],
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -973,7 +973,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -1003,7 +1003,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -1033,7 +1033,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -1063,7 +1063,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -1084,7 +1084,7 @@
     "description": "test7 description",
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -1140,7 +1140,7 @@
     ],
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -1182,7 +1182,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -1206,7 +1206,7 @@
     "description": "test type mapping",
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -1236,7 +1236,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -1266,7 +1266,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {
@@ -1296,7 +1296,7 @@
     },
     "responses": {
      "200": {
-      "description": "",
+      "description": "OK",
       "content": {
        "application/json": {
         "schema": {

@@ -292,8 +292,6 @@ func (g *Generator) AddSecurityDefinition(name string, def SecurityDef) *Generat
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
-	g.doc.SecurityDefinitions[name] = def
-
 	if g.oas3Proxy != nil {
 		ss := openapi3.SecuritySchemeOrRef{}
 		sss := ss.SecuritySchemeEns()
@@ -301,6 +299,16 @@ func (g *Generator) AddSecurityDefinition(name string, def SecurityDef) *Generat
 		switch def.Type {
 		case SecurityBasicAuth:
 			sss.HTTPSecuritySchemeEns().Scheme = "basic"
+			if def.Description != "" {
+				sss.HTTPSecuritySchemeEns().Description = &def.Description
+			}
+		case SecurityBearerToken:
+			sss.HTTPSecuritySchemeEns().Scheme = "bearer"
+
+			if def.BearerFormat != "" {
+				sss.HTTPSecuritySchemeEns().BearerFormat = &def.BearerFormat
+			}
+
 			if def.Description != "" {
 				sss.HTTPSecuritySchemeEns().Description = &def.Description
 			}
@@ -327,6 +335,18 @@ func (g *Generator) AddSecurityDefinition(name string, def SecurityDef) *Generat
 		g.oas3Proxy.SpecEns().ComponentsEns().SecuritySchemesEns().
 			WithMapOfSecuritySchemeOrRefValuesItem(name, ss)
 	}
+
+	if def.Type == SecurityBearerToken {
+		def.Type = SecurityAPIKey
+		def.In = APIKeyInHeader
+		def.Name = "Authorization"
+
+		if def.Description == "" {
+			def.Description = "Should be in form: 'Bearer <token_value>'"
+		}
+	}
+
+	g.doc.SecurityDefinitions[name] = def
 
 	return g
 }

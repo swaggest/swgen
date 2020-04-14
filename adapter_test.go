@@ -51,7 +51,7 @@ func TestInterceptType(t *testing.T) {
 	require.NoError(t, err)
 	assertjson.Equal(t, []byte(`{
 	 "definitions": {
-	  "SwjschemaTestISOWeek": {
+	  "SwgenTestISOWeek": {
 	   "description": "ISO Week",
 	   "examples": [
 		"2006-W43"
@@ -59,7 +59,7 @@ func TestInterceptType(t *testing.T) {
 	   "pattern": "^[0-9]{4}-W(0[1-9]|[1-4][0-9]|5[0-2])$",
 	   "type": "string"
 	  },
-	  "SwjschemaTestUUID": {
+	  "SwgenTestUUID": {
 	   "examples": [
 		"248df4b7-aa70-47b8-a036-33ac447e668d"
 	   ],
@@ -69,10 +69,10 @@ func TestInterceptType(t *testing.T) {
 	 },
 	 "properties": {
 	  "iso_week": {
-	   "$ref": "#/definitions/SwjschemaTestISOWeek"
+	   "$ref": "#/definitions/SwgenTestISOWeek"
 	  },
 	  "uuid": {
-	   "$ref": "#/definitions/SwjschemaTestUUID"
+	   "$ref": "#/definitions/SwgenTestUUID"
 	  }
 	 },
 	 "type": "object"

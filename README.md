@@ -6,6 +6,16 @@
 
 Swagger Generator is a library which helps to generate [Swagger Specification](http://swagger.io/specification/) in JSON format on-the-fly.
 
+## OpenAPI 3.0 Support
+
+OpenAPI 3.0 support is available with `openapi3.Reflector`.
+
+```go
+// Add OpenAPI 3.0 reflector to enable proxying to OpenAPI 3.0 Schema.
+openapi3Reflector := openapi3.Reflector{}
+gen.SetOAS3Proxy(&openapi3Reflector)
+```
+
 ## Installation
 
 You can use `go get` to install the `swgen` package

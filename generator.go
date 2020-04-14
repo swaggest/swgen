@@ -7,11 +7,15 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/swaggest/jsonschema-go"
+	"github.com/swaggest/openapi-go/openapi3"
 	"github.com/swaggest/refl"
 )
 
 // Generator create swagger document
 type Generator struct {
+	oas3Proxy *openapi3.Reflector
+
 	doc  Document
 	host string // address of api in host:port format
 
@@ -144,88 +148,221 @@ func (g *Generator) writeCORSHeaders(w http.ResponseWriter) {
 	w.Header().Set("Access-Control-Allow-Headers", strings.Join(g.corsAllowHeaders, ", "))
 }
 
+func (g *Generator) updateServer() {
+	if len(g.oas3Proxy.SpecEns().Servers) == 0 {
+		g.oas3Proxy.SpecEns().Servers = append(g.oas3Proxy.SpecEns().Servers, openapi3.Server{})
+	}
+
+	if g.host != "" {
+		g.oas3Proxy.SpecEns().Servers[0].URL = "http://" + g.host + g.doc.BasePath
+	} else {
+		g.oas3Proxy.SpecEns().Servers[0].URL = g.doc.BasePath
+	}
+}
+
 // SetHost set host info for swagger specification
 func (g *Generator) SetHost(host string) *Generator {
 	g.mu.Lock()
+	defer g.mu.Unlock()
+
 	g.host = host
-	g.mu.Unlock()
+
+	if g.oas3Proxy != nil {
+		g.updateServer()
+	}
+
 	return g
 }
 
 // SetBasePath set host info for swagger specification
 func (g *Generator) SetBasePath(basePath string) *Generator {
-	basePath = "/" + strings.Trim(basePath, "/")
 	g.mu.Lock()
-	g.doc.BasePath = basePath
-	g.mu.Unlock()
+	defer g.mu.Unlock()
+
+	g.doc.BasePath = "/" + strings.Trim(basePath, "/")
+
+	if g.oas3Proxy != nil {
+		g.updateServer()
+	}
+
 	return g
 }
 
 // SetContact set contact information for API
 func (g *Generator) SetContact(name, url, email string) *Generator {
-	ct := ContactObj{
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
+	g.doc.Info.Contact = ContactObj{
 		Name:  name,
 		URL:   url,
 		Email: email,
 	}
 
-	g.mu.Lock()
-	g.doc.Info.Contact = ct
-	g.mu.Unlock()
+	if g.oas3Proxy != nil {
+		if name != "" {
+			g.oas3Proxy.SpecEns().Info.ContactEns().Name = &name
+		}
+		if url != "" {
+			g.oas3Proxy.SpecEns().Info.ContactEns().URL = &url
+		}
+		if email != "" {
+			g.oas3Proxy.SpecEns().Info.ContactEns().Email = &email
+		}
+	}
+
 	return g
+}
+
+// SetOAS3Proxy enables OpenAPI3 spec collection with provided reflector.
+func (g *Generator) SetOAS3Proxy(oas3Proxy *openapi3.Reflector) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
+	oas3Proxy.DefaultOptions = append(oas3Proxy.DefaultOptions,
+		jsonschema.InterceptType(JSONSchemaInterceptType),
+	)
+
+	g.oas3Proxy = oas3Proxy
 }
 
 // SetInfo set information about API
 func (g *Generator) SetInfo(title, description, term, version string) *Generator {
-	info := InfoObj{
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
+	g.doc.Info = InfoObj{
 		Title:          title,
 		Description:    description,
 		TermsOfService: term,
 		Version:        version,
 	}
 
-	g.mu.Lock()
-	g.doc.Info = info
-	g.mu.Unlock()
+	if g.oas3Proxy != nil {
+		g.oas3Proxy.SpecEns().Info.Title = title
+		if description != "" {
+			g.oas3Proxy.SpecEns().Info.Description = &description
+		}
+		g.oas3Proxy.SpecEns().Info.Version = version
+		if term != "" {
+			g.oas3Proxy.SpecEns().Info.TermsOfService = &term
+		}
+	}
+
 	return g
 }
 
 // SetLicense set license information for API
 func (g *Generator) SetLicense(name, url string) *Generator {
-	ls := LicenseObj{
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
+	g.doc.Info.License = LicenseObj{
 		Name: name,
 		URL:  url,
 	}
 
-	g.mu.Lock()
-	g.doc.Info.License = ls
-	g.mu.Unlock()
+	if g.oas3Proxy != nil {
+		g.oas3Proxy.SpecEns().Info.LicenseEns().Name = name
+
+		if url != "" {
+			g.oas3Proxy.SpecEns().Info.LicenseEns().URL = &url
+		}
+	}
+
 	return g
 }
 
 // AddExtendedField add vendor extension field to document
 func (g *Generator) AddExtendedField(name string, value interface{}) *Generator {
 	g.mu.Lock()
+	defer g.mu.Unlock()
+
 	g.doc.AddExtendedField(name, value)
-	g.mu.Unlock()
+
+	if g.oas3Proxy != nil {
+		g.oas3Proxy.SpecEns().WithMapOfAnythingItem(name, value)
+	}
+
 	return g
 }
 
 // AddSecurityDefinition adds shared security definition to document
 func (g *Generator) AddSecurityDefinition(name string, def SecurityDef) *Generator {
 	g.mu.Lock()
+	defer g.mu.Unlock()
+
+	if g.oas3Proxy != nil {
+		ss := openapi3.SecuritySchemeOrRef{}
+		sss := ss.SecuritySchemeEns()
+
+		switch def.Type {
+		case SecurityBasicAuth:
+			sss.HTTPSecuritySchemeEns().Scheme = "basic"
+			if def.Description != "" {
+				sss.HTTPSecuritySchemeEns().Description = &def.Description
+			}
+		case SecurityBearerToken:
+			sss.HTTPSecuritySchemeEns().Scheme = "bearer"
+
+			if def.BearerFormat != "" {
+				sss.HTTPSecuritySchemeEns().BearerFormat = &def.BearerFormat
+			}
+
+			if def.Description != "" {
+				sss.HTTPSecuritySchemeEns().Description = &def.Description
+			}
+		case SecurityAPIKey:
+			sss.APIKeySecuritySchemeEns().Name = def.Name
+			sss.APIKeySecuritySchemeEns().In = openapi3.APIKeySecuritySchemeIn(def.In)
+			if def.Description != "" {
+				sss.APIKeySecuritySchemeEns().Description = &def.Description
+			}
+		case SecurityOAuth2:
+			switch def.Flow {
+			case Oauth2Implicit:
+				sss.OAuth2SecuritySchemeEns().Flows.ImplicitEns().AuthorizationURL = def.AuthorizationURL
+				sss.OAuth2SecuritySchemeEns().Flows.ImplicitEns().Scopes = def.Scopes
+			case Oauth2Password:
+				sss.OAuth2SecuritySchemeEns().Flows.PasswordEns().TokenURL = def.TokenURL
+				sss.OAuth2SecuritySchemeEns().Flows.PasswordEns().Scopes = def.Scopes
+			}
+			if def.Description != "" {
+				sss.APIKeySecuritySchemeEns().Description = &def.Description
+			}
+		}
+
+		g.oas3Proxy.SpecEns().ComponentsEns().SecuritySchemesEns().
+			WithMapOfSecuritySchemeOrRefValuesItem(name, ss)
+	}
+
+	if def.Type == SecurityBearerToken {
+		def.Type = SecurityAPIKey
+		def.In = APIKeyInHeader
+		def.Name = "Authorization"
+
+		if def.Description == "" {
+			def.Description = "Should be in form: 'Bearer <token_value>'"
+		}
+	}
+
 	g.doc.SecurityDefinitions[name] = def
-	g.mu.Unlock()
+
 	return g
 }
 
 // AddTypeMap adds mapping relation to treat values of same type as source as they were of same type as destination
 func (g *Generator) AddTypeMap(source interface{}, destination interface{}) *Generator {
 	g.mu.Lock()
+	defer g.mu.Unlock()
 
 	goTypeName := refl.GoType(refl.DeepIndirect(reflect.TypeOf(source)))
 	g.typesMap[goTypeName] = destination
-	g.mu.Unlock()
+
+	if g.oas3Proxy != nil {
+		g.oas3Proxy.AddTypeMapping(source, destination)
+	}
+
 	return g
 }
 

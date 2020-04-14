@@ -122,6 +122,8 @@ const (
 	SecurityAPIKey securityType = "apiKey"
 	// SecurityOAuth2 is an OAuth2 security type.
 	SecurityOAuth2 securityType = "oauth2"
+	// SecurityBearerToken is a HTTP Bearer token security type.
+	SecurityBearerToken = "bearer"
 )
 
 type apiKeyIn string
@@ -150,15 +152,18 @@ const (
 type SecurityDef struct {
 	Type securityType `json:"type"`
 
-	// apiKey properties
+	// apiKey properties.
 	In   apiKeyIn `json:"in,omitempty"`
-	Name string   `json:"name,omitempty"` // Example: X-API-Key
+	Name string   `json:"name,omitempty"` // Example: X-API-Key.
 
-	// oauth2 properties
+	// oauth2 properties.
 	Flow             oauthFlow         `json:"flow,omitempty"`
-	AuthorizationURL string            `json:"authorizationUrl,omitempty"` // Example: https://example.com/oauth/authorize
-	TokenURL         string            `json:"tokenUrl,omitempty"`         // Example: https://example.com/oauth/token
-	Scopes           map[string]string `json:"scopes,omitempty"`           // Example: {"read": "Grants read access", "write": "Grants write access"}
+	AuthorizationURL string            `json:"authorizationUrl,omitempty"` // Example: https://example.com/oauth/authorize.
+	TokenURL         string            `json:"tokenUrl,omitempty"`         // Example: https://example.com/oauth/token.
+	Scopes           map[string]string `json:"scopes,omitempty"`           // Example: {"read": "Grants read access", "write": "Grants write access"}.
+
+	// BearerFormat holds arbitrary value for documentation , for example "JWT".
+	BearerFormat string `json:"-"`
 
 	Description string `json:"description,omitempty"`
 }

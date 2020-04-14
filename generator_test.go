@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/swaggest/assertjson"
+	"github.com/swaggest/openapi-go/openapi3"
 	"github.com/swaggest/swgen/internal/sample"
 	"github.com/swaggest/swgen/internal/sample/experiment"
 	"github.com/swaggest/swgen/internal/sample/experiment/variation"
@@ -328,6 +330,11 @@ func createPathItemInfo(path, method, title, description, tag string, deprecated
 
 func TestREST(t *testing.T) {
 	gen := NewGenerator()
+
+	oas3 := openapi3.Reflector{}
+
+	gen.SetOAS3Proxy(&oas3)
+
 	gen.SetHost("localhost").
 		SetBasePath("/").
 		SetInfo("swgen title", "swgen description", "term", "2.0").
@@ -446,7 +453,14 @@ func TestREST(t *testing.T) {
 	assert.NoError(t, writeLastRun("test_REST_last_run.json", bytes))
 
 	expected := readTestFile(t, "test_REST.json")
-	assert.JSONEq(t, expected, string(bytes), coloredJSONDiff(expected, string(bytes)))
+	assertjson.Equal(t, []byte(expected), bytes)
+
+	bytes, err = json.MarshalIndent(oas3.Spec, "", " ")
+	assert.NoError(t, err)
+	assert.NoError(t, writeLastRun("test_REST_OAS3_last_run.json", bytes))
+
+	expected = readTestFile(t, "test_REST_OAS3.json")
+	assertjson.Equal(t, []byte(expected), bytes)
 }
 
 func getTestDataDir(filename string) string {

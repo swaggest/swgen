@@ -1,0 +1,1830 @@
+{
+ "openapi": "3.0.2",
+ "info": {
+  "title": "swgen title",
+  "description": "swgen description",
+  "termsOfService": "term",
+  "contact": {
+   "name": "Dylan Noblitt",
+   "url": "http://example.com",
+   "email": "dylan.noblitt@example.com"
+  },
+  "license": {
+   "name": "BEER-WARE",
+   "url": "https://fedoraproject.org/wiki/Licensing/Beerware"
+  },
+  "version": "2.0"
+ },
+ "servers": [
+  {
+   "url": "http://localhost/"
+  }
+ ],
+ "paths": {
+  "/V1/IDefinition1": {
+   "post": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test IDefinition1 name",
+    "description": "test IDefinition1 description",
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwgenDefinitionExample"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/anonymous1": {
+   "post": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test10 name",
+    "description": "test10 description",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenTestSimpleStruct"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "additionalProperties": {
+          "type": "integer"
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/anonymous2": {
+   "post": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test11 name",
+    "description": "test11 description",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenTestSimpleStruct"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "additionalProperties": {
+          "type": "string"
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/anonymous3": {
+   "post": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test12 name",
+    "description": "test12 description",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenTestSimpleStruct"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/anonymous4": {
+   "post": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test13 name",
+    "description": "test13 description",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenTestSimpleStruct"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "type": "integer"
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/anonymous5": {
+   "post": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test14 name",
+    "description": "test14 description",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenTestSimpleStruct"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "string"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/anonymous6": {
+   "post": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test15 name",
+    "description": "test15 description",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenTestSimpleStruct"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "boolean"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/anonymous7": {
+   "post": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test16 name",
+    "description": "test16 description",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenTestSimpleStruct"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "additionalProperties": {
+          "$ref": "#/components/schemas/SwgenTestSimpleStruct"
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/combine": {
+   "delete": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test5 name",
+    "description": "test5 description",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenTestSimpleMapList"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwgenTestSubTypes"
+        }
+       }
+      }
+     }
+    },
+    "deprecated": true
+   },
+   "get": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test1 name",
+    "description": "test1 description",
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwgenTestSimpleStruct"
+        }
+       }
+      }
+     }
+    },
+    "deprecated": true
+   },
+   "options": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test7 name",
+    "description": "test7 description",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenTestSubTypes"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwgenTestSimpleStruct"
+        }
+       }
+      }
+     }
+    },
+    "deprecated": true
+   },
+   "patch": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test6 name",
+    "description": "test6 description",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenTestSubTypes"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwgenTestSimpleStruct"
+        }
+       }
+      }
+     }
+    },
+    "deprecated": true
+   },
+   "post": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test4 name",
+    "description": "test4 description",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenTestSimpleMaps"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwgenTestSimpleMapList"
+        }
+       }
+      }
+     }
+    },
+    "deprecated": true
+   },
+   "put": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test3 name",
+    "description": "test3 description",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenTestSimpleSlices"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwgenTestSimpleMaps"
+        }
+       }
+      }
+     }
+    },
+    "deprecated": true
+   }
+  },
+  "/V1/date1": {
+   "post": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test date 1 name",
+    "description": "test date 1 description",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenTestSimpleStruct"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwgenSimpleDateTime"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/date2": {
+   "post": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test date 2 name",
+    "description": "test date 2 description",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenTestSimpleStruct"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwgenSliceDateTime"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/date3": {
+   "post": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test date 3 name",
+    "description": "test date 3 description",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenTestSimpleStruct"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwgenMapDateTime"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/date4": {
+   "post": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test date 4 name",
+    "description": "test date 4 description",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenTestSimpleStruct"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/SwgenMapDateTime"
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/defaults1": {
+   "get": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "default",
+    "description": "test defaults",
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwgenTestDefaults"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/empty": {
+   "post": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test empty struct",
+    "description": "test empty struct",
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwgenTestEmptyStruct"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/nullTypes": {
+   "post": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test nulltypes",
+    "description": "test nulltypes",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenNullTypes"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwgenNullTypes"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/pathParams/{category:[a-zA-Z]{32}}/{id:[0-9]+}": {
+   "get": {
+    "tags": [
+     "V1"
+    ],
+    "summary": "test8 name",
+    "description": "test8 description",
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "minimum": 0,
+       "type": "integer"
+      }
+     },
+     {
+      "name": "category",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwgenTestSimpleStruct"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/primitiveTypes1": {
+   "post": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "testPrimitives",
+    "description": "test Primitives",
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "integer"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/primitiveTypes2": {
+   "post": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "testPrimitives",
+    "description": "test Primitives",
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "number"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/primitiveTypes3": {
+   "post": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "testPrimitives",
+    "description": "test Primitives",
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "string"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/primitiveTypes4": {
+   "post": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "testPrimitives",
+    "description": "test Primitives",
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "string"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/slice1": {
+   "post": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test slice 1 name",
+    "description": "test slice 1 description",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenTestSimpleStruct"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/SwgenMapDateTime"
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/slice2": {
+   "post": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test slice 2 name",
+    "description": "test slice 2 description",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenTestSimpleStruct"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwgenSliceType"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/struct-collision": {
+   "post": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test struct name collision",
+    "description": "test struct name collision",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenTestSampleStruct"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwgenTestSampleStruct"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/test1": {
+   "get": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test1 name",
+    "description": "test1 description",
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwgenTestSimpleStruct"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/test2": {
+   "get": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test2 name",
+    "description": "test2 description",
+    "parameters": [
+     {
+      "name": "simple_string",
+      "in": "query",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "simple_int",
+      "in": "query",
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "name": "simple_int32",
+      "in": "query",
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "name": "simple_int64",
+      "in": "query",
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "name": "simple_uint32",
+      "in": "query",
+      "schema": {
+       "minimum": 0,
+       "type": "integer"
+      }
+     },
+     {
+      "name": "simple_uint64",
+      "in": "query",
+      "schema": {
+       "minimum": 0,
+       "type": "integer"
+      }
+     },
+     {
+      "name": "simple_float32",
+      "in": "query",
+      "schema": {
+       "type": "number"
+      }
+     },
+     {
+      "name": "simple_float64",
+      "in": "query",
+      "schema": {
+       "type": "number"
+      }
+     },
+     {
+      "name": "simple_bool",
+      "in": "query",
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwgenTestSimpleSlices"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/test3": {
+   "put": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test3 name",
+    "description": "test3 description",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenTestSimpleSlices"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwgenTestSimpleMaps"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/test4": {
+   "post": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test4 name",
+    "description": "test4 description",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenTestSimpleMaps"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwgenTestSimpleMapList"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/test5": {
+   "delete": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test5 name",
+    "description": "test5 description",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenTestSimpleMapList"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwgenTestSubTypes"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/test6": {
+   "patch": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test6 name",
+    "description": "test6 description",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenTestSubTypes"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwgenTestSimpleStruct"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/test7": {
+   "options": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test7 name",
+    "description": "test7 description",
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwgenTestSimpleSlices"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/test8": {
+   "get": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test8v1 name",
+    "description": "test8v1 description",
+    "parameters": [
+     {
+      "name": "field1",
+      "in": "query",
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "name": "field2",
+      "in": "query",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "field3",
+      "in": "query",
+      "schema": {
+       "$ref": "#/components/schemas/SwgenSimpleTestReplacement"
+      }
+     },
+     {
+      "name": "field4",
+      "in": "query",
+      "style": "form",
+      "explode": false,
+      "schema": {
+       "type": "array",
+       "items": {
+        "type": "integer"
+       }
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "additionalProperties": {
+          "$ref": "#/components/schemas/SwgenTestSimpleStruct"
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/test9": {
+   "post": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test9 name",
+    "description": "test9 description",
+    "parameters": [
+     {
+      "name": "fieldQuery",
+      "in": "query",
+      "schema": {
+       "type": "integer"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenMixedStruct"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "additionalProperties": {
+          "$ref": "#/components/schemas/SwgenTestSimpleStruct"
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/type-map": {
+   "post": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test type mapping",
+    "description": "test type mapping",
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwgenTypeMapHolder"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/typeReplacement1": {
+   "post": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test9 name",
+    "description": "test9 description",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenTestSubTypes"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwgenTestWrapParams"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V1/unknown": {
+   "post": {
+    "tags": [
+     "v1"
+    ],
+    "summary": "test unknown types",
+    "description": "test unknown types",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenUnknown"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwgenUnknown"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/V2/struct-collision": {
+   "post": {
+    "tags": [
+     "v2"
+    ],
+    "summary": "test struct name collision",
+    "description": "test struct name collision",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SampleTestSampleStruct"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SampleTestSampleStruct"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "components": {
+  "schemas": {
+   "SampleTestSampleStruct": {
+    "type": "object",
+    "properties": {
+     "anon_type_struct": {
+      "type": "object",
+      "properties": {
+       "int": {
+        "type": "integer"
+       }
+      }
+     },
+     "simple_bool": {
+      "type": "boolean"
+     },
+     "simple_float64": {
+      "type": "number"
+     },
+     "sub": {
+      "$ref": "#/components/schemas/SampleTestSubStruct"
+     },
+     "sub_slice": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/SampleTestSubStruct"
+      }
+     }
+    }
+   },
+   "SampleTestSubStruct": {
+    "type": "object",
+    "properties": {
+     "sample_int": {
+      "type": "integer"
+     }
+    }
+   },
+   "SwgenDeepReplacementTag": {
+    "type": "object",
+    "properties": {
+     "test_field_1": {
+      "type": "string",
+      "format": "double"
+     }
+    }
+   },
+   "SwgenDefinitionExample": {
+    "type": "object",
+    "format": "byte"
+   },
+   "SwgenMapDateTime": {
+    "type": "object",
+    "properties": {
+     "items": {
+      "type": "object",
+      "additionalProperties": {
+       "$ref": "#/components/schemas/SwgenSimpleDateTime"
+      }
+     }
+    }
+   },
+   "SwgenMixedStruct": {
+    "type": "object",
+    "properties": {
+     "anonProp": {
+      "type": "integer"
+     },
+     "fieldBody": {
+      "type": "integer"
+     }
+    }
+   },
+   "SwgenNullBool": {
+    "type": "object"
+   },
+   "SwgenNullDate": {
+    "type": "object",
+    "format": "date"
+   },
+   "SwgenNullDateTime": {
+    "type": "object",
+    "format": "date-time"
+   },
+   "SwgenNullFloat64": {
+    "type": "object",
+    "format": "float"
+   },
+   "SwgenNullInt64": {
+    "type": "object",
+    "format": "int64"
+   },
+   "SwgenNullString": {
+    "type": "object"
+   },
+   "SwgenNullTimestamp": {
+    "type": "object",
+    "format": "int64"
+   },
+   "SwgenNullTypes": {
+    "type": "object",
+    "properties": {
+     "null_bool": {
+      "$ref": "#/components/schemas/SwgenNullBool"
+     },
+     "null_date": {
+      "$ref": "#/components/schemas/SwgenNullDate"
+     },
+     "null_date_time": {
+      "$ref": "#/components/schemas/SwgenNullDateTime"
+     },
+     "null_float": {
+      "$ref": "#/components/schemas/SwgenNullFloat64"
+     },
+     "null_int": {
+      "$ref": "#/components/schemas/SwgenNullInt64"
+     },
+     "null_string": {
+      "$ref": "#/components/schemas/SwgenNullString"
+     },
+     "null_timestamp": {
+      "$ref": "#/components/schemas/SwgenNullTimestamp"
+     }
+    }
+   },
+   "SwgenSimpleDateTime": {
+    "type": "object",
+    "properties": {
+     "time": {
+      "type": "string",
+      "format": "date-time"
+     }
+    }
+   },
+   "SwgenSimpleTestReplacement": {
+    "type": "string"
+   },
+   "SwgenSliceDateTime": {
+    "type": "object",
+    "properties": {
+     "items": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/SwgenSimpleDateTime"
+      }
+     }
+    }
+   },
+   "SwgenSliceType": {
+    "type": "number"
+   },
+   "SwgenTestDefaults": {
+    "type": "object",
+    "properties": {
+     "field1": {
+      "type": "integer"
+     },
+     "field2": {
+      "type": "number"
+     },
+     "field3": {
+      "type": "string"
+     },
+     "field4": {
+      "type": "boolean"
+     },
+     "field5": {
+      "type": "array",
+      "items": {
+       "type": "integer"
+      }
+     },
+     "field6": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "integer"
+      }
+     },
+     "field7": {
+      "minimum": 0,
+      "type": "integer",
+      "nullable": true
+     }
+    }
+   },
+   "SwgenTestEmptyStruct": {
+    "type": "object"
+   },
+   "SwgenTestSampleStruct": {
+    "type": "object",
+    "properties": {
+     "simple_int": {
+      "type": "integer"
+     },
+     "simple_string": {
+      "type": "string"
+     },
+     "sub": {
+      "$ref": "#/components/schemas/SwgenTestSubStruct"
+     },
+     "sub_slice": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/SwgenTestSubStruct"
+      }
+     }
+    }
+   },
+   "SwgenTestSimpleMapList": {
+    "type": "object",
+    "properties": {
+     "map_list_bool": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "additionalProperties": {
+        "type": "boolean"
+       }
+      }
+     },
+     "map_list_float32": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "additionalProperties": {
+        "type": "number"
+       }
+      }
+     },
+     "map_list_float64": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "additionalProperties": {
+        "type": "number"
+       }
+      }
+     },
+     "map_list_int": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "additionalProperties": {
+        "type": "integer"
+       }
+      }
+     },
+     "map_list_int32": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "additionalProperties": {
+        "type": "integer"
+       }
+      }
+     },
+     "map_list_int64": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "additionalProperties": {
+        "type": "integer"
+       }
+      }
+     },
+     "map_list_string": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "additionalProperties": {
+        "type": "string"
+       }
+      }
+     },
+     "map_list_uint32": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "additionalProperties": {
+        "minimum": 0,
+        "type": "integer"
+       }
+      }
+     },
+     "map_list_uint64": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "additionalProperties": {
+        "minimum": 0,
+        "type": "integer"
+       }
+      }
+     }
+    }
+   },
+   "SwgenTestSimpleMaps": {
+    "type": "object",
+    "properties": {
+     "map_bool": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "boolean"
+      }
+     },
+     "map_float32": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "number"
+      }
+     },
+     "map_float64": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "number"
+      }
+     },
+     "map_int": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "integer"
+      }
+     },
+     "map_int32": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "integer"
+      }
+     },
+     "map_int64": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "integer"
+      }
+     },
+     "map_string": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "string"
+      }
+     },
+     "map_uint32": {
+      "type": "object",
+      "additionalProperties": {
+       "minimum": 0,
+       "type": "integer"
+      }
+     },
+     "map_uint64": {
+      "type": "object",
+      "additionalProperties": {
+       "minimum": 0,
+       "type": "integer"
+      }
+     }
+    }
+   },
+   "SwgenTestSimpleSlices": {
+    "type": "object",
+    "properties": {
+     "list_bool": {
+      "type": "array",
+      "items": {
+       "type": "boolean"
+      }
+     },
+     "list_float32": {
+      "type": "array",
+      "items": {
+       "type": "number"
+      }
+     },
+     "list_float64": {
+      "type": "array",
+      "items": {
+       "type": "number"
+      }
+     },
+     "list_int": {
+      "type": "array",
+      "items": {
+       "type": "integer"
+      }
+     },
+     "list_int32": {
+      "type": "array",
+      "items": {
+       "type": "integer"
+      }
+     },
+     "list_int64": {
+      "type": "array",
+      "items": {
+       "type": "integer"
+      }
+     },
+     "list_string": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "list_uint32": {
+      "type": "array",
+      "items": {
+       "minimum": 0,
+       "type": "integer"
+      }
+     },
+     "list_uint64": {
+      "type": "array",
+      "items": {
+       "minimum": 0,
+       "type": "integer"
+      }
+     }
+    }
+   },
+   "SwgenTestSimpleStruct": {
+    "required": [
+     "simple_int"
+    ],
+    "type": "object",
+    "properties": {
+     "simple_bool": {
+      "type": "boolean"
+     },
+     "simple_float32": {
+      "type": "number"
+     },
+     "simple_float64": {
+      "type": "number"
+     },
+     "simple_int": {
+      "type": "integer"
+     },
+     "simple_int32": {
+      "type": "integer"
+     },
+     "simple_int64": {
+      "type": "integer"
+     },
+     "simple_string": {
+      "type": "string"
+     },
+     "simple_uint32": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "simple_uint64": {
+      "minimum": 0,
+      "type": "integer"
+     }
+    }
+   },
+   "SwgenTestSubStruct": {
+    "type": "object",
+    "properties": {
+     "sample_int": {
+      "type": "integer"
+     }
+    }
+   },
+   "SwgenTestSubTypes": {
+    "type": "object",
+    "properties": {
+     "test_simple_map_list": {
+      "$ref": "#/components/schemas/SwgenTestSimpleMapList"
+     },
+     "test_simple_maps": {
+      "$ref": "#/components/schemas/SwgenTestSimpleMaps"
+     },
+     "test_simple_slices": {
+      "$ref": "#/components/schemas/SwgenTestSimpleSlices"
+     },
+     "test_simple_struct": {
+      "$ref": "#/components/schemas/SwgenTestSimpleStruct"
+     }
+    }
+   },
+   "SwgenTestWrapParams": {
+    "type": "object",
+    "properties": {
+     "deep_replacement": {
+      "$ref": "#/components/schemas/SwgenDeepReplacementTag"
+     },
+     "should_be_sting": {
+      "type": "integer",
+      "format": "-"
+     },
+     "simple_test_replacement": {
+      "$ref": "#/components/schemas/SwgenSimpleTestReplacement"
+     }
+    }
+   },
+   "SwgenTypeMap": {
+    "type": "object",
+    "additionalProperties": {
+     "type": "integer"
+    }
+   },
+   "SwgenTypeMapHolder": {
+    "type": "object",
+    "properties": {
+     "m": {
+      "$ref": "#/components/schemas/SwgenTypeMap"
+     }
+    }
+   },
+   "SwgenUnknown": {
+    "type": "object",
+    "properties": {
+     "anything": {},
+     "whatever": {}
+    }
+   }
+  }
+ }
+}

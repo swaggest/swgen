@@ -456,6 +456,7 @@ func TestREST(t *testing.T) {
 	assertjson.Equal(t, []byte(expected), bytes)
 
 	bytes, err = json.MarshalIndent(oas3.Spec, "", " ")
+	assert.NoError(t, err)
 	assert.NoError(t, writeLastRun("test_REST_OAS3_last_run.json", bytes))
 
 	expected = readTestFile(t, "test_REST_OAS3.json")

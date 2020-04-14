@@ -781,7 +781,7 @@ func setOpenAPIPathItem(info PathItemInfo, g *openapi3.Reflector) {
 		op.WithDescription(info.Description)
 	}
 
-	pathItem, _ := g.Spec.Paths.MapOfPathItemValues[info.Path]
+	pathItem := g.Spec.Paths.MapOfPathItemValues[info.Path]
 	pathItem.WithOperation(info.Method, op)
 
 	g.Spec.Paths.WithMapOfPathItemValuesItem(info.Path, pathItem)

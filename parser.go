@@ -797,7 +797,7 @@ func (g *Generator) SetPathItem(info PathItemInfo) *OperationObj {
 	if g.oas3Proxy != nil {
 		err := setOpenAPIPathItem(info, g.oas3Proxy)
 		if err != nil {
-			panic(err)
+			panic(fmt.Errorf("failed to add OpenAPI 3 operation %s %s: %v", info.Method, info.Path, err))
 		}
 	}
 

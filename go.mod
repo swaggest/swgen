@@ -7,7 +7,7 @@ require (
 	github.com/stretchr/testify v1.5.1
 	github.com/swaggest/assertjson v1.0.0
 	github.com/swaggest/jsonschema-go v0.2.4
-	github.com/swaggest/openapi-go v0.1.2
+	github.com/swaggest/openapi-go v0.1.3-0.20200420192806-9c433376503c
 	github.com/swaggest/refl v0.1.2
 	github.com/yudai/gojsondiff v1.0.0
 )

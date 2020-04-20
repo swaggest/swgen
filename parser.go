@@ -737,16 +737,13 @@ func (g *Generator) ResetPaths() {
 
 var regexFindPathParameter = regexp.MustCompile(`\{([^}:]+)(:[^\/]+)?(?:\})`)
 
-func mustNotFail(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
-func setOpenAPIPathItem(info PathItemInfo, g *openapi3.Reflector) {
+func setOpenAPIPathItem(info PathItemInfo, g *openapi3.Reflector) error {
 	op := openapi3.Operation{}
 	if info.Request != nil {
-		mustNotFail(g.SetRequest(&op, info.Request, info.Method))
+		err := g.SetRequest(&op, info.Request, info.Method)
+		if err != nil {
+			return err
+		}
 	}
 
 	if info.Response != nil {
@@ -754,19 +751,28 @@ func setOpenAPIPathItem(info PathItemInfo, g *openapi3.Reflector) {
 		if info.SuccessfulResponseCode != 0 {
 			httpStatus = info.SuccessfulResponseCode
 		}
-		mustNotFail(g.SetJSONResponse(&op, info.Response, httpStatus))
+
+		err := g.SetJSONResponse(&op, info.Response, httpStatus)
+		if err != nil {
+			return err
+		}
 	}
 
 	for httpStatus, response := range info.Responses() {
-		mustNotFail(g.SetJSONResponse(&op, response, httpStatus))
+		err := g.SetJSONResponse(&op, response, httpStatus)
+		if err != nil {
+			return err
+		}
 	}
 
 	if info.Deprecated {
 		op.WithDeprecated(true)
 	}
+
 	if info.Tag != "" {
 		op.WithTags(info.Tag)
 	}
+
 	if len(info.Security) > 0 {
 		for _, s := range info.Security {
 			op.WithSecurity(map[string][]string{
@@ -774,23 +780,25 @@ func setOpenAPIPathItem(info PathItemInfo, g *openapi3.Reflector) {
 			})
 		}
 	}
+
 	if info.Title != "" {
 		op.WithSummary(info.Title)
 	}
+
 	if info.Description != "" {
 		op.WithDescription(info.Description)
 	}
 
-	pathItem := g.Spec.Paths.MapOfPathItemValues[info.Path]
-	pathItem.WithOperation(info.Method, op)
-
-	g.Spec.Paths.WithMapOfPathItemValuesItem(info.Path, pathItem)
+	return g.Spec.AddOperation(info.Method, info.Path, op)
 }
 
 // SetPathItem register path item with some information and input, output
 func (g *Generator) SetPathItem(info PathItemInfo) *OperationObj {
 	if g.oas3Proxy != nil {
-		setOpenAPIPathItem(info, g.oas3Proxy)
+		err := setOpenAPIPathItem(info, g.oas3Proxy)
+		if err != nil {
+			panic(fmt.Errorf("failed to add OpenAPI 3 operation %s %s: %v", info.Method, info.Path, err))
+		}
 	}
 
 	var (

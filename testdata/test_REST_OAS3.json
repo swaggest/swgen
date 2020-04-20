@@ -629,7 +629,7 @@
     }
    }
   },
-  "/V1/pathParams/{category:[a-zA-Z]{32}}/{id:[0-9]+}": {
+  "/V1/pathParams/{category}/{id}": {
    "get": {
     "tags": [
      "V1"

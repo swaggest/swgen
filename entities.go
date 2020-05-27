@@ -290,6 +290,9 @@ type SwaggerData struct {
 	SchemaObj
 }
 
+// IgnoreTypeName is a marker interface for github.com/swaggest/jsonschema-go.
+func (s SwaggerData) IgnoreTypeName() {}
+
 // SwaggerDef returns schema object.
 func (s SwaggerData) SwaggerDef() SwaggerData {
 	return s

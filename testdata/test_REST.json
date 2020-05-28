@@ -1512,7 +1512,7 @@
           "x-go-type": "::interface {}"
         },
         "whatever": {
-          "x-go-type": "*[]uint8"
+          "x-go-type": "*encoding/json.RawMessage"
         }
       },
       "x-go-type": "github.com/swaggest/swgen.Unknown",
@@ -1522,7 +1522,7 @@
       },
       "x-go-property-types": {
         "anything": "::interface {}",
-        "whatever": "*[]uint8"
+        "whatever": "*encoding/json.RawMessage"
       }
     },
     "deepReplacementTag": {

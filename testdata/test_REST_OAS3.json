@@ -808,7 +808,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/SwgenSliceType"
+         "type": "number"
         }
        }
       }
@@ -1122,7 +1122,7 @@
       "name": "field3",
       "in": "query",
       "schema": {
-       "$ref": "#/components/schemas/SwgenSimpleTestReplacement"
+       "type": "string"
       }
      },
      {
@@ -1443,9 +1443,6 @@
      }
     }
    },
-   "SwgenSimpleTestReplacement": {
-    "type": "string"
-   },
    "SwgenSliceDateTime": {
     "type": "object",
     "properties": {
@@ -1456,9 +1453,6 @@
       }
      }
     }
-   },
-   "SwgenSliceType": {
-    "type": "number"
    },
    "SwgenTestDefaults": {
     "type": "object",
@@ -1800,21 +1794,18 @@
       "format": "-"
      },
      "simple_test_replacement": {
-      "$ref": "#/components/schemas/SwgenSimpleTestReplacement"
+      "type": "string"
      }
-    }
-   },
-   "SwgenTypeMap": {
-    "type": "object",
-    "additionalProperties": {
-     "type": "integer"
     }
    },
    "SwgenTypeMapHolder": {
     "type": "object",
     "properties": {
      "m": {
-      "$ref": "#/components/schemas/SwgenTypeMap"
+      "type": "object",
+      "additionalProperties": {
+       "type": "integer"
+      }
      }
     }
    },

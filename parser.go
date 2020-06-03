@@ -756,6 +756,19 @@ func setOpenAPIPathItem(info PathItemInfo, g *openapi3.Reflector) error {
 		if err != nil {
 			return err
 		}
+	} else {
+		httpStatus := http.StatusNoContent
+		if info.SuccessfulResponseCode != 0 {
+			httpStatus = info.SuccessfulResponseCode
+		}
+
+		resp := openapi3.Response{
+			Description: http.StatusText(httpStatus),
+		}
+
+		op.Responses.WithMapOfResponseOrRefValuesItem(strconv.Itoa(httpStatus), openapi3.ResponseOrRef{
+			Response: &resp,
+		})
 	}
 
 	for httpStatus, response := range info.Responses() {

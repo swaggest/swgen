@@ -2,6 +2,8 @@ package swgen
 
 import (
 	"fmt"
+	"github.com/swaggest/assertjson"
+	"github.com/swaggest/jsonschema-go"
 	"mime/multipart"
 	"net/http"
 	"reflect"
@@ -618,4 +620,146 @@ func TestGenerator_SetPathItem_emptyInterface(t *testing.T) {
 }
 `
 	assert.JSONEq(t, expected, string(swg))
+}
+
+var (
+	_ jsonschema.RawExposer = ISOWeek("")
+	_ jsonschema.Exposer    = ISOCountry("")
+)
+
+// ISOWeek is an ISO week.
+type ISOWeek string
+
+// JSONSchemaBytes returns JSON Schema definition.
+func (ISOWeek) JSONSchemaBytes() ([]byte, error) {
+	return []byte(`{
+		"type": "string",
+		"examples": ["2018-W43"],
+		"description": "ISO Week",
+		"pattern": "^[0-9]{4}-W(0[1-9]|[1-4][0-9]|5[0-3])$"
+	}`), nil
+}
+
+type ISOCountry string
+
+// JSONSchemaBytes returns JSON Schema definition.
+func (ISOCountry) JSONSchema() (jsonschema.Schema, error) {
+	s := jsonschema.Schema{}
+
+	s.AddType(jsonschema.String)
+	s.WithExamples("US")
+	s.WithDescription("ISO Country")
+	s.WithPattern("^[a-zA-Z]{2}$")
+	s.WithMinLength(2)
+	s.WithMaxLength(2)
+
+	return s, nil
+}
+
+func TestGenerator_SetPathItem_exposer(t *testing.T) {
+	type Req struct {
+		Week    ISOWeek    `query:"week"`
+		Country ISOCountry `query:"country"`
+	}
+
+	type Resp struct {
+		Week    ISOWeek    `json:"week"`
+		Country ISOCountry `json:"country"`
+	}
+
+	g := NewGenerator()
+	g.AddPackagePrefix(true)
+	obj := g.SetPathItem(PathItemInfo{
+		Method:   http.MethodGet,
+		Path:     "/",
+		Request:  new(Req),
+		Response: new(Resp),
+	})
+
+	assert.Len(t, obj.Parameters, 2)
+	swg, err := g.IndentJSON(true).GenDocument()
+	//println(string(swg))
+	assert.NoError(t, err)
+
+	assertjson.Equal(t, []byte(`{
+        	            	  "swagger": "2.0",
+        	            	  "info": {
+        	            	    "title": "",
+        	            	    "description": "",
+        	            	    "termsOfService": "",
+        	            	    "contact": {
+        	            	      "name": ""
+        	            	    },
+        	            	    "license": {
+        	            	      "name": ""
+        	            	    },
+        	            	    "version": ""
+        	            	  },
+        	            	  "basePath": "/",
+        	            	  "schemes": [
+        	            	    "http",
+        	            	    "https"
+        	            	  ],
+        	            	  "paths": {
+        	            	    "/": {
+        	            	      "get": {
+        	            	        "summary": "",
+        	            	        "description": "",
+        	            	        "parameters": [
+        	            	          {
+        	            	            "description": "ISO Week",
+        	            	            "type": "string",
+        	            	            "pattern": "^[0-9]{4}-W(0[1-9]|[1-4][0-9]|5[0-3])$",
+        	            	            "name": "week",
+        	            	            "in": "query"
+        	            	          },
+        	            	          {
+        	            	            "description": "ISO Country",
+        	            	            "type": "string",
+        	            	            "pattern": "^[a-zA-Z]{2}$",
+        	            	            "maxLength": 2,
+        	            	            "minLength": 2,
+        	            	            "name": "country",
+        	            	            "in": "query"
+        	            	          }
+        	            	        ],
+        	            	        "responses": {
+        	            	          "200": {
+        	            	            "description": "OK",
+        	            	            "schema": {
+        	            	              "$ref": "#/definitions/SwgenResp"
+        	            	            }
+        	            	          }
+        	            	        }
+        	            	      }
+        	            	    }
+        	            	  },
+        	            	  "definitions": {
+        	            	    "SwgenISOCountry": {
+        	            	      "description": "ISO Country",
+        	            	      "type": "string",
+        	            	      "pattern": "^[a-zA-Z]{2}$",
+        	            	      "maxLength": 2,
+        	            	      "minLength": 2,
+        	            	      "example": "US"
+        	            	    },
+        	            	    "SwgenISOWeek": {
+        	            	      "description": "ISO Week",
+        	            	      "type": "string",
+        	            	      "pattern": "^[0-9]{4}-W(0[1-9]|[1-4][0-9]|5[0-3])$",
+        	            	      "example": "2018-W43"
+        	            	    },
+        	            	    "SwgenResp": {
+        	            	      "type": "object",
+        	            	      "properties": {
+        	            	        "country": {
+        	            	          "$ref": "#/definitions/SwgenISOCountry"
+        	            	        },
+        	            	        "week": {
+        	            	          "$ref": "#/definitions/SwgenISOWeek"
+        	            	        }
+        	            	      }
+        	            	    }
+        	            	  }
+        	            	}`), swg, string(swg))
 }

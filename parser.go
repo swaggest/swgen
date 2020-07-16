@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/swaggest/jsonschema-go"
 	"github.com/swaggest/openapi-go/openapi3"
 	"github.com/swaggest/refl"
 )
@@ -155,8 +156,8 @@ func (g *Generator) ParseDefinition(i interface{}) SchemaObj {
 		v = reflect.ValueOf(mappedTo)
 	}
 
-	if definition, ok := i.(SchemaDefinition); ok {
-		typeDef = definition.SwaggerDef().Schema()
+	if definition, ok := swaggerData(i); ok {
+		typeDef = definition.Schema()
 		if typeDef.TypeName == "" {
 			typeName = t.Name()
 		} else {
@@ -297,8 +298,8 @@ func (g *Generator) parseDefinitionProperties(v reflect.Value, parent *SchemaObj
 		)
 
 		if mapped, found := g.getMappedType(field.Type); found {
-			if def, ok := mapped.(SchemaDefinition); ok {
-				obj = def.SwaggerDef().Schema()
+			if def, ok := swaggerData(mapped); ok {
+				obj = def.Schema()
 				objReady = true
 			} else {
 				field.Type = reflect.TypeOf(mapped)
@@ -385,8 +386,8 @@ func (g *Generator) parseDefInQueue() {
 
 // reflectTypeReliableName returns real name of given reflect.Type
 func (g *Generator) reflectTypeReliableName(t reflect.Type, fallbackRef string) string {
-	if def, ok := reflect.Zero(t).Interface().(SchemaDefinition); ok {
-		typeDef := def.SwaggerDef()
+	if def, ok := swaggerData(reflect.Zero(t).Interface()); ok {
+		typeDef := def
 		if typeDef.TypeName != "" {
 			return typeDef.TypeName
 		}
@@ -468,8 +469,8 @@ func (g *Generator) genSchemaForType(t reflect.Type, fallbackRef string) SchemaO
 		panic(fmt.Sprintf("type %s is not supported: %s", t.Kind(), typeName))
 	}
 
-	if sd, ok := reflect.New(t).Interface().(SchemaDefinition); ok {
-		smObj = sd.SwaggerDef().Schema()
+	if sd, ok := swaggerData(reflect.New(t).Interface()); ok {
+		smObj = sd.Schema()
 		name := g.reflectTypeReliableName(t, fallbackRef)
 		name = g.makeNameForType(t, name)
 		smObj = SchemaObj{Ref: refDefinitionPrefix + name}
@@ -483,6 +484,66 @@ func (g *Generator) genSchemaForType(t reflect.Type, fallbackRef string) SchemaO
 	}
 
 	return smObj
+}
+
+func swaggerData(v interface{}) (SwaggerData, bool) {
+	if sd, ok := v.(SchemaDefinition); ok {
+		return sd.SwaggerDef(), true
+	}
+
+	if ex, ok := v.(jsonschema.Exposer); ok {
+		sd := SwaggerData{}
+
+		s, err := ex.JSONSchema()
+		if err != nil {
+			panic(err)
+		}
+
+		j, err := json.Marshal(s)
+		if err != nil {
+			panic(err)
+		}
+
+		err = json.Unmarshal(j, &sd)
+		if err != nil {
+			panic(err)
+		}
+
+		if len(s.Examples) > 0 {
+			sd.Example = s.Examples[0]
+		}
+
+		return sd, true
+	}
+
+	if ex, ok := v.(jsonschema.RawExposer); ok {
+		sd := SwaggerData{}
+
+		j, err := ex.JSONSchemaBytes()
+		if err != nil {
+			panic(err)
+		}
+
+		s := jsonschema.Schema{}
+
+		err = json.Unmarshal(j, &s)
+		if err != nil {
+			panic(err)
+		}
+
+		err = json.Unmarshal(j, &sd)
+		if err != nil {
+			panic(err)
+		}
+
+		if len(s.Examples) > 0 {
+			sd.Example = s.Examples[0]
+		}
+
+		return sd, true
+	}
+
+	return SwaggerData{}, false
 }
 
 //
@@ -563,8 +624,8 @@ func (g *Generator) ParseParameters(i interface{}) (string, []ParamObj) {
 
 		paramName := strings.Split(nameTag, ",")[0]
 		param := ParamObj{}
-		if def, ok := reflect.Zero(field.Type).Interface().(SchemaDefinition); ok {
-			param = def.SwaggerDef().Param()
+		if def, ok := swaggerData(reflect.Zero(field.Type).Interface()); ok {
+			param = def.Param()
 		} else {
 			var schemaObj SchemaObj
 			fieldTypeName := refl.GoType(field.Type)
@@ -572,8 +633,8 @@ func (g *Generator) ParseParameters(i interface{}) (string, []ParamObj) {
 				schemaObj.Type = "file"
 			} else {
 				if mappedTo, ok := g.getMappedType(field.Type); ok {
-					if def, ok := mappedTo.(SchemaDefinition); ok {
-						schemaObj = def.SwaggerDef().Schema()
+					if def, ok := swaggerData(mappedTo); ok {
+						schemaObj = def.Schema()
 						if schemaObj.TypeName != "" {
 							name = schemaObj.TypeName
 						}

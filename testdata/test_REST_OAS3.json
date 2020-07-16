@@ -1335,7 +1335,8 @@
       "type": "array",
       "items": {
        "$ref": "#/components/schemas/SampleTestSubStruct"
-      }
+      },
+      "nullable": true
      }
     }
    },
@@ -1367,7 +1368,8 @@
       "type": "object",
       "additionalProperties": {
        "$ref": "#/components/schemas/SwgenSimpleDateTime"
-      }
+      },
+      "nullable": true
      }
     }
    },
@@ -1450,7 +1452,8 @@
       "type": "array",
       "items": {
        "$ref": "#/components/schemas/SwgenSimpleDateTime"
-      }
+      },
+      "nullable": true
      }
     }
    },
@@ -1473,13 +1476,15 @@
       "type": "array",
       "items": {
        "type": "integer"
-      }
+      },
+      "nullable": true
      },
      "field6": {
       "type": "object",
       "additionalProperties": {
        "type": "integer"
-      }
+      },
+      "nullable": true
      },
      "field7": {
       "minimum": 0,
@@ -1507,7 +1512,8 @@
       "type": "array",
       "items": {
        "$ref": "#/components/schemas/SwgenTestSubStruct"
-      }
+      },
+      "nullable": true
      }
     }
    },
@@ -1521,7 +1527,8 @@
        "additionalProperties": {
         "type": "boolean"
        }
-      }
+      },
+      "nullable": true
      },
      "map_list_float32": {
       "type": "array",
@@ -1530,7 +1537,8 @@
        "additionalProperties": {
         "type": "number"
        }
-      }
+      },
+      "nullable": true
      },
      "map_list_float64": {
       "type": "array",
@@ -1539,7 +1547,8 @@
        "additionalProperties": {
         "type": "number"
        }
-      }
+      },
+      "nullable": true
      },
      "map_list_int": {
       "type": "array",
@@ -1548,7 +1557,8 @@
        "additionalProperties": {
         "type": "integer"
        }
-      }
+      },
+      "nullable": true
      },
      "map_list_int32": {
       "type": "array",
@@ -1557,7 +1567,8 @@
        "additionalProperties": {
         "type": "integer"
        }
-      }
+      },
+      "nullable": true
      },
      "map_list_int64": {
       "type": "array",
@@ -1566,7 +1577,8 @@
        "additionalProperties": {
         "type": "integer"
        }
-      }
+      },
+      "nullable": true
      },
      "map_list_string": {
       "type": "array",
@@ -1575,7 +1587,8 @@
        "additionalProperties": {
         "type": "string"
        }
-      }
+      },
+      "nullable": true
      },
      "map_list_uint32": {
       "type": "array",
@@ -1585,7 +1598,8 @@
         "minimum": 0,
         "type": "integer"
        }
-      }
+      },
+      "nullable": true
      },
      "map_list_uint64": {
       "type": "array",
@@ -1595,7 +1609,8 @@
         "minimum": 0,
         "type": "integer"
        }
-      }
+      },
+      "nullable": true
      }
     }
    },
@@ -1606,57 +1621,66 @@
       "type": "object",
       "additionalProperties": {
        "type": "boolean"
-      }
+      },
+      "nullable": true
      },
      "map_float32": {
       "type": "object",
       "additionalProperties": {
        "type": "number"
-      }
+      },
+      "nullable": true
      },
      "map_float64": {
       "type": "object",
       "additionalProperties": {
        "type": "number"
-      }
+      },
+      "nullable": true
      },
      "map_int": {
       "type": "object",
       "additionalProperties": {
        "type": "integer"
-      }
+      },
+      "nullable": true
      },
      "map_int32": {
       "type": "object",
       "additionalProperties": {
        "type": "integer"
-      }
+      },
+      "nullable": true
      },
      "map_int64": {
       "type": "object",
       "additionalProperties": {
        "type": "integer"
-      }
+      },
+      "nullable": true
      },
      "map_string": {
       "type": "object",
       "additionalProperties": {
        "type": "string"
-      }
+      },
+      "nullable": true
      },
      "map_uint32": {
       "type": "object",
       "additionalProperties": {
        "minimum": 0,
        "type": "integer"
-      }
+      },
+      "nullable": true
      },
      "map_uint64": {
       "type": "object",
       "additionalProperties": {
        "minimum": 0,
        "type": "integer"
-      }
+      },
+      "nullable": true
      }
     }
    },
@@ -1667,57 +1691,66 @@
       "type": "array",
       "items": {
        "type": "boolean"
-      }
+      },
+      "nullable": true
      },
      "list_float32": {
       "type": "array",
       "items": {
        "type": "number"
-      }
+      },
+      "nullable": true
      },
      "list_float64": {
       "type": "array",
       "items": {
        "type": "number"
-      }
+      },
+      "nullable": true
      },
      "list_int": {
       "type": "array",
       "items": {
        "type": "integer"
-      }
+      },
+      "nullable": true
      },
      "list_int32": {
       "type": "array",
       "items": {
        "type": "integer"
-      }
+      },
+      "nullable": true
      },
      "list_int64": {
       "type": "array",
       "items": {
        "type": "integer"
-      }
+      },
+      "nullable": true
      },
      "list_string": {
       "type": "array",
       "items": {
        "type": "string"
-      }
+      },
+      "nullable": true
      },
      "list_uint32": {
       "type": "array",
       "items": {
        "minimum": 0,
        "type": "integer"
-      }
+      },
+      "nullable": true
      },
      "list_uint64": {
       "type": "array",
       "items": {
        "minimum": 0,
        "type": "integer"
-      }
+      },
+      "nullable": true
      }
     }
    },
@@ -1805,7 +1838,8 @@
       "type": "object",
       "additionalProperties": {
        "type": "integer"
-      }
+      },
+      "nullable": true
      }
     }
    },

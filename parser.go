@@ -887,8 +887,10 @@ func (g *Generator) SetPathItem(info PathItemInfo) *OperationObj {
 		params = info.Request
 	}
 
+	_, forceRequestBody := info.Request.(openapi3.RequestBodyEnforcer)
+
 	var body interface{}
-	if info.Method != http.MethodGet && info.Method != http.MethodHead {
+	if (info.Method != http.MethodGet && info.Method != http.MethodHead) || forceRequestBody {
 		if _, ok := info.Request.(SchemaDefinition); ok {
 			body = info.Request
 		} else if refl.HasTaggedFields(info.Request, "json") ||

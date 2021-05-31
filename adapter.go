@@ -20,6 +20,8 @@ func JSONSchemaInterceptType(v reflect.Value, s *jsonschema.Schema) (bool, error
 	if def, ok := i.(SchemaDefinition); ok {
 		d := def.SwaggerDef()
 		LoadJSONSchemaFromSwgen(d, s)
+
+		return true, nil
 	}
 
 	return false, nil

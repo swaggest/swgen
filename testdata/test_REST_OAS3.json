@@ -30,7 +30,14 @@
     "description": "test IDefinition1 description",
     "responses": {
      "200": {
-      "description": "OK"
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SwgenDefinitionExample"
+        }
+       }
+      }
      }
     }
    }
@@ -1330,6 +1337,10 @@
      }
     }
    },
+   "SwgenDefinitionExample": {
+    "type": "string",
+    "format": "byte"
+   },
    "SwgenMapDateTime": {
     "type": "object",
     "properties": {
@@ -1354,29 +1365,29 @@
     }
    },
    "SwgenNullBool": {
-    "type": "object"
+    "type": "boolean"
    },
    "SwgenNullDate": {
-    "type": "object",
+    "type": "string",
     "format": "date"
    },
    "SwgenNullDateTime": {
-    "type": "object",
+    "type": "string",
     "format": "date-time"
    },
    "SwgenNullFloat64": {
-    "type": "object",
+    "type": "number",
     "format": "float"
    },
    "SwgenNullInt64": {
-    "type": "object",
+    "type": "integer",
     "format": "int64"
    },
    "SwgenNullString": {
-    "type": "object"
+    "type": "string"
    },
    "SwgenNullTimestamp": {
-    "type": "object",
+    "type": "integer",
     "format": "int64"
    },
    "SwgenNullTypes": {

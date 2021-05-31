@@ -2,14 +2,14 @@ package swgen
 
 import (
 	"fmt"
-	"github.com/swaggest/assertjson"
-	"github.com/swaggest/jsonschema-go"
 	"mime/multipart"
 	"net/http"
 	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/swaggest/assertjson"
+	"github.com/swaggest/jsonschema-go"
 )
 
 type Person struct {
@@ -42,7 +42,7 @@ type Project struct {
 	Manager interface{} `json:"manager"`
 }
 
-// PreferredWarehouseRequest is request object of get preferred warehouse handler
+// PreferredWarehouseRequest is request object of get preferred warehouse handler.
 type PreferredWarehouseRequest struct {
 	Items              []string `query:"items" description:"List of simple sku"`
 	IDCustomerLocation uint64   `query:"id_customer_location" description:"-"`
@@ -58,14 +58,16 @@ func TestResetDefinitions(t *testing.T) {
 	assert.Equal(t, 0, len(gen.definitions))
 }
 
-func TestParseDefinition(t *testing.T) {
+func TestParseDefinition(_ *testing.T) {
 	ts := &Person{}
 	NewGenerator().ParseDefinition(ts)
 }
 
-func TestParseDefinitionEmptyInterface(t *testing.T) {
+func TestParseDefinitionEmptyInterface(_ *testing.T) {
 	var ts interface{}
+
 	gen := NewGenerator()
+
 	gen.ParseDefinition(&ts)
 }
 
@@ -121,6 +123,7 @@ func TestParseDefinitionString(t *testing.T) {
 
 func TestParseDefinitionArray(t *testing.T) {
 	type Names []string
+
 	typeDef := NewGenerator().ParseDefinition(Names{})
 
 	assert.Equal(t, "Names", typeDef.TypeName)
@@ -131,11 +134,15 @@ func TestParseDefinitionArray(t *testing.T) {
 
 	// try to parse a named map
 	type MapList map[string]string
+
 	NewGenerator().ParseDefinition(&MapList{})
 
 	// named array of object
-	type Person struct{}
-	type Persons []*Person
+	type (
+		Person  struct{}
+		Persons []*Person
+	)
+
 	NewGenerator().ParseDefinition(&Persons{})
 }
 
@@ -174,7 +181,7 @@ func TestSetPathItem(t *testing.T) {
 	assert.Equal(t, 0, len(gen.paths))
 }
 
-// testHandler can handle POST and GET request
+// testHandler can handle POST and GET request.
 type testHandler struct{}
 
 func (th *testHandler) GetName() string {
@@ -226,6 +233,7 @@ func (custom) SwaggerDef() SwaggerData {
 	d.Description = "A custom string"
 	d.Type = "string"
 	d.Pattern = "^[a-z]{4}$"
+
 	return d
 }
 
@@ -258,6 +266,7 @@ func TestSwaggerDef(t *testing.T) {
 
 	swg, err := gen.GenDocument()
 	assert.NoError(t, err)
+
 	expected := `
 {
   "swagger": "2.0",
@@ -370,16 +379,18 @@ func TestGenerator_CapitalizeDefinitions(t *testing.T) {
 }
 
 func TestGenerator_SetPathItem_typeFile(t *testing.T) {
-	type requestWithFileAndHeader struct {
-		Upload       multipart.File        `file:"upload"`
-		UploadHeader *multipart.FileHeader `file:"upload"`
-	}
-	type requestWithFile struct {
-		Upload multipart.File `file:"upload"`
-	}
-	type requestWithHeader struct {
-		UploadHeader *multipart.FileHeader `file:"upload"`
-	}
+	type (
+		requestWithFileAndHeader struct {
+			Upload       multipart.File        `file:"upload"`
+			UploadHeader *multipart.FileHeader `file:"upload"`
+		}
+		requestWithFile struct {
+			Upload multipart.File `file:"upload"`
+		}
+		requestWithHeader struct {
+			UploadHeader *multipart.FileHeader `file:"upload"`
+		}
+	)
 
 	g := NewGenerator()
 	g.SetPathItem(PathItemInfo{
@@ -413,6 +424,7 @@ func (CountryCode) SwaggerDef() SwaggerData {
 	def.Example = "us"
 	def.Type = "string"
 	def.Pattern = "^[a-zA-Z]{2}$"
+
 	return def
 }
 
@@ -421,14 +433,15 @@ func TestGenerator_ParseParameters_namedSchemaParamItem(t *testing.T) {
 		Codes []CountryCode `query:"countries" collectionFormat:"csv"`
 	}
 
+	expected := `{"swagger":"2.0","info":{"title":"","description":"","termsOfService":"","contact":{"name":""},"license":{"name":""},"version":""},"basePath":"/","schemes":["http","https"],"paths":{"/some":{"get":{"summary":"","description":"","parameters":[{"type":"array","name":"countries","in":"query","items":{"type":"string","pattern":"^[a-zA-Z]{2}$"},"collectionFormat":"csv"}],"responses":{"204":{"description":"No Content"}}}}},"definitions":{"CountryCode":{"description":"Country Code","type":"string","pattern":"^[a-zA-Z]{2}$","example":"us"}}}`
 	g := NewGenerator()
 	pathItem := PathItemInfo{
 		Request: new(Req),
 		Method:  http.MethodGet,
 		Path:    "/some",
 	}
+
 	g.SetPathItem(pathItem)
-	expected := `{"swagger":"2.0","info":{"title":"","description":"","termsOfService":"","contact":{"name":""},"license":{"name":""},"version":""},"basePath":"/","schemes":["http","https"],"paths":{"/some":{"get":{"summary":"","description":"","parameters":[{"type":"array","name":"countries","in":"query","items":{"type":"string","pattern":"^[a-zA-Z]{2}$"},"collectionFormat":"csv"}],"responses":{"204":{"description":"No Content"}}}}},"definitions":{"CountryCode":{"description":"Country Code","type":"string","pattern":"^[a-zA-Z]{2}$","example":"us"}}}`
 
 	swg, err := g.GenDocument()
 	assert.NoError(t, err)
@@ -474,7 +487,9 @@ func TestGenerator_SetPathItem_bodyMap(t *testing.T) {
 	})
 
 	assert.Len(t, obj.Parameters, 1)
+
 	swg, err := g.GenDocument()
+
 	assert.NoError(t, err)
 	assert.Equal(t, `{"swagger":"2.0","info":{"title":"","description":"","termsOfService":"","contact":{"name":""},"license":{"name":""},"version":""},"basePath":"/","schemes":["http","https"],"paths":{"/":{"post":{"summary":"","description":"","parameters":[{"name":"body","in":"body","schema":{"$ref":"#/definitions/SwgenMap"},"required":true}],"responses":{"204":{"description":"No Content"}}}}},"definitions":{"SwgenMap":{"type":"object","additionalProperties":{"$ref":"#/definitions/SwgenValue"}},"SwgenValue":{"type":"object","properties":{"s":{"type":"string"}}}}}`, string(swg))
 }
@@ -504,8 +519,10 @@ func TestGenerator_SetPathItem_embeddedMap(t *testing.T) {
 	})
 
 	assert.Len(t, obj.Parameters, 2)
+
 	swg, err := g.GenDocument()
 	assert.NoError(t, err)
+
 	assert.Equal(t, `{"swagger":"2.0","info":{"title":"","description":"","termsOfService":"","contact":{"name":""},"license":{"name":""},"version":""},"basePath":"/","schemes":["http","https"],"paths":{"/":{"post":{"summary":"","description":"","parameters":[{"type":"integer","format":"int32","name":"p0","in":"path","required":true},{"name":"body","in":"body","schema":{"$ref":"#/definitions/SwgenMap"},"required":true}],"responses":{"204":{"description":"No Content"}}}}},"definitions":{"SwgenMap":{"type":"object","additionalProperties":{"$ref":"#/definitions/SwgenValue"}},"SwgenValue":{"type":"object","properties":{"s":{"type":"string"}}}}}`, string(swg))
 }
 
@@ -540,9 +557,10 @@ func TestGenerator_SetPathItem_emptyInterface(t *testing.T) {
 	})
 
 	assert.Len(t, obj.Parameters, 2)
+
 	swg, err := g.IndentJSON(true).GenDocument()
-	//println(string(swg))
 	assert.NoError(t, err)
+
 	expected := `{
   "swagger": "2.0",
   "info": {
@@ -677,8 +695,8 @@ func TestGenerator_SetPathItem_exposer(t *testing.T) {
 	})
 
 	assert.Len(t, obj.Parameters, 2)
+
 	swg, err := g.IndentJSON(true).GenDocument()
-	//println(string(swg))
 	assert.NoError(t, err)
 
 	assertjson.Equal(t, []byte(`{

@@ -3,9 +3,9 @@ package swgen_test
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/swaggest/openapi-go/openapi3"
 	"net/http"
 
+	"github.com/swaggest/openapi-go/openapi3"
 	"github.com/swaggest/swgen"
 	"github.com/swaggest/swgen/internal/sample/experiment"
 )
@@ -62,7 +62,7 @@ func ExampleGenerator_GenDocument() {
 
 	// output:
 	// {"swagger":"2.0","info":{"title":"Swagger Petstore (Simple)","description":"A sample API that uses a petstore as an example to demonstrate features in the swagger-2.0 specification","termsOfService":"http://helloreverb.com/terms/","contact":{"name":"Swagger API team","url":"http://swagger.io","email":"foo@example.com"},"license":{"name":"MIT","url":"http://opensource.org/licenses/MIT"},"version":"2.0"},"host":"petstore.swagger.io","basePath":"/api","schemes":["http","https"],"paths":{"/pets":{"get":{"tags":["v1"],"summary":"findPets","description":"Returns all pets from the system that the user has access to","parameters":[{"description":"tags to filter by","type":"array","name":"tags","in":"query","items":{"type":"string"},"collectionFormat":"multi"},{"description":"maximum number of results to return","type":"integer","format":"int32","name":"limit","in":"query"}],"responses":{"200":{"description":"OK","schema":{"type":"array","items":{"$ref":"#/definitions/Pet"}}}},"security":[{"BasicAuth":[]}],"x-example":"example"}}},"definitions":{"Pet":{"type":"object","properties":{"id":{"type":"integer","format":"int64"},"name":{"type":"string"},"tag":{"type":"string"}}}},"securityDefinitions":{"BasicAuth":{"type":"basic"}},"x-uppercase-version":true}
-	// {"openapi":"3.0.2","info":{"title":"Swagger Petstore (Simple)","description":"A sample API that uses a petstore as an example to demonstrate features in the swagger-2.0 specification","termsOfService":"http://helloreverb.com/terms/","contact":{"name":"Swagger API team","url":"http://swagger.io","email":"foo@example.com"},"license":{"name":"MIT","url":"http://opensource.org/licenses/MIT"},"version":"2.0"},"servers":[{"url":"http://petstore.swagger.io/api"}],"paths":{"/pets":{"get":{"tags":["v1"],"summary":"findPets","description":"Returns all pets from the system that the user has access to","parameters":[{"name":"tags","in":"query","description":"tags to filter by","schema":{"type":"array","items":{"type":"string"},"description":"tags to filter by"}},{"name":"limit","in":"query","description":"maximum number of results to return","schema":{"type":"integer","description":"maximum number of results to return"}}],"responses":{"200":{"description":"OK","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/SwgenTestPet"}}}}}},"security":[{"BasicAuth":[]}]}}},"components":{"schemas":{"SwgenTestPet":{"type":"object","properties":{"id":{"type":"integer"},"name":{"type":"string"},"tag":{"type":"string"}}}},"securitySchemes":{"BasicAuth":{"type":"http","scheme":"basic"}}},"x-uppercase-version":true}
+	// {"openapi":"3.0.3","info":{"title":"Swagger Petstore (Simple)","description":"A sample API that uses a petstore as an example to demonstrate features in the swagger-2.0 specification","termsOfService":"http://helloreverb.com/terms/","contact":{"name":"Swagger API team","url":"http://swagger.io","email":"foo@example.com"},"license":{"name":"MIT","url":"http://opensource.org/licenses/MIT"},"version":"2.0"},"servers":[{"url":"http://petstore.swagger.io/api"}],"paths":{"/pets":{"get":{"tags":["v1"],"summary":"findPets","description":"Returns all pets from the system that the user has access to","parameters":[{"name":"tags","in":"query","description":"tags to filter by","schema":{"type":"array","items":{"type":"string"},"description":"tags to filter by"}},{"name":"limit","in":"query","description":"maximum number of results to return","schema":{"type":"integer","description":"maximum number of results to return"}}],"responses":{"200":{"description":"OK","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/SwgenTestPet"}}}}}},"security":[{"BasicAuth":[]}]}}},"components":{"schemas":{"SwgenTestPet":{"type":"object","properties":{"id":{"type":"integer"},"name":{"type":"string"},"tag":{"type":"string"}}}},"securitySchemes":{"BasicAuth":{"type":"http","scheme":"basic"}}},"x-uppercase-version":true}
 }
 
 func ExampleGenerator_AddTypeMap() {
@@ -78,6 +78,7 @@ func ExampleGenerator_AddTypeMap() {
 	gen.AddTypeMap(new(experiment.Data), swgen.SchemaDefinitionFunc(func() swgen.SwaggerData {
 		def := swgen.SwaggerData{}
 		def.TypeName = "experimentData"
+
 		return def
 	}))
 

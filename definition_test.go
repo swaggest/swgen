@@ -7,7 +7,7 @@ import (
 )
 
 func TestDefinition(t *testing.T) {
-	var obj = SwaggerData{}
+	obj := SwaggerData{}
 	obj.Type = "integer"
 	obj.Format = "int64"
 	obj.TypeName = "MyName"

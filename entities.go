@@ -25,6 +25,7 @@ type Document struct {
 // MarshalJSON marshal Document with additionalData inlined.
 func (s Document) MarshalJSON() ([]byte, error) {
 	type i Document
+
 	return s.marshalJSONWithStruct(i(s))
 }
 
@@ -45,7 +46,7 @@ type ContactObj struct {
 	Email string `json:"email,omitempty"`
 }
 
-// LicenseObj license information for the exposed API
+// LicenseObj license information for the exposed API.
 type LicenseObj struct {
 	Name string `json:"name"`
 	URL  string `json:"url,omitempty"`
@@ -89,27 +90,35 @@ func (pi PathItem) HasMethod(method string) bool {
 // Map returns operations mapped by HTTP method.
 func (pi PathItem) Map() map[string]*OperationObj {
 	result := make(map[string]*OperationObj, 7)
+
 	if pi.Get != nil {
 		result[http.MethodGet] = pi.Get
 	}
+
 	if pi.Put != nil {
 		result[http.MethodPut] = pi.Put
 	}
+
 	if pi.Post != nil {
 		result[http.MethodPost] = pi.Post
 	}
+
 	if pi.Delete != nil {
 		result[http.MethodDelete] = pi.Delete
 	}
+
 	if pi.Options != nil {
 		result[http.MethodOptions] = pi.Options
 	}
+
 	if pi.Head != nil {
 		result[http.MethodHead] = pi.Head
 	}
+
 	if pi.Patch != nil {
 		result[http.MethodPatch] = pi.Patch
 	}
+
 	return result
 }
 
@@ -206,10 +215,13 @@ func (p *PathItemInfo) RemoveResponse(statusCode int) bool {
 	if nil == p.responses {
 		return false
 	}
+
 	if _, ok := p.responses[statusCode]; ok {
 		delete(p.responses, statusCode)
+
 		return true
 	}
+
 	return false
 }
 
@@ -218,7 +230,9 @@ func (p *PathItemInfo) AddResponse(statusCode int, output interface{}) *PathItem
 	if nil == p.responses {
 		p.responses = make(map[int]interface{}, 1)
 	}
+
 	p.responses[statusCode] = output
+
 	return p
 }
 
@@ -227,9 +241,11 @@ func (p *PathItemInfo) AddResponses(responses ...WithStatusCode) {
 	if len(responses) == 0 {
 		return
 	}
+
 	if nil == p.responses {
 		p.responses = make(map[int]interface{}, len(responses))
 	}
+
 	for _, r := range responses {
 		p.responses[r.StatusCode()] = r
 	}
@@ -271,14 +287,17 @@ func (enum *Enum) LoadFromField(field reflect.StructField) {
 
 	if enumTag := field.Tag.Get("enum"); enumTag != "" {
 		var e []interface{}
+
 		err := json.Unmarshal([]byte(enumTag), &e)
 		if err != nil {
 			es := strings.Split(enumTag, ",")
 			e = make([]interface{}, len(es))
+
 			for i, s := range es {
 				e[i] = s
 			}
 		}
+
 		enum.Enum = e
 	}
 }
@@ -287,7 +306,7 @@ func (enum *Enum) LoadFromField(field reflect.StructField) {
 type SwaggerData struct {
 	CommonFields
 	ParamObj
-	SchemaObj
+	SchemaObj // nolint:govet
 }
 
 // IgnoreTypeName is a marker interface for github.com/swaggest/jsonschema-go.
@@ -301,12 +320,14 @@ func (s SwaggerData) SwaggerDef() SwaggerData {
 // Schema returns schema object.
 func (s SwaggerData) Schema() SchemaObj {
 	s.SchemaObj.CommonFields = s.CommonFields
+
 	return s.SchemaObj
 }
 
 // Param returns parameter object.
 func (s SwaggerData) Param() ParamObj {
 	s.ParamObj.CommonFields = s.CommonFields
+
 	return s.ParamObj
 }
 
@@ -391,9 +412,10 @@ type OperationObj struct {
 	additionalData
 }
 
-// MarshalJSON marshal OperationObj with additionalData inlined
+// MarshalJSON marshal OperationObj with additionalData inlined.
 func (o OperationObj) MarshalJSON() ([]byte, error) {
 	type i OperationObj
+
 	return o.marshalJSONWithStruct(i(o))
 }
 
@@ -424,8 +446,8 @@ func jsonRecode(v interface{}) (map[string]interface{}, error) {
 	}
 
 	var decoded interface{}
-	err = json.Unmarshal(jsonBytes, &decoded)
-	if err != nil {
+
+	if err = json.Unmarshal(jsonBytes, &decoded); err != nil {
 		return nil, err
 	}
 
@@ -439,12 +461,14 @@ func jsonRecode(v interface{}) (map[string]interface{}, error) {
 // MarshalJSON marshal ParamObj with additionalData inlined.
 func (o ParamObj) MarshalJSON() ([]byte, error) {
 	type i ParamObj
+
 	return o.marshalJSONWithStruct(i(o))
 }
 
 // MarshalJSON marshal SchemaObj with additionalData inlined.
 func (o SchemaObj) MarshalJSON() ([]byte, error) {
 	type i SchemaObj
+
 	return o.marshalJSONWithStruct(i(o))
 }
 
@@ -455,10 +479,10 @@ type ParamItemObj struct {
 	CollectionFormat string        `json:"collectionFormat,omitempty"` // "multi" - this is valid only for parameters in "query" or "formData"
 }
 
-// Responses list of response object
+// Responses list of response object.
 type Responses map[int]ResponseObj
 
-// ResponseObj describes a single response from an API Operation
+// ResponseObj describes a single response from an API Operation.
 type ResponseObj struct {
 	Ref         string      `json:"$ref,omitempty"`
 	Description string      `json:"description,omitempty"`
@@ -467,7 +491,7 @@ type ResponseObj struct {
 	Examples    interface{} `json:"examples,omitempty"`
 }
 
-// SchemaObj describes a schema for json format
+// SchemaObj describes a schema for json format.
 type SchemaObj struct {
 	CommonFields
 	Ref                  string               `json:"$ref,omitempty"`
@@ -487,17 +511,20 @@ type SchemaObj struct {
 
 func (o *SchemaObj) setProperties(properties map[string]SchemaObj) {
 	required := make([]string, 0, len(properties))
+
 	for name, prop := range properties {
 		if prop.isRequired {
 			required = append(required, name)
 		}
 	}
+
 	sort.Strings(required)
+
 	o.Required = required
 	o.Properties = properties
 }
 
-// NewSchemaObj Constructor function for SchemaObj struct type
+// NewSchemaObj Constructor function for SchemaObj struct type.
 func NewSchemaObj(jsonType, typeName string) (so *SchemaObj) {
 	so = &SchemaObj{}
 	so.Type = jsonType
@@ -506,6 +533,7 @@ func NewSchemaObj(jsonType, typeName string) (so *SchemaObj) {
 	if typeName != "" {
 		so.Ref = refDefinitionPrefix + typeName
 	}
+
 	return
 }
 

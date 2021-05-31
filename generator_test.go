@@ -206,6 +206,7 @@ type NullFloat64 struct{}
 func (NullFloat64) SwaggerDef() SwaggerData {
 	typeDef := schemaFromCommonName(commonNameFloat)
 	typeDef.TypeName = "NullFloat64"
+
 	return SwaggerData{
 		CommonFields: typeDef.CommonFields,
 		SchemaObj:    typeDef,
@@ -217,6 +218,7 @@ type NullBool struct{}
 func (NullBool) SwaggerDef() SwaggerData {
 	typeDef := schemaFromCommonName(commonNameBoolean)
 	typeDef.TypeName = "NullBool"
+
 	return SwaggerData{
 		CommonFields: typeDef.CommonFields,
 		SchemaObj:    typeDef,
@@ -228,6 +230,7 @@ type NullString struct{}
 func (NullString) SwaggerDef() SwaggerData {
 	typeDef := schemaFromCommonName(commonNameString)
 	typeDef.TypeName = "NullString"
+
 	return SwaggerData{
 		CommonFields: typeDef.CommonFields,
 		SchemaObj:    typeDef,
@@ -239,6 +242,7 @@ type NullInt64 struct{}
 func (NullInt64) SwaggerDef() SwaggerData {
 	typeDef := schemaFromCommonName(commonNameLong)
 	typeDef.TypeName = "NullInt64"
+
 	return SwaggerData{
 		CommonFields: typeDef.CommonFields,
 		SchemaObj:    typeDef,
@@ -250,6 +254,7 @@ type NullDateTime struct{}
 func (NullDateTime) SwaggerDef() SwaggerData {
 	typeDef := schemaFromCommonName(commonNameDateTime)
 	typeDef.TypeName = "NullDateTime"
+
 	return SwaggerData{
 		CommonFields: typeDef.CommonFields,
 		SchemaObj:    typeDef,
@@ -261,6 +266,7 @@ type NullDate struct{}
 func (NullDate) SwaggerDef() SwaggerData {
 	typeDef := schemaFromCommonName(commonNameDate)
 	typeDef.TypeName = "NullDate"
+
 	return SwaggerData{
 		CommonFields: typeDef.CommonFields,
 		SchemaObj:    typeDef,
@@ -272,6 +278,7 @@ type NullTimestamp struct{}
 func (NullTimestamp) SwaggerDef() SwaggerData {
 	typeDef := schemaFromCommonName(commonNameLong)
 	typeDef.TypeName = "NullTimestamp"
+
 	return SwaggerData{
 		CommonFields: typeDef.CommonFields,
 		SchemaObj:    typeDef,
@@ -357,7 +364,7 @@ func TestREST(t *testing.T) {
 		"test3 description", "v1", false, testSimpleSlices{}, testSimpleMaps{}))
 	gen.SetPathItem(createPathItemInfo("/V1/test4", "POST", "test4 name",
 		"test4 description", "v1", false, testSimpleMaps{}, testSimpleMapList{}))
-	gen.SetPathItem(createPathItemInfo("/V1/test5", "DELETE", "test5 name",
+	gen.SetPathItem(createPathItemInfo("/V1/test5", "POST", "test5 name",
 		"test5 description", "v1", false, testSimpleMapList{}, testSubTypes{}))
 	gen.SetPathItem(createPathItemInfo("/V1/test6", "PATCH", "test6 name",
 		"test6 description", "v1", false, testSubTypes{}, testSimpleStruct{}))
@@ -384,7 +391,7 @@ func TestREST(t *testing.T) {
 	gen.SetPathItem(createPathItemInfo("/V1/pathParams/{category:[a-zA-Z]{32}}/{id:[0-9]+}", "GET", "test8 name",
 		"test8 description", "V1", false, testPathParam{}, testSimpleStruct{}))
 
-	//anonymous types:
+	// anonymous types:
 	gen.SetPathItem(createPathItemInfo("/V1/anonymous1", "POST", "test10 name",
 		"test10 description", "v1", false, testSimpleStruct{}, map[string]int64{}))
 	gen.SetPathItem(createPathItemInfo("/V1/anonymous2", "POST", "test11 name",
@@ -477,6 +484,8 @@ func writeLastRun(filename string, data []byte) error {
 }
 
 func readTestFile(t *testing.T, filename string) string {
+	t.Helper()
+
 	bytes, readError := ioutil.ReadFile(getTestDataDir(filename))
 	assert.NoError(t, readError)
 
@@ -492,6 +501,7 @@ func coloredJSONDiff(expected, generated string) string {
 	if err := json.Unmarshal(expectedBytes, &expectedData); err != nil {
 		return fmt.Sprintf("can not unmarshal expected data: %s", err.Error())
 	}
+
 	if err := json.Unmarshal(generatedBytes, &generatedData); err != nil {
 		return fmt.Sprintf("can not unmarshal generated data: %s", err.Error())
 	}
@@ -508,9 +518,15 @@ func coloredJSONDiff(expected, generated string) string {
 		}
 
 		f := formatter.NewAsciiFormatter(expectedData, config)
-		diffString, _ := f.Format(diff)
+
+		diffString, err := f.Format(diff)
+		if err != nil {
+			panic(err)
+		}
+
 		return diffString
 	}
+
 	return ""
 }
 
@@ -633,7 +649,7 @@ func TestGenerator_GenDocument_StructCollisionWithExplicitRemapping(t *testing.T
 	gen.SetHost("localhost")
 	gen.SetInfo("swgen title", "swgen description", "term", "2.0")
 	gen.IndentJSON(true)
-	//gen.ReflectGoTypes(true)
+	// gen.ReflectGoTypes(true)
 	gen.AddTypeMap(new(experiment.Entity), new(experimentEntity))
 	gen.AddTypeMap(new(variation.Entity), new(experimentVariationEntity))
 	gen.AddTypeMap(new(experiment.Metadata), new(experimentMetadata))

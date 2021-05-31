@@ -12,7 +12,7 @@ import (
 	"github.com/swaggest/refl"
 )
 
-// Generator create swagger document
+// Generator create swagger document.
 type Generator struct {
 	oas3Proxy *openapi3.Reflector
 
@@ -46,6 +46,7 @@ func (m *defMap) GenDefinitions() (result map[string]SchemaObj) {
 	}
 
 	result = make(map[string]SchemaObj)
+
 	for t, typeDef := range *m {
 		typeDef.Ref = "" // first (top) level Swagger definitions are never references
 		if _, ok := result[typeDef.TypeName]; ok {
@@ -55,10 +56,11 @@ func (m *defMap) GenDefinitions() (result map[string]SchemaObj) {
 			result[typeDef.TypeName] = typeDef
 		}
 	}
+
 	return
 }
 
-// NewGenerator create a new Generator
+// NewGenerator create a new Generator.
 func NewGenerator() *Generator {
 	g := &Generator{}
 
@@ -82,19 +84,21 @@ func NewGenerator() *Generator {
 	return g
 }
 
-// IndentJSON controls JSON indentation
+// IndentJSON controls JSON indentation.
 func (g *Generator) IndentJSON(enabled bool) *Generator {
 	g.mu.Lock()
 	g.indentJSON = enabled
 	g.mu.Unlock()
+
 	return g
 }
 
-// ReflectGoTypes controls JSON indentation
+// ReflectGoTypes controls JSON indentation.
 func (g *Generator) ReflectGoTypes(enabled bool) *Generator {
 	g.mu.Lock()
 	g.reflectGoTypes = enabled
 	g.mu.Unlock()
+
 	return g
 }
 
@@ -104,6 +108,7 @@ func (g *Generator) AddPackagePrefix(enabled bool) *Generator {
 	g.mu.Lock()
 	g.addPackagePrefix = enabled
 	g.mu.Unlock()
+
 	return g
 }
 
@@ -113,25 +118,30 @@ func (g *Generator) CapitalizeDefinitions(enabled bool) *Generator {
 	g.mu.Lock()
 	g.capitalizeDefinitions = enabled
 	g.mu.Unlock()
+
 	return g
 }
 
-// AddDefaultResponse adds http code and response structure that will be applied to all operations
+// AddDefaultResponse adds http code and response structure that will be applied to all operations.
 func (g *Generator) AddDefaultResponse(httpCode int, response interface{}) {
 	if g.defaultResponses == nil {
 		g.defaultResponses = make(map[int]interface{})
 	}
+
 	g.defaultResponses[httpCode] = response
 }
 
-// EnableCORS enable HTTP handler support CORS
+// EnableCORS enable HTTP handler support CORS.
 func (g *Generator) EnableCORS(b bool, allowHeaders ...string) *Generator {
 	g.corsMu.Lock()
 	g.corsEnabled = b
+
 	if len(allowHeaders) != 0 {
 		g.corsAllowHeaders = append(g.corsAllowHeaders, allowHeaders...)
 	}
+
 	g.corsMu.Unlock()
+
 	return g
 }
 
@@ -160,7 +170,7 @@ func (g *Generator) updateServer() {
 	}
 }
 
-// SetHost set host info for swagger specification
+// SetHost set host info for swagger specification.
 func (g *Generator) SetHost(host string) *Generator {
 	g.mu.Lock()
 	defer g.mu.Unlock()
@@ -174,7 +184,7 @@ func (g *Generator) SetHost(host string) *Generator {
 	return g
 }
 
-// SetBasePath set host info for swagger specification
+// SetBasePath set host info for swagger specification.
 func (g *Generator) SetBasePath(basePath string) *Generator {
 	g.mu.Lock()
 	defer g.mu.Unlock()
@@ -188,7 +198,7 @@ func (g *Generator) SetBasePath(basePath string) *Generator {
 	return g
 }
 
-// SetContact set contact information for API
+// SetContact set contact information for API.
 func (g *Generator) SetContact(name, url, email string) *Generator {
 	g.mu.Lock()
 	defer g.mu.Unlock()
@@ -203,9 +213,11 @@ func (g *Generator) SetContact(name, url, email string) *Generator {
 		if name != "" {
 			g.oas3Proxy.SpecEns().Info.ContactEns().Name = &name
 		}
+
 		if url != "" {
 			g.oas3Proxy.SpecEns().Info.ContactEns().URL = &url
 		}
+
 		if email != "" {
 			g.oas3Proxy.SpecEns().Info.ContactEns().Email = &email
 		}
@@ -226,7 +238,7 @@ func (g *Generator) SetOAS3Proxy(oas3Proxy *openapi3.Reflector) {
 	g.oas3Proxy = oas3Proxy
 }
 
-// SetInfo set information about API
+// SetInfo set information about API.
 func (g *Generator) SetInfo(title, description, term, version string) *Generator {
 	g.mu.Lock()
 	defer g.mu.Unlock()
@@ -240,10 +252,13 @@ func (g *Generator) SetInfo(title, description, term, version string) *Generator
 
 	if g.oas3Proxy != nil {
 		g.oas3Proxy.SpecEns().Info.Title = title
+
 		if description != "" {
 			g.oas3Proxy.SpecEns().Info.Description = &description
 		}
+
 		g.oas3Proxy.SpecEns().Info.Version = version
+
 		if term != "" {
 			g.oas3Proxy.SpecEns().Info.TermsOfService = &term
 		}
@@ -252,7 +267,7 @@ func (g *Generator) SetInfo(title, description, term, version string) *Generator
 	return g
 }
 
-// SetLicense set license information for API
+// SetLicense set license information for API.
 func (g *Generator) SetLicense(name, url string) *Generator {
 	g.mu.Lock()
 	defer g.mu.Unlock()
@@ -273,7 +288,7 @@ func (g *Generator) SetLicense(name, url string) *Generator {
 	return g
 }
 
-// AddExtendedField add vendor extension field to document
+// AddExtendedField add vendor extension field to document.
 func (g *Generator) AddExtendedField(name string, value interface{}) *Generator {
 	g.mu.Lock()
 	defer g.mu.Unlock()
@@ -287,7 +302,7 @@ func (g *Generator) AddExtendedField(name string, value interface{}) *Generator 
 	return g
 }
 
-// AddSecurityDefinition adds shared security definition to document
+// AddSecurityDefinition adds shared security definition to document.
 func (g *Generator) AddSecurityDefinition(name string, def SecurityDef) *Generator {
 	g.mu.Lock()
 	defer g.mu.Unlock()
@@ -299,6 +314,7 @@ func (g *Generator) AddSecurityDefinition(name string, def SecurityDef) *Generat
 		switch def.Type {
 		case SecurityBasicAuth:
 			sss.HTTPSecuritySchemeEns().Scheme = "basic"
+
 			if def.Description != "" {
 				sss.HTTPSecuritySchemeEns().Description = &def.Description
 			}
@@ -315,6 +331,7 @@ func (g *Generator) AddSecurityDefinition(name string, def SecurityDef) *Generat
 		case SecurityAPIKey:
 			sss.APIKeySecuritySchemeEns().Name = def.Name
 			sss.APIKeySecuritySchemeEns().In = openapi3.APIKeySecuritySchemeIn(def.In)
+
 			if def.Description != "" {
 				sss.APIKeySecuritySchemeEns().Description = &def.Description
 			}
@@ -327,6 +344,7 @@ func (g *Generator) AddSecurityDefinition(name string, def SecurityDef) *Generat
 				sss.OAuth2SecuritySchemeEns().Flows.PasswordEns().TokenURL = def.TokenURL
 				sss.OAuth2SecuritySchemeEns().Flows.PasswordEns().Scopes = def.Scopes
 			}
+
 			if def.Description != "" {
 				sss.APIKeySecuritySchemeEns().Description = &def.Description
 			}
@@ -351,7 +369,7 @@ func (g *Generator) AddSecurityDefinition(name string, def SecurityDef) *Generat
 	return g
 }
 
-// AddTypeMap adds mapping relation to treat values of same type as source as they were of same type as destination
+// AddTypeMap adds mapping relation to treat values of same type as source as they were of same type as destination.
 func (g *Generator) AddTypeMap(source interface{}, destination interface{}) *Generator {
 	g.mu.Lock()
 	defer g.mu.Unlock()
@@ -369,10 +387,11 @@ func (g *Generator) AddTypeMap(source interface{}, destination interface{}) *Gen
 func (g *Generator) getMappedType(t reflect.Type) (dst interface{}, found bool) {
 	goTypeName := refl.GoType(refl.DeepIndirect(t))
 	dst, found = g.typesMap[goTypeName]
+
 	return
 }
 
-// genDocument returns document specification in JSON string (in []byte)
+// genDocument returns document specification in JSON string (in []byte).
 func (g *Generator) genDocument(host *string) ([]byte, error) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
@@ -385,11 +404,13 @@ func (g *Generator) genDocument(host *string) ([]byte, error) {
 	// ensure that all definition in queue is parsed before generating
 	g.parseDefInQueue()
 	g.doc.Definitions = g.definitions.GenDefinitions()
+
 	if g.host != "" || host == nil {
 		g.doc.Host = g.host
 	} else {
 		g.doc.Host = *host
 	}
+
 	g.doc.Paths = make(map[string]PathItem)
 
 	for path, item := range g.paths {
@@ -405,13 +426,13 @@ func (g *Generator) genDocument(host *string) ([]byte, error) {
 	return data, err
 }
 
-// GenDocument returns document specification in JSON string (in []byte)
+// GenDocument returns document specification in JSON string (in []byte).
 func (g *Generator) GenDocument() ([]byte, error) {
 	// pass nil here to set host as g.host
 	return g.genDocument(nil)
 }
 
-// ServeHTTP implements http.Handler to server swagger.json document
+// ServeHTTP implements http.Handler to server swagger.json document.
 func (g *Generator) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	data, err := g.genDocument(&r.URL.Host)
 	if err != nil {
@@ -422,10 +443,13 @@ func (g *Generator) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	g.writeCORSHeaders(w)
 
-	_, _ = w.Write(data)
+	_, err = w.Write(data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
-// Document is an accessor to generated document
+// Document is an accessor to generated document.
 func (g *Generator) Document() Document {
 	return g.doc
 }

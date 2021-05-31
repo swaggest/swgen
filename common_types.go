@@ -3,27 +3,27 @@ package swgen
 type commonName string
 
 const (
-	// CommonNameInteger data type is integer, format int32 (signed 32 bits)
+	// CommonNameInteger data type is integer, format int32 (signed 32 bits).
 	commonNameInteger commonName = "integer"
-	// CommonNameLong data type is integer, format int64 (signed 64 bits)
+	// CommonNameLong data type is integer, format int64 (signed 64 bits).
 	commonNameLong commonName = "long"
-	// CommonNameFloat data type is number, format float
+	// CommonNameFloat data type is number, format float.
 	commonNameFloat commonName = "float"
-	// CommonNameDouble data type is number, format double
+	// CommonNameDouble data type is number, format double.
 	commonNameDouble commonName = "double"
-	// CommonNameString data type is string
+	// CommonNameString data type is string.
 	commonNameString commonName = "string"
-	// CommonNameByte data type is string, format byte (base64 encoded characters)
+	// CommonNameByte data type is string, format byte (base64 encoded characters).
 	commonNameByte commonName = "byte"
-	// CommonNameBinary data type is string, format binary (any sequence of octets)
+	// CommonNameBinary data type is string, format binary (any sequence of octets).
 	commonNameBinary commonName = "binary"
-	// CommonNameBoolean data type is boolean
+	// CommonNameBoolean data type is boolean.
 	commonNameBoolean commonName = "boolean"
-	// CommonNameDate data type is string, format date (As defined by full-date - RFC3339)
+	// CommonNameDate data type is string, format date (As defined by full-date - RFC3339).
 	commonNameDate commonName = "date"
-	// CommonNameDateTime data type is string, format date-time (As defined by date-time - RFC3339)
+	// CommonNameDateTime data type is string, format date-time (As defined by date-time - RFC3339).
 	commonNameDateTime commonName = "dateTime"
-	// CommonNamePassword data type is string, format password
+	// CommonNamePassword data type is string, format password.
 	commonNamePassword commonName = "password"
 )
 
@@ -48,6 +48,7 @@ var commonNamesMap = map[commonName]typeFormat{
 
 func isCommonName(typeName string) (ok bool) {
 	_, ok = commonNamesMap[commonName(typeName)]
+
 	return
 }
 

@@ -1,6 +1,7 @@
+// Package sample is a test package.
 package sample
 
-// TestSampleStruct is a test dummy
+// TestSampleStruct is a test dummy.
 type TestSampleStruct struct {
 	SimpleFloat64 float64 `json:"simple_float64"`
 	SimpleBool    bool    `json:"simple_bool"`
@@ -13,7 +14,7 @@ type TestSampleStruct struct {
 	} `json:"anon_type_struct"`
 }
 
-// TestSubStruct is a test dummy
+// TestSubStruct is a test dummy.
 type TestSubStruct struct {
 	SubInt int `json:"sample_int"`
 }

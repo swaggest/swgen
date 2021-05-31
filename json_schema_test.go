@@ -60,9 +60,10 @@ func TestGenerator_JSONSchemaWithCustomConfig(t *testing.T) {
 		Method:  http.MethodPost,
 		Path:    "/three",
 	})
+
 	assert.NoError(t, err)
 
-	g, err = gen.GetJSONSchemaRequestGroups(obj, cfg)
+	_, err = gen.GetJSONSchemaRequestGroups(obj, cfg)
 	assert.NoError(t, err)
 
 	bodySchema, err = gen.GetJSONSchemaRequestBody(obj, cfg)
@@ -126,7 +127,7 @@ func TestGenerator_WalkJSONSchemaResponses(t *testing.T) {
 		assert.Equal(t, http.StatusOK, statusCode)
 		assert.Equal(t, map[string]interface{}{
 			"$schema": "http://json-schema.org/draft-04/schema#",
-			"type": "object",
+			"type":    "object",
 			"properties": map[string]interface{}{
 				"barrr": map[string]interface{}{"$ref": "#/definitions/bar"},
 				"name":  map[string]interface{}{"type": "string"},
@@ -218,5 +219,4 @@ func TestGenerator_ParamJSONSchema(t *testing.T) {
 	jsonBytes, err := json.Marshal(schema)
 	assert.NoError(t, err)
 	assert.Equal(t, `{"description":"File Upload"}`, string(jsonBytes))
-
 }

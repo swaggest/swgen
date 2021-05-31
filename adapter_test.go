@@ -1,7 +1,6 @@
 package swgen_test
 
 import (
-	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -47,34 +46,21 @@ func TestInterceptType(t *testing.T) {
 	schema, err := reflector.Reflect(MyStruct{})
 	require.NoError(t, err)
 
-	js, err := json.MarshalIndent(schema, "", " ")
-	require.NoError(t, err)
-	assertjson.Equal(t, []byte(`{
-	 "definitions": {
-	  "SwgenTestISOWeek": {
-	   "description": "ISO Week",
-	   "examples": [
-		"2006-W43"
-	   ],
-	   "pattern": "^[0-9]{4}-W(0[1-9]|[1-4][0-9]|5[0-2])$",
-	   "type": "string"
+	assertjson.EqualMarshal(t, []byte(`{
+	  "definitions":{
+		"SwgenTestISOWeek":{
+		  "description":"ISO Week","examples":["2006-W43","2006-W43"],
+		  "pattern":"^[0-9]{4}-W(0[1-9]|[1-4][0-9]|5[0-2])$","type":"string"
+		},
+		"SwgenTestUUID":{
+		  "examples":["248df4b7-aa70-47b8-a036-33ac447e668d"],"type":"string",
+		  "format":"uuid"
+		}
 	  },
-	  "SwgenTestUUID": {
-	   "examples": [
-		"248df4b7-aa70-47b8-a036-33ac447e668d"
-	   ],
-	   "type": "string",
-	   "format": "uuid"
-	  }
-	 },
-	 "properties": {
-	  "iso_week": {
-	   "$ref": "#/definitions/SwgenTestISOWeek"
+	  "properties":{
+		"iso_week":{"$ref":"#/definitions/SwgenTestISOWeek"},
+		"uuid":{"$ref":"#/definitions/SwgenTestUUID"}
 	  },
-	  "uuid": {
-	   "$ref": "#/definitions/SwgenTestUUID"
-	  }
-	 },
-	 "type": "object"
-	}`), js, string(js))
+	  "type":"object"
+	}`), schema)
 }

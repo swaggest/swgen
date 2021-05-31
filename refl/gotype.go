@@ -5,15 +5,17 @@ import (
 	"strings"
 )
 
-// GoType returns string representation of type name including import path
+// GoType returns string representation of type name including import path.
 func GoType(t reflect.Type) string {
 	s := t.Name()
+
 	pkgPath := t.PkgPath()
 	if pkgPath != "" {
 		pos := strings.Index(pkgPath, "/vendor/")
 		if pos != -1 {
 			pkgPath = pkgPath[pos+8:]
 		}
+
 		s = pkgPath + "." + s
 	}
 

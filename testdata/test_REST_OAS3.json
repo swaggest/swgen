@@ -1,5 +1,5 @@
 {
- "openapi": "3.0.2",
+ "openapi": "3.0.3",
  "info": {
   "title": "swgen title",
   "description": "swgen description",
@@ -30,14 +30,7 @@
     "description": "test IDefinition1 description",
     "responses": {
      "200": {
-      "description": "OK",
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/SwgenDefinitionExample"
-        }
-       }
-      }
+      "description": "OK"
      }
     }
    }
@@ -274,15 +267,6 @@
     ],
     "summary": "test5 name",
     "description": "test5 description",
-    "requestBody": {
-     "content": {
-      "application/json": {
-       "schema": {
-        "$ref": "#/components/schemas/SwgenTestSimpleMapList"
-       }
-      }
-     }
-    },
     "responses": {
      "200": {
       "description": "OK",
@@ -587,14 +571,7 @@
     "description": "test empty struct",
     "responses": {
      "200": {
-      "description": "OK",
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/SwgenTestEmptyStruct"
-        }
-       }
-      }
+      "description": "OK"
      }
     }
    }
@@ -1022,15 +999,6 @@
     ],
     "summary": "test5 name",
     "description": "test5 description",
-    "requestBody": {
-     "content": {
-      "application/json": {
-       "schema": {
-        "$ref": "#/components/schemas/SwgenTestSimpleMapList"
-       }
-      }
-     }
-    },
     "responses": {
      "200": {
       "description": "OK",
@@ -1121,8 +1089,13 @@
      {
       "name": "field3",
       "in": "query",
-      "schema": {
-       "type": "string"
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "string",
+         "nullable": true
+        }
+       }
       }
      },
      {
@@ -1357,10 +1330,6 @@
      }
     }
    },
-   "SwgenDefinitionExample": {
-    "type": "object",
-    "format": "byte"
-   },
    "SwgenMapDateTime": {
     "type": "object",
     "properties": {
@@ -1461,16 +1430,20 @@
     "type": "object",
     "properties": {
      "field1": {
-      "type": "integer"
+      "type": "integer",
+      "default": 25
      },
      "field2": {
-      "type": "number"
+      "type": "number",
+      "default": 25.5
      },
      "field3": {
-      "type": "string"
+      "type": "string",
+      "default": "test"
      },
      "field4": {
-      "type": "boolean"
+      "type": "boolean",
+      "default": true
      },
      "field5": {
       "type": "array",
@@ -1492,9 +1465,6 @@
       "nullable": true
      }
     }
-   },
-   "SwgenTestEmptyStruct": {
-    "type": "object"
    },
    "SwgenTestSampleStruct": {
     "type": "object",

@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/swaggest/refl"
 	"github.com/swaggest/swgen/internal/sample"
-	"github.com/swaggest/swgen/refl"
 )
 
 func TestDeepIndirect(t *testing.T) {

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/swaggest/swgen/refl"
+	"github.com/swaggest/refl"
 )
 
 type (

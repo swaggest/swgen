@@ -59,7 +59,7 @@ func TestGenerator_ParseDefinition_Embedded(t *testing.T) {
 	assert.Equal(t, `{}`, string(b))
 
 	g := swgen.NewGenerator()
-	//g.IndentJSON(true)
+	// g.IndentJSON(true)
 	g.SetPathItem(swgen.PathItemInfo{
 		Method:   http.MethodPost,
 		Path:     "/structWithTaggedEmbedded",
@@ -287,5 +287,4 @@ func TestGenerator_ParseDefinition_Embedded(t *testing.T) {
     }
   }
 }`), b)
-
 }

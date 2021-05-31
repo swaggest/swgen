@@ -49,7 +49,7 @@ func TestInterceptType(t *testing.T) {
 	assertjson.EqualMarshal(t, []byte(`{
 	  "definitions":{
 		"SwgenTestISOWeek":{
-		  "description":"ISO Week","examples":["2006-W43","2006-W43"],
+		  "description":"ISO Week","examples":["2006-W43"],
 		  "pattern":"^[0-9]{4}-W(0[1-9]|[1-4][0-9]|5[0-2])$","type":"string"
 		},
 		"SwgenTestUUID":{

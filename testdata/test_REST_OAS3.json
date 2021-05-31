@@ -1000,12 +1000,21 @@
    }
   },
   "/V1/test5": {
-   "delete": {
+   "post": {
     "tags": [
      "v1"
     ],
     "summary": "test5 name",
     "description": "test5 description",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwgenTestSimpleMapList"
+       }
+      }
+     }
+    },
     "responses": {
      "200": {
       "description": "OK",

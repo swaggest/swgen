@@ -364,7 +364,7 @@ func TestREST(t *testing.T) {
 		"test3 description", "v1", false, testSimpleSlices{}, testSimpleMaps{}))
 	gen.SetPathItem(createPathItemInfo("/V1/test4", "POST", "test4 name",
 		"test4 description", "v1", false, testSimpleMaps{}, testSimpleMapList{}))
-	gen.SetPathItem(createPathItemInfo("/V1/test5", "DELETE", "test5 name",
+	gen.SetPathItem(createPathItemInfo("/V1/test5", "POST", "test5 name",
 		"test5 description", "v1", false, testSimpleMapList{}, testSubTypes{}))
 	gen.SetPathItem(createPathItemInfo("/V1/test6", "PATCH", "test6 name",
 		"test6 description", "v1", false, testSubTypes{}, testSimpleStruct{}))
